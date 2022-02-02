@@ -1,20 +1,14 @@
-const mongoose = require("mongoose");
+const Sequelize = require('sequelize');
+const db = require("../settings/database");
+const roles = ["buyer", "seller", "admin"];
 
-const roles = ["buyer", "seller", "admin"]
-
-const userSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    username: { type: String, required: true },
-    password: { type: String, required: true },
-    birthdate: { type: String, required: true },
-    role: { type: String, enum: roles, required: true },
-    isAdmin: {
-        type: Boolean, default: false
+const User = Sequelize.define('Users', {
+    id: {
+        type: Sequelize.DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true // Automatically gets converted to SERIAL for postgres
     },
-},
-    {
-        timestamps: true
+    email: {
+        type: Sequelize.DataTypes.STRING, unique: true
     }
-);
-
-module.exports = mongoose.model("user", userSchema);
+})

@@ -1,18 +1,20 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const env = require("dotenv").config();
+const db = require("./settings/database")
+
+db.authenticate().
+    then(() => console.log(`Connected to data base ${process.env.DB_NAME}...`))
+    .catch((error) => console.log(error))
+
+
 const app = express();
 
-const registerRoute = require("./routes/register")
-
-mongoose.connect(
-    process.env.MONGODB_URL
-)
-    .then((console.log("Connected to Mylittleshop!")))
-    .catch((error) => { console.log(error); });
+//ROUTES
+const authRoute = require("./routes/auth")
 app.use(express.json());
-app.use("/api/user/", registerRoute);
+app.use("/api/auth/", authRoute);
 
-app.listen(process.env.PORT || 5000, () => {
+//NETWORK SETTINGS
+app.listen(process.env.APP_PORT || 5000, () => {
     console.log(`Backend is running on port ${process.env.PORT || 5000}`);
 });

@@ -15,9 +15,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "crypto-js": "^4.1.1",
     "dotenv": "^14.3.2",
     "express": "^4.17.2",
-    "mongoose": "^6.1.8",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "pg": "^8.7.1",
+    "sequelize": "^6.15.0"
   }
 }
