@@ -1,14 +1,14 @@
-const Sequelize = require('sequelize');
 const db = require("../settings/database");
+const {DataTypes} = require('sequelize')
 const roles = ["buyer", "seller", "admin"];
 
-const User = Sequelize.define('Users', {
+const User = db.define('Users', {
     id: {
-        type: Sequelize.DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true // Automatically gets converted to SERIAL for postgres
     },
     email: {
-        type: Sequelize.DataTypes.STRING, unique: true
+        type: DataTypes.STRING, unique: true
     }
 })
