@@ -1,0 +1,129 @@
+openapi: "3.0.3"
+info:
+  title: "MyLittleShopping API"
+  version: 0.0.1
+paths:
+  /user/disable:
+    post:
+      security:
+        - bearerAuth: []
+      description: "Disable the account"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+      responses:
+        200:
+          description: "Account disabled"
+        401:
+          description: "Unauthorized"
+  /user/login:
+    post:
+      description: "Log In"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: "Logged In"
+        400:
+          description: "Malformed request"
+        401:
+          description: "Bad credentials"
+  /user/register:
+    post:
+      description: "Sign In"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - birthdate
+                - email
+                - password
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                birthdate:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        201:
+          description: "Signed In"
+        400:
+          description: "Malformed request"
+        409:
+          description: "Email already used"
+  /user:
+    get:
+      security:
+        - bearerAuth: []
+      description: "List all users"
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: "The number of user to skip before starting collecting the result set"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: "The number of users to return"
+      responses:
+        200:
+          description: "List of users"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+  /user/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      description: "Get user information"
+      responses:
+        200:
+          description: "Return user information"
+        401:
+          description: "Unauthorized"
+  /user/{}/state:
+    put:
+      security:
+        - bearerAuth: []
+      description: "Switch state of the user (disabled or enabled)"
+      responses:
+        200:
+          description: "Changed state"
+        401:
+          description: "Unauthorized"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
