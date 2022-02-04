@@ -2,8 +2,17 @@ const express = require("express");
 const env = require("dotenv").config();
 const db = require("./settings/database")
 
+
+// DB CONNECTION
 db.authenticate().
     then(() => console.log(`Connected to data base ${process.env.DB_NAME}...`))
+    .catch((error) => console.log(error))
+
+// DB SYNC
+db.sync({ force: true }).
+    then(
+        () => console.log(`database ${process.env.DB_NAME} synced!`)
+    )
     .catch((error) => console.log(error))
 
 
