@@ -16,26 +16,16 @@ const checkToken = (request, response, next) => {
     }
 }
 
-// const checkPassword = (request, response, next) => {
-//     const decryptedPassword = CryptoJS.AES.decrypt(request.body.password, process.env.PASSWORD_SECRET);
-//     const originalPassword = decryptedPassword.toString(CryptoJS.enc.Utf8);
-//     if (originalPassword === request.body.password) {
-//         next();
-//     } else {
-//         return response.status(401).json({ "response": "Bad credentials" });
-//     }
-// }
-
-function checkPassword(password){
+const checkPassword = (request, response, next) => {
     const decryptedPassword = CryptoJS.AES.decrypt(request.body.password, process.env.PASSWORD_SECRET);
     const originalPassword = decryptedPassword.toString(CryptoJS.enc.Utf8);
-    if (originalPassword === password) {
-        return 
+    if (originalPassword === request.body.password) {
+        next();
     } else {
         return response.status(401).json({ "response": "Bad credentials" });
     }
-
 }
+
 
 const checkIsAdminOrOwner = (request, response, next) => {
     checkToken(request, response, () => {
