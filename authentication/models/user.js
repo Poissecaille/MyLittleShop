@@ -29,6 +29,9 @@ const User = db.define('users', {
     role: {
         type: DataTypes.ENUM(roles), allowNull: false, defaultValue: roles[0]
     },
+    activated: {
+        type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true
+    },
     createdAt: {
         type: DataTypes.DATE, allowNull: false
     },
