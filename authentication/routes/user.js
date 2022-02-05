@@ -3,10 +3,13 @@ const User = require("../models/user");
 const { checkIsAdminOrOwner, checkPassword } = require("./security")
 
 
-router.put("disable/:id", checkIsAdminOrOwner, (request, response) => {
+router.put("disable/:id", checkIsAdminOrOwner, async (request, response) => {
 
-    const requestUser = await User.findByPk(request.params.id);
-    requestUser.update(
+    const requestedUser = await User.findByPk(request.params.id);
+    if (requestedUser.role === "seller"){
+        // CONTACT INVENTORY SERVICE
+    }
+    requestedUser.update(
         {
             activated: false
         }
