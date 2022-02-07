@@ -13,7 +13,7 @@ info:
     - "http"
 paths:
   /user/disable:
-    post:
+    put:
       security:
         - bearerAuth: []
       description: "Disable the account"
@@ -32,6 +32,8 @@ paths:
           description: "Account disabled"
         401:
           description: "Unauthorized"
+        403:
+          description: "Forbidden"
   /user/login:
     post:
       description: "Log In"
@@ -50,11 +52,13 @@ paths:
                   type: string
       responses:
         200:
-          description: "Logged In"
+          description: "Logged in"
         400:
           description: "Malformed request"
         401:
           description: "Bad credentials"
+        404:
+          description: "User not found"
   /user/register:
     post:
       description: "Sign In"
@@ -82,7 +86,7 @@ paths:
                   type: string
       responses:
         201:
-          description: "Signed In"
+          description: "Signed in"
         400:
           description: "Malformed request"
         409:
@@ -536,6 +540,8 @@ definitions:
           - "buyer"
           - "seller"
           - "admin"
+      activated:
+        type: "bool"
       created_at:
         type: "date-time"
       modified_at:
