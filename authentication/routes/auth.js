@@ -80,6 +80,7 @@ router.post("/login", async (request, response) => {
             return response.status(401).json({ "response": "Bad credentials" })
         }
     } catch (error) {
+        console.log(error)
         return response.status(500).json(error);
     }
 });

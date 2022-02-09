@@ -9,13 +9,15 @@ DB_NAME=DB_NAME
 DB_USERNAME=DB_USERNAME
 DB_PASSWORD=DB_PASSWORD
 DIALECT=DIALECT
+JWT_SECRET=JWT_SECRET
 ```
-## packages installation
+## packages
 ```bash
-npm i express
-npm i nodemon
-npm i dotenv
-npm i crypto-js
-npm i sequelize
-npm install pg 
+express
+nodemon
+dotenv
+crypto-js
+sequelize
+pg
+axios 
 ```
