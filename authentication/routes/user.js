@@ -1,32 +1,19 @@
 const router = require("express").Router();
 const User = require("../models/user");
-//const { checkIsAdminOrOwner, checkPassword } = require("./security")
+const { checkIsAdmin } = require("../middlewares/security")
 
-
-// router.put("disable/:id", checkIsAdminOrOwner, async (request, response) => {
-
-//     const requestedUser = await User.findByPk(request.params.id);
-//     if (requestedUser.role === "seller"){
-//         // CONTACT INVENTORY SERVICE
-//     }
-//     requestedUser.update(
-//         {
-//             activated: false
-//         }
-//     ).then(() => {
-//         return response.status(200).json({
-//             "response": "User deactivated"
-//         });
-//     }).catch((error) => console.log(error))
-// });
-
-router.put("user/disable/", checkIsAdminOrOwner, async (request, response) => {
-    if (!request.body.email) {
+router.put("/disable", checkIsAdmin, async (request, response) => {
+    console.log("prout")
+    if (!request.body.email || !request.body.password) {
         return response.status(400).json({
-            "response": "No email provided!"
+            "response": "Bad json format!"
         });
     }
-    const requestedUser = await User.findOne(request.params.email);
+    const requestedUser = await User.findOne(
+        {
+            where: { email: request.body.email }
+        }
+    );
     if (requestedUser) {
         requestedUser.update(
             { activated: false }

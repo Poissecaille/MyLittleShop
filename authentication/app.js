@@ -23,8 +23,8 @@ const authRoute = require("./routes/auth");
 const userRoute = require("./routes/user");
 
 app.use(express.json());
-app.use("/api/auth/", authRoute);
-app.use("/api/user/", userRoute);
+app.use("/api/", authRoute);
+app.use("/api/", userRoute);
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT || 5000, () => {
     console.log(`Backend is running on port ${process.env.PORT || 5000}`);

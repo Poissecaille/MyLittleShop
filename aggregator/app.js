@@ -4,8 +4,6 @@ const db = require("./settings/database");
 //const axios = require('axios');
 //const httpProxy = require('http-proxy');
 
-//ROUTES
-const authRoute = require("./routes/users");
 
 // DB CONNECTION
 db.authenticate().
@@ -37,7 +35,14 @@ db.sync({ force: true }).
 // });
 // console.log(res.data);
 const app = express();
+
+
+//ROUTES
+const disableRoute = require("./routes/users");
+
 app.use(express.json());
+app.use("/", disableRoute);
+
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT || 5000, () => {
     console.log(`Backend is running on port ${process.env.PORT || 5000}`);
