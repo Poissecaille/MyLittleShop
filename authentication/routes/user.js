@@ -2,13 +2,8 @@ const router = require("express").Router();
 const User = require("../models/user");
 const { checkIsAdmin } = require("../middlewares/security")
 
+// DISABLE ACCOUNT
 router.put("/disable", checkIsAdmin, async (request, response) => {
-    console.log("prout")
-    if (!request.body.email || !request.body.password) {
-        return response.status(400).json({
-            "response": "Bad json format!"
-        });
-    }
     const requestedUser = await User.findOne(
         {
             where: { email: request.body.email }

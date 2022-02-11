@@ -3,7 +3,7 @@ const User = require("../models/user");
 const CryptoJS = require("crypto-js")
 const jwt = require('jsonwebtoken');
 
-//REGISTER
+// REGISTER
 router.post("/register", async (request, response) => {
     if (!request.body.email || !request.body.firstName || !request.body.lastName || !request.body.password || !request.body.birthDate) {
         return response.status(400).json({
@@ -28,17 +28,15 @@ router.post("/register", async (request, response) => {
             "response": "Signed in!"
         });
     } catch (error) {
-        console.log("ERRORNAME", error.name)
         if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Email already used"
             })
         }
-        return response.status(500).json(error);
     }
 });
 
-//LOGIN
+// LOGIN
 router.post("/login", async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
