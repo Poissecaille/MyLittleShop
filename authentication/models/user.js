@@ -23,9 +23,6 @@ const User = db.define('users', {
     birthDate: {
         type: DataTypes.DATEONLY, allowNull: false
     },
-    firstName: {
-        type: DataTypes.STRING(50), allowNull: false
-    },
     role: {
         type: DataTypes.ENUM(roles), allowNull: false, defaultValue: roles[0]
     },
@@ -35,7 +32,7 @@ const User = db.define('users', {
     createdAt: {
         type: DataTypes.DATE, allowNull: false
     },
-    modifiedAt: {
+    updatedAt: {
         type: DataTypes.DATE, allowNull: false
     },
 });
