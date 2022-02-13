@@ -1,6 +1,38 @@
 const router = require("express").Router();
 const User = require("../models/user");
 const { checkIsAdmin, checkToken } = require("../middlewares/security")
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op
+
+// GET ACCOUNTS
+router.get("/users", checkToken, async (request, response) => {
+    var userEmails = []
+    if (Array.isArray(request.query.userEmail)) {
+        await request.query.userEmail.forEach(
+            (email) => {
+                userEmails.push(email)
+            }
+        )
+    } else {
+        var dict = {}
+        ["email"] = request.query.userEmail
+        userEmails.push(dict)
+    }
+    try {
+        console.log(userEmails)
+        const users = await User.findAll({
+            where: {
+                [Op.and]: [
+                    { email: { [Op.or]: userEmails } },
+                    { role: { [Op.eq]: "seller" } }
+                ]
+            }
+        });
+        return response.status(200).json({
+            "response": users
+        });
+    } catch (error) { console.log(error) }
+});
 
 // DISABLE ACCOUNT
 router.put("/disable", checkIsAdmin, async (request, response) => {
@@ -9,18 +41,17 @@ router.put("/disable", checkIsAdmin, async (request, response) => {
             where: { email: request.query.email }
         }
     );
-    //if (userToDisable) {
+
     userToDisable.update(
         { activated: false }
     )
-    //.then(() => {
+
     return response.status(200).json({
         "response": "User deactivated"
     });
-})//.catch((error) => console.log(error))
-//}
-//});
+})
 
+// DEACTIVATE ACCOUNT
 router.put("/deactivate", checkToken, async (request, response) => {
     tokenUserID = request.user.id
     const userToDeactivate = await User.findByPk(tokenUserID)

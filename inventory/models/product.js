@@ -9,7 +9,7 @@ const Product = db.define('product', {
         autoIncrement: true
     },
     name: {
-        type: DataTypes.STRING(50), allowNull: false
+        type: DataTypes.STRING(50), allowNull: false, unique: true
     },
     label: {
         type: DataTypes.STRING(50), allowNull: false
@@ -20,25 +20,28 @@ const Product = db.define('product', {
     description: {
         type: DataTypes.TEXT, allowNull: false
     },
-    unit_price: {
+    unitPrice: {
         type: DataTypes.FLOAT, allowNull: false
     },
-    available_quantity: {
+    availableQuantity: {
         type: DataTypes.INTEGER, allowNull: false
     },
+    ownerId: {
+        type: DataTypes.INTEGER, allowNull: false
+    }
     // product_category_id: {
     //     type: DataTypes.INTEGER,
-        // references: {
-        //     model: "ProductCategory",
-        //     key: "id"
-        // }
+    // references: {
+    //     model: "ProductCategory",
+    //     key: "id"
+    // }
     // },
     // product_tag_id: {
     //     type: DataTypes.INTEGER,
-        // references: {
-        //     model: "ProductTag",
-        //     key: "id"
-        // }
+    // references: {
+    //     model: "ProductTag",
+    //     key: "id"
+    // }
     // }
 },
     {

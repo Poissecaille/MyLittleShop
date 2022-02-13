@@ -1,13 +1,12 @@
 const router = require("express").Router();
 const axios = require('axios');
-const { response } = require("express");
 
 const roads = {
     // USER MICROSERVICE
     CREATE_ACCOUNT_URL: "http://localhost:5002/api/register",
     LOGIN_ACCOUNT_URL: "http://localhost:5002/api/login",
     DISABLE_ACCOUNT_URL: "http://localhost:5002/api/disable",
-    DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate/"
+    DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate"
 }
 
 router.post("/login", async (request, response) => {

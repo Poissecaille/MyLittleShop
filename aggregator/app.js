@@ -11,7 +11,7 @@ db.authenticate().
     .catch((error) => console.log(error));
 
 // DB SYNC
-db.sync({ force: true }).
+db.sync({ force: false }).
     then(
         () => console.log(`database ${process.env.DB_NAME} synced!`)
     )
@@ -38,10 +38,12 @@ const app = express();
 
 
 //ROUTES
-const disableRoute = require("./routes/users");
+const users = require("./routes/users");
+const products = require("./routes/products");
 
 app.use(express.json());
-app.use("/", disableRoute);
+app.use("/", users);
+app.use("/", products);
 
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT || 5000, () => {

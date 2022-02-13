@@ -21,3 +21,9 @@ sequelize
 pg
 axios 
 ```
+
+## seeder
+A the root of the project:  
+```
+./seeder.sh
+```
