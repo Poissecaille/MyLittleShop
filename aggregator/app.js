@@ -4,8 +4,6 @@ const db = require("./settings/database");
 //const axios = require('axios');
 //const httpProxy = require('http-proxy');
 
-//ROUTES
-const authRoute = require("./routes/users");
 
 // DB CONNECTION
 db.authenticate().
@@ -13,7 +11,7 @@ db.authenticate().
     .catch((error) => console.log(error));
 
 // DB SYNC
-db.sync({ force: true }).
+db.sync({ force: false }).
     then(
         () => console.log(`database ${process.env.DB_NAME} synced!`)
     )
@@ -37,7 +35,16 @@ db.sync({ force: true }).
 // });
 // console.log(res.data);
 const app = express();
+
+
+//ROUTES
+const users = require("./routes/users");
+const products = require("./routes/products");
+
 app.use(express.json());
+app.use("/", users);
+app.use("/", products);
+
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT || 5000, () => {
     console.log(`Backend is running on port ${process.env.PORT || 5000}`);

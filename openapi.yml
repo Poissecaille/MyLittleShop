@@ -6,7 +6,7 @@ paths:
   /user/disable:
     put:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Disable the account"
       requestBody:
         content:
@@ -85,7 +85,7 @@ paths:
   /user:
     get:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "List all users"
       parameters:
         - in: query
@@ -114,7 +114,7 @@ paths:
   /user/{id}:
     get:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Get user information"
       responses:
         200:
@@ -128,7 +128,7 @@ paths:
   /user/{}/state:
     put:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Switch state of the user (disabled or enabled)"
       responses:
         200:
@@ -174,7 +174,7 @@ paths:
   /product:
     post:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Add a product to the e-shop catalog"
       requestBody:
         content:
@@ -190,7 +190,7 @@ paths:
           description: "Unauthorized"
     put:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Allow a seller to update a product saved in the e-shop catalog"
       requestBody:
         content:
@@ -248,7 +248,7 @@ paths:
   /product/products/{seller_id}:
     get:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Get a list of products from the e-shop catalog according to the seller who owns the products"
       parameters:
         - in: "query"
@@ -272,7 +272,7 @@ paths:
   /product/cart/{user_id}:
     get:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Allow a user to get access to his owned cart data"
       parameters:
         - in: query
@@ -294,7 +294,7 @@ paths:
           description: "No cart found"
     put:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Allow a user to update his owned cart"
       parameters:
         - in: "query"
@@ -320,7 +320,7 @@ paths:
   /orders/product/{product_id}/{timestamp1}-{timestamp2}:
     get:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Allow a seller to retrieve data concerning the sales of their products over a time range"
       parameters:
         - in: "query"
@@ -331,14 +331,12 @@ paths:
         - in: "query"
           name: "timestamp1"
           schema:
-            type: "number"
-            format: "date-time"
+            type: "string"
           description: "The youngest timestamp range of the query"
         - in: "query"
           name: "timestamp2"
           schema:
-            type: "number"
-            format: "date-time"
+            type: "string"
           description: "The youngest timestamp range of the query"
       responses:
         200:
@@ -356,7 +354,7 @@ paths:
   /orders/order{cart_id}:
     post:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Allow a user to validate his cart which create an order"
       parameters:
         - in: "query"
@@ -380,7 +378,7 @@ paths:
   /orders/deliveries{}-{}:
     get:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Get a list of deliveries handled by the sellers"
       parameters:
         - in: query
@@ -409,7 +407,7 @@ paths:
   /orders/delivery{payment_id}:
     post:
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
       description: "Allows the creation of a delivery if payment has been made"
       parameters:
         - in: "query"

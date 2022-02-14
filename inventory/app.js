@@ -15,6 +15,7 @@ db.authenticate().
 // DB ASSOCIATIONS
 ProductCategory.hasMany(Product)
 ProductTag.hasMany(Product)
+
 // ProductCategory.sync({force:true}).then(() => { console.log("success1"), ProductTag.sync({force:true}) }
 // ).then(() => { console.log("success2"), Product.sync({force:true}) }).then(() => { console.log("success3") })
 // console.log("success4")
@@ -31,7 +32,7 @@ ProductTag.hasMany(Product)
 
 
 // DB SYNC
-db.sync({ force: true }).
+db.sync({ force: false }).
     then(
         () => console.log(`database ${process.env.DB_NAME} synced!`)
     )
@@ -42,7 +43,7 @@ const app = express();
 //ROUTES
 const productRoute = require("./routes/product");
 app.use(express.json());
-app.use("/api/products/", productRoute);
+app.use("/api/", productRoute);
 
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT || 5000, () => {
