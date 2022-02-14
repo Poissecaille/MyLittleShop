@@ -12,7 +12,7 @@ const roads = {
 router.post("/login", async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
-            "response": "Bad json format!"
+            "response": "Bad json format"
         });
     }
     try {
@@ -38,7 +38,7 @@ router.post("/login", async (request, response) => {
 router.post("/register", async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
-            "response": "Bad json format!"
+            "response": "Bad json format"
         });
     }
     try {
@@ -71,7 +71,7 @@ router.post("/register", async (request, response) => {
 router.put("/disable:email", async (request, response) => {
     if (!request.body.password) {
         return response.status(400).json({
-            "response": "Bad json format!"
+            "response": "Bad json format"
         });
     }
     const userEmailToDisable = request.query.email;

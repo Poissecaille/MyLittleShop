@@ -78,7 +78,7 @@ router.get("/products", async (request, response) => {
     console.log(condition)
     console.log(request.query)
     console.log("####################")
-    
+
     const products = await Product.findAndCountAll({
         where: {
             [Op.and]: [
@@ -87,7 +87,8 @@ router.get("/products", async (request, response) => {
                 { productTagId: tagsIds == true ? { [Op.in]: tagsIds } : { [Op.not]: null } },
                 { ownerId: usersIds == true ? { [Op.in]: usersIds } : { [Op.not]: null } },
                 { unitPrice: { [Op.between]: [lowerPrice, higherPrice] } },
-                { condition: condition ? { [Op.eq]: condition } : { [Op.not]: null } }
+                { condition: condition ? { [Op.eq]: condition } : { [Op.not]: null } },
+                { availableQuantity: { [Op.gt]: 0 } }
             ]
         }, sort: [[filter, "ASC"]]
     });

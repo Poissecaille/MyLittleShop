@@ -8,7 +8,7 @@ const { checkPassword } = require("../middlewares/security");
 router.post("/register", async (request, response) => {
     if (!request.body.email || !request.body.firstName || !request.body.lastName || !request.body.password || !request.body.birthDate) {
         return response.status(400).json({
-            "response": "Bad json format!"
+            "response": "Bad json format"
         });
     }
     var date = new Date();
@@ -27,10 +27,9 @@ router.post("/register", async (request, response) => {
     try {
         await newUser.save();
         return response.status(201).json({
-            "response": "Signed in!"
+            "response": "Signed in"
         });
     } catch (error) {
-        console.log(error)
         if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Email already used"

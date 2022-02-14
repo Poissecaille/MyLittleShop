@@ -42,8 +42,10 @@ const app = express();
 
 //ROUTES
 const productRoute = require("./routes/product");
+const cartProductRoute = require("./routes/cartProduct");
 app.use(express.json());
 app.use("/api/", productRoute);
+app.use("/api/", cartProductRoute);
 
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT, () => {
