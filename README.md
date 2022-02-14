@@ -22,8 +22,24 @@ pg
 axios 
 ```
 
+## local environment
+Please create a .env file in each microservice with a different APP_PORT value.
+
 ## seeder
-A the root of the project:  
+A the root of the project excecute this script to download data into database:  
 ```
 ./seeder.sh
 ```
+
+## nodemon
+To avoid network bugs you can create a nodemon.json file in each service with this format:
+```
+{
+    "events": {
+      "restart": "kill-port 5002",
+      "crash": "kill-port 5002"
+    },
+    "delay": "1500"
+  }
+```
+Please use a command supported by your os to kill port activity

@@ -26,6 +26,6 @@ app.use(express.json());
 app.use("/api/", authRoute);
 app.use("/api/", userRoute);
 //NETWORK SETTINGS
-app.listen(process.env.APP_PORT || 5000, () => {
-    console.log(`Backend is running on port ${process.env.PORT || 5000}`);
+app.listen(process.env.APP_PORT, () => {
+    console.log(`Backend is running on port ${process.env.APP_PORT}`);
 });

@@ -6,21 +6,37 @@ const ProductCategory = require("../models/productCategory");
 const ProductTag = require("../models/productTag");
 
 router.get("/products", async (request, response) => {
-    if (!request.query.lowerPrice || !request.query.higherPrice || !request.query.condition || !request.query.userId || !request.query.name || !request.query.category || !request.query.filter) {
-        return response.status(400).json({
-            "response": "Bad request format",
-        });
+    var condition;
+    var lowerPrice;
+    var higherPrice;
+    var filter;
+
+    if (!request.query.lowerPrice) {
+        lowerPrice = 0;
+    } else {
+        lowerPrice = request.query.lowerPrice;
     }
+    if (!request.query.higherPrice) {
+        higherPrice = Infinity;
+    } else {
+        higherPrice = request.query.higherPrice;
+    }
+    if (!request.query.filter) {
+        filter = "unitPrice";
+    } else {
+        filter = request.query.filter;
+    }
+
     var usersIds = []
-    await request.query.userId.forEach(
-        (id) => {
-            usersIds.push(parseInt(id))
-        }
-    )
-    const lowerPrice = request.query.lowerPrice
-    const higherPrice = request.query.higherPrice
-    const condition = request.query.condition
-    const filter = request.query.filter
+    if (Array.isArray(request.query.userId)) {
+        await request.query.userId.forEach(
+            (id) => {
+                usersIds.push(parseInt(id))
+            }
+        )
+    } else {
+        usersIds.push(parseInt(request.query.userId))
+    }
 
     var categoriesIds = []
     const categories = await ProductCategory.findAll({
@@ -41,17 +57,18 @@ router.get("/products", async (request, response) => {
             }
         }
     });
+
     await tags.forEach(
         (tag) => {
             tagsIds.push(tag.id)
         }
     );
-
     await categories.forEach(
         (category) => {
             categoriesIds.push(category.id)
         }
     );
+
     console.log("####################")
     console.log(categoriesIds)
     console.log(tagsIds)
@@ -59,22 +76,21 @@ router.get("/products", async (request, response) => {
     console.log(lowerPrice)
     console.log(higherPrice)
     console.log(condition)
+    console.log(request.query)
     console.log("####################")
-    // try {
+    
     const products = await Product.findAndCountAll({
         where: {
             [Op.and]: [
-                { name: { [Op.substring]: request.query.name } },
-                { productCategoryId: { [Op.in]: categoriesIds }, },
-                { productTagId: { [Op.in]: tagsIds } },
-                { ownerId: { [Op.in]: usersIds } },
-                { unitPrice: { [Op.gte]: lowerPrice } },
-                { unitPrice: { [Op.lte]: higherPrice } },
-                { condition: { [Op.eq]: condition } }
+                { name: request.query.name ? { [Op.substring]: request.query.name } : { [Op.not]: null } },
+                { productCategoryId: categoriesIds == true ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
+                { productTagId: tagsIds == true ? { [Op.in]: tagsIds } : { [Op.not]: null } },
+                { ownerId: usersIds == true ? { [Op.in]: usersIds } : { [Op.not]: null } },
+                { unitPrice: { [Op.between]: [lowerPrice, higherPrice] } },
+                { condition: condition ? { [Op.eq]: condition } : { [Op.not]: null } }
             ]
         }, sort: [[filter, "ASC"]]
     });
-    //} catch (error) { console.log("ERROR", error) }
     return response.status(200).json({
         "response": products.rows,
         "rows": products.count

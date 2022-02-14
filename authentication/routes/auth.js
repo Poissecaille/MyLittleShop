@@ -21,7 +21,7 @@ router.post("/register", async (request, response) => {
         password: CryptoJS.AES.encrypt(request.body.password, process.env.PASSWORD_SECRET).toString(),
         birthDate: request.body.birthDate,
         createdAt: date,
-        modifiedAt: date
+        updatedAt: date
     });
     console.log("WAT", newUser.password)
     try {
@@ -30,6 +30,7 @@ router.post("/register", async (request, response) => {
             "response": "Signed in!"
         });
     } catch (error) {
+        console.log(error)
         if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Email already used"

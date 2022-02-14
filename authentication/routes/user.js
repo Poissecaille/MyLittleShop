@@ -5,7 +5,12 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
 // GET ACCOUNTS
-router.get("/users", checkToken, async (request, response) => {
+router.get("/sellers", checkToken, async (request, response) => {
+    if (!request.query.userEmail) {
+        return response.status(400).json({
+            "response": "Bad request format",
+        });
+    }
     var userEmails = []
     if (Array.isArray(request.query.userEmail)) {
         await request.query.userEmail.forEach(
@@ -19,7 +24,6 @@ router.get("/users", checkToken, async (request, response) => {
         userEmails.push(dict)
     }
     try {
-        console.log(userEmails)
         const users = await User.findAll({
             where: {
                 [Op.and]: [
