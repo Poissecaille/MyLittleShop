@@ -36,8 +36,8 @@ To avoid network bugs you can create a nodemon.json file in each service with th
 ```
 {
     "events": {
-      "restart": "kill-port 5002",
-      "crash": "kill-port 5002"
+      "restart": "kill-port-command ${PORT}",
+      "crash": "kill-port-command ${PORT}"
     },
     "delay": "1500"
   }
