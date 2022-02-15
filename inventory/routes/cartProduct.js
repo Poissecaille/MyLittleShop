@@ -142,6 +142,11 @@ router.delete("/cartProduct", async (request, response) => {
             productId: product.id
         }
     });
+    if (!cartProductToDelete) {
+        return response.status(404).json({
+            "response": "product not found"
+        })
+    }
     await cartProductToDelete.destroy();
     return response.status(200).json({
         "response": "product deleted from cart"

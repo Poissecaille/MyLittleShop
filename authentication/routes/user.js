@@ -1,8 +1,17 @@
 const router = require("express").Router();
 const User = require("../models/user");
-const { checkIsAdmin, checkToken } = require("../middlewares/security")
+const { checkIsAdmin, checkToken, checkIsBuyerOrAdmin } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
+
+// SIMPLE TOKEN CHECKING AND USER ID GETTER
+router.get("/checkToken",checkToken, async(request,response)=>{
+    console.log("#########")
+    console.log(request.user)
+    return response.status(200).json({
+        "response": request.user
+    });
+})
 
 // GET ACCOUNTS
 router.get("/sellers", checkToken, async (request, response) => {
