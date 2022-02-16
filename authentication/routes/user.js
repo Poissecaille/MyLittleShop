@@ -1,54 +1,46 @@
 const router = require("express").Router();
 const User = require("../models/user");
-const { checkIsAdmin, checkIsAdminOrUserWithPCorrectPassword, checkToken } = require("../middlewares/security")
+const { checkIsAdminWithCorrectPassword, checkToken } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
-// SIMPLE TOKEN CHECKING AND USER ID GETTER
-router.get("/checkToken", checkToken, async (request, response) => {
-    console.log("#########")
-    console.log(request.user)
-    return response.status(200).json({
-        "response": request.user
-    });
-})
 
-// GET ACCOUNTS
-router.get("/sellers", checkToken, async (request, response) => {
-    if (!request.query.userEmail) {
-        return response.status(400).json({
-            "response": "Bad request format",
-        });
-    }
-    var userEmails = []
-    if (Array.isArray(request.query.userEmail)) {
-        await request.query.userEmail.forEach(
-            (email) => {
-                userEmails.push(email)
-            }
-        )
-    } else {
-        var dict = {}
-        ["email"] = request.query.userEmail
-        userEmails.push(dict)
-    }
-    try {
-        const users = await User.findAll({
-            where: {
-                [Op.and]: [
-                    { email: { [Op.or]: userEmails } },
-                    { role: { [Op.eq]: "seller" } }
-                ]
-            }
-        });
-        return response.status(200).json({
-            "response": users
-        });
-    } catch (error) { console.log(error) }
-});
+// // GET ACCOUNTS
+// router.get("/sellers", checkToken, async (request, response) => {
+//     if (!request.query.userEmail) {
+//         return response.status(400).json({
+//             "response": "Bad request format",
+//         });
+//     }
+//     var userEmails = []
+//     if (Array.isArray(request.query.userEmail)) {
+//         await request.query.userEmail.forEach(
+//             (email) => {
+//                 userEmails.push(email)
+//             }
+//         )
+//     } else {
+//         var dict = {}
+//         ["email"] = request.query.userEmail
+//         userEmails.push(dict)
+//     }
+//     try {
+//         const users = await User.findAll({
+//             where: {
+//                 [Op.and]: [
+//                     { email: { [Op.or]: userEmails } },
+//                     { role: { [Op.eq]: "seller" } }
+//                 ]
+//             }
+//         });
+//         return response.status(200).json({
+//             "response": users
+//         });
+//     } catch (error) { console.log(error) }
+// });
 
 // DISABLE ACCOUNT
-router.put("/disable", checkIsAdminOrUserWithPCorrectPassword, async (request, response) => {
+router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response) => {
     const userToDisable = await User.findOne(
         {
             where: { email: request.query.email }

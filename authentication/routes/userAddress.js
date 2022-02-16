@@ -6,118 +6,177 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
 
-// GET ALL USER ADDRESSESD
+// GET ALL USER ADDRESSES
 router.get("/userAddresses", checkToken, async (request, response) => {
-    const addresses = await UserAddress.findAll();
-    if (!addresses) {
-        return response.status(404).json({
-            "response": "Address not found"
-        });
+    const userId = request.user.id
+    const userRole = request.user.role
+    if (userRole == "buyer") {
+        try {
+            const addresses = await UserAddress.findAll({
+                where: {
+                    userId: userId,
+                }
+            });
+            if (!addresses) {
+                return response.status(404).json({
+                    "response": "Address not found"
+                });
+            } else {
+                return response.status(200).json({
+                    "response": addresses
+                });
+            }
+        } catch (error) {
+            return response.status(error.response.status).json({
+                "response": error.response.data.response
+            });
+        }
     } else {
-        return response.status(200).json({
-            "response": addresses
-        });
+        return response.status(401).json({ "response": "Unauthorized" });
     }
 });
 
 // GET A USER ADDRESS
 router.get("/userAddress", checkToken, async (request, response) => {
-    const userID = request.user.id;
-    const address = await UserAddress.findOne({
-        where: {
-            userId: userID,
-            address1: request.query.address1
+    const userId = request.user.id
+    const userRole = request.user.role
+    if (userRole == "buyer") {
+        try {
+            const address = await UserAddress.findOne({
+                where: {
+                    userId: userId,
+                    address1: request.query.address1
+                }
+            });
+            if (!address) {
+                return response.status(404).json({
+                    "response": "Address not found"
+                });
+            } else {
+                return response.status(200).json({
+                    "response": address
+                });
+            }
+
+        } catch (error) {
+            return response.status(error.response.status).json({
+                "response": error.response.data.response
+            });
+
         }
-    });
-    if (!address) {
-        return response.status(404).json({
-            "response": "Address not found"
-        });
     } else {
-        return response.status(200).json({
-            "response": address
-        });
+        return response.status(401).json({ "response": "Unauthorized" });
     }
 });
 
 // CREATE ADDRESS
 router.post("/userAddress", checkToken, async (request, response) => {
-    const userID = request.user.id
-    const userAddressExistant = await UserAddress.findOne({
-        where: {
-            address1: request.body.address1,
-            address2: request.body.address2,
-            address3: request.body.address3,
-            userId: userID
-        }
-    })
-    if (!userAddressExistant) {
+    const userId = request.user.id
+    const userRole = request.user.role
+    if (userRole == "buyer") {
         try {
-            const newUserAddress = new UserAddress({
-                address1: request.body.address1,
-                address2: request.body.address2,
-                address3: request.body.address3,
-                city: request.body.city,
-                region: request.body.region,
-                country: request.body.country,
-                postalCode: request.body.postalCode,
-                userId: userID
-            });
-            await newUserAddress.save();
-            return response.status(201).json({
-                "response": "New address added"
-            });
+            const userAddressExistant = await UserAddress.findOne({
+                where: {
+                    address1: request.body.address1,
+                    address2: request.body.address2,
+                    address3: request.body.address3,
+                    userId: userId
+                }
+            })
+            if (!userAddressExistant) {
+                const newUserAddress = new UserAddress({
+                    address1: request.body.address1,
+                    address2: request.body.address2,
+                    address3: request.body.address3,
+                    city: request.body.city,
+                    region: request.body.region,
+                    country: request.body.country,
+                    postalCode: request.body.postalCode,
+                    userId: userID
+                });
+                await newUserAddress.save();
+                return response.status(201).json({
+                    "response": "New address added"
+                });
+            } else {
+                return response.status(409).json({
+                    "response": "Address already existant for the current user"
+                });
+            }
         } catch (error) {
-            console.log(error)
+            return response.status(error.response.status).json({
+                "response": error.response.data.response
+            });
         }
     } else {
-        return response.status(409).json({
-            "response": "Address already existant for the current user"
-        });
+        return response.status(401).json({ "response": "Unauthorized" });
     }
 });
 
 // MODIFY ADDRESS
 router.put("/userAddress", checkToken, async (request, response) => {
-    const userID = request.user.id;
-    const userAddressToUpdate = await UserAddress.findOne({
-        where: {
-            userId: userID,
-            address1: request.body.address1
+    const userId = request.user.id
+    const userRole = request.user.role
+    if (userRole == "buyer") {
+        try {
+            const userAddressToUpdate = await UserAddress.findOne({
+                where: {
+                    userId: userId,
+                    address1: request.body.address1
+                }
+            });
+            if (!userAddressToUpdate) {
+                return response.status(404).json({
+                    "response": "Address not found"
+                });
+            } else {
+                userAddressToUpdate.update(request.body);
+                await userAddressToUpdate.save();
+                return response.status(200).json({
+                    "response": userAddressToUpdate
+                });
+            }
+        } catch (error) {
+            return response.status(error.response.status).json({
+                "response": error.response.data.response
+            });
         }
-    });
-    if (!userAddressToUpdate) {
-        return response.status(404).json({
-            "response": "Address not found"
-        });
     } else {
-        userAddressToUpdate.update(request.body);
-        await userAddressToUpdate.save();
-        return response.status(200).json({
-            "response": userAddressToUpdate
-        });
+        return response.status(401).json({ "response": "Unauthorized" });
     }
 });
 
 //DELETE ADDRESS
 router.delete("/userAddress", checkToken, async (request, response) => {
-    const userID = request.user.id;
-    const userAddressToDelete = await UserAddress.findOne({
-        where: {
-            userId: userID,
-            address1: request.body.address1
+    const userId = request.user.id
+    const userRole = request.user.role
+    if (userRole == "buyer") {
+        try {
+            const userAddressToDelete = await UserAddress.findOne({
+                where: {
+                    userId: userId,
+                    address1: request.body.address1
+                }
+            });
+            if (!userAddressToDelete) {
+                return response.status(404).json({
+                    "response": "Address not found"
+                });
+            } else {
+                await userAddressToDelete.destroy()
+                return response.status(200).json({
+                    "response": "Address deleted"
+                });
+            }
+        } catch (error) {
+            return response.status(error.response.status).json({
+                "response": error.response.data.response
+            });
         }
-    });
-    if (!userAddressToDelete) {
-        return response.status(404).json({
-            "response": "Address not found"
-        });
     } else {
-        await userAddressToDelete.destroy()
-        return response.status(200).json({
-            "response": "Address deleted"
-        });
+        return response.status(401).json({ "response": "Unauthorized" });
     }
 });
+
 
 module.exports = router;

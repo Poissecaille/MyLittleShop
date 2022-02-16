@@ -18,7 +18,7 @@ router.get("/cartProduct", async (request, response) => {
     });
     const userId = user.data.response.id
     const userRole = user.data.response.role
-    if (userRole === "admin" || userRole == "buyer") {
+    if (userRole == "buyer") {
         const cart = await axios.get(roads.CART_URL, {
             params: {
                 userId: userId
@@ -47,7 +47,7 @@ router.post("/cartProduct", async (request, response) => {
     const userId = user.data.response.id
     const userRole = user.data.response.role
     try {
-        if (userRole === "admin" || userRole == "buyer") {
+        if (userRole == "buyer") {
             const newCart = await axios.post(roads.CART_URL, {
                 userId: userId,
                 productName: request.body.productName,
@@ -81,7 +81,7 @@ router.put("/cartProduct", async (request, response) => {
     const userId = user.data.response.id
     const userRole = user.data.response.role
     try {
-        if (userRole === "admin" || userRole == "buyer") {
+        if (userRole == "buyer") {
             const newCart = await axios.put(roads.CART_URL, {
                 userId: userId,
                 productName: request.body.productName,
@@ -115,7 +115,7 @@ router.delete("/cartProduct", async (request, response) => {
     const userId = user.data.response.id
     const userRole = user.data.response.role
     try {
-        if (userRole === "admin" || userRole == "buyer") {
+        if (userRole == "buyer") {
             const newCart = await axios.delete(roads.CART_URL, {
                 data: {
                     userId: userId,

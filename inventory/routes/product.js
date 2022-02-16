@@ -1,11 +1,12 @@
 const router = require("express").Router();
 const Sequelize = require('sequelize');
-const Op = Sequelize.Op
-const Product = require("../models/product");
 const ProductCategory = require("../models/productCategory");
 const ProductTag = require("../models/productTag");
+const Op = Sequelize.Op
+const Product = require("../models/product");
 
-router.get("/products", async (request, response) => {
+// CONSULT PRODUCTS FOR BUYERS
+router.get("/buyer/products", async (request, response) => {
     var condition;
     var lowerPrice;
     var higherPrice;
@@ -97,6 +98,24 @@ router.get("/products", async (request, response) => {
         "rows": products.count
     });
 
+});
+
+// CONSULT PRODUCTS FOR SELLERS
+router.get("/seller/products", async (request, response) => {
+    const sellerProducts = await Product.findAll({
+        where: {
+            ownerId: request.query.userId
+        }
+    });
+    if (!sellerProducts) {
+        return response.status(404).json({
+            "response": "No product to sell for the current user"
+        });
+    } else {
+        return response.status(200).json({
+            "response": sellerProducts
+        });
+    }
 });
 
 module.exports = router;

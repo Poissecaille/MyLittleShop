@@ -2,7 +2,17 @@ const router = require("express").Router();
 const User = require("../models/user");
 const CryptoJS = require("crypto-js")
 const jwt = require('jsonwebtoken');
-const { checkPasswordWithEmail } = require("../middlewares/security");
+const { checkPasswordWithEmail, checkToken } = require("../middlewares/security");
+
+// GIVE ACCESS TO BUYER REQUESTS
+router.get("/checkToken", checkToken, async (request, response) => {
+    console.log("#########")
+    console.log(request.user)
+    return response.status(200).json({
+        "response": request.user
+    });
+})
+
 
 // REGISTER
 router.post("/register", async (request, response) => {
