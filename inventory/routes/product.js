@@ -2,8 +2,8 @@ const router = require("express").Router();
 const Sequelize = require('sequelize');
 const ProductCategory = require("../models/productCategory");
 const ProductTag = require("../models/productTag");
-const Op = Sequelize.Op
 const Product = require("../models/product");
+const Op = Sequelize.Op
 
 // CONSULT PRODUCTS FOR BUYERS
 router.get("/buyer/products", async (request, response) => {

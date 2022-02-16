@@ -22,7 +22,9 @@ db.sync({ force: false }).
 const app = express();
 
 //ROUTES
+const orderRoute = require("./routes/order");
 app.use(express.json());
+app.use("/api/", orderRoute);
 
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT, () => {
