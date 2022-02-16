@@ -33,13 +33,53 @@ router.get("/products", async (request, response) => {
             return response.status(products.status).json({
                 "response": products.data.response
             });
+        } else {
+            return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }
-})
+});
+
+router.post("/product", async (request, response) => {
+    if (!request.body.name || request.body.label || request.body.condition || request.body.description || request.body.unitPrice || request.body.availableQuantity) {
+        return response.status(400).json({
+            "response": "Bad request format",
+        });
+    }
+    try {
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
+        if (userRole == "seller") {
+            const newProduct = await axios.post(roads.SEARCH_PRODUCTS_SELLER_URL,
+                {
+                    name: request.body.name,
+                    label: request.body.label,
+                    condition: request.body.condition,
+                    description: request.body.description,
+                    unitPrice: request.body.unitPrice,
+                    availableQuantity: request.body.availableQuantity,
+                    ownerId: userId
+                }
+            )
+            return response.status(newProduct.status).json({
+                "response": newProduct.data.response
+            });
+        }
+    }
+    catch (error) {
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 //SEARCH_USERS_URL: "http://localhost:5002/api/sellers"
 // router.get("/products", async (request, response) => {

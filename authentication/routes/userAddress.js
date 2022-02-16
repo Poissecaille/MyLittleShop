@@ -92,7 +92,7 @@ router.post("/userAddress", checkToken, async (request, response) => {
                     region: request.body.region,
                     country: request.body.country,
                     postalCode: request.body.postalCode,
-                    userId: userID
+                    userId: userId
                 });
                 await newUserAddress.save();
                 return response.status(201).json({

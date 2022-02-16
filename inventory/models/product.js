@@ -9,7 +9,7 @@ const Product = db.define('product', {
         autoIncrement: true
     },
     name: {
-        type: DataTypes.STRING(50), allowNull: false, unique: true
+        type: DataTypes.STRING(50), allowNull: false, unique: "compositePK"
     },
     label: {
         type: DataTypes.STRING(50), allowNull: false
@@ -27,22 +27,11 @@ const Product = db.define('product', {
         type: DataTypes.INTEGER, allowNull: false
     },
     ownerId: {
-        type: DataTypes.INTEGER, allowNull: false
+        type: DataTypes.INTEGER, allowNull: false, unique: "compositePK"
+    },
+    onSale: {
+        type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true
     }
-    // product_category_id: {
-    //     type: DataTypes.INTEGER,
-    // references: {
-    //     model: "ProductCategory",
-    //     key: "id"
-    // }
-    // },
-    // product_tag_id: {
-    //     type: DataTypes.INTEGER,
-    // references: {
-    //     model: "ProductTag",
-    //     key: "id"
-    // }
-    // }
 },
     {
         freezeTableName: true,

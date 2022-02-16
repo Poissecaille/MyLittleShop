@@ -8,7 +8,7 @@ const roads = {
     DISABLE_ACCOUNT_URL: "http://localhost:5002/api/disable",
     DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate"
 }
-
+// BUYER LOGIN
 router.post("/login", async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
@@ -34,7 +34,7 @@ router.post("/login", async (request, response) => {
         }
     }
 });
-
+// BUYER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
@@ -67,9 +67,9 @@ router.post("/register", async (request, response) => {
         }
     }
 });
-
-router.put("/disable:email", async (request, response) => {
-    if (!request.body.password) {
+// ADMIN ROAD FOR ACCOUNT DISABLING
+router.put("/disable", async (request, response) => {
+    if (!request.body.password || !request.query.email) {
         return response.status(400).json({
             "response": "Bad json format"
         });
@@ -77,12 +77,8 @@ router.put("/disable:email", async (request, response) => {
     const userEmailToDisable = request.query.email;
     const userPassword = request.body.password;
     try {
-        const userDisabled = await axios.put(roads.DISABLE_ACCOUNT_URL, {
+        const userDisabled = await axios.put(roads.DISABLE_ACCOUNT_URL + "?email=" + userEmailToDisable, {
             password: userPassword,
-        }, {
-            params: {
-                email: userEmailToDisable
-            }
         }, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -92,6 +88,7 @@ router.put("/disable:email", async (request, response) => {
             "response": userDisabled.data.response
         });
     } catch (error) {
+        console.log(error)
         return response.status(400).json({
             "response": error.response.statusText
         });
@@ -112,9 +109,7 @@ router.put("/deactivate", async (request, response) => {
     return response.status(200).json({
         "response": deactivatedAccount.data.response
     });
-    //} catch (error) {
-    console.log(error)
-    //}
+
 });
 
 

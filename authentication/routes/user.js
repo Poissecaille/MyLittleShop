@@ -41,6 +41,7 @@ const Op = Sequelize.Op
 
 // DISABLE ACCOUNT
 router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response) => {
+    console.log(request.data)
     const userToDisable = await User.findOne(
         {
             where: { email: request.query.email }
@@ -59,8 +60,9 @@ router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response
 // DEACTIVATE ACCOUNT
 // TODO RETURN USER ID FROM SUBREQUEST?
 router.put("/deactivate", checkToken, async (request, response) => {
-    const tokenUserID = request.user.id
-    const userToDeactivate = await User.findByPk(tokenUserID)
+    const userId = request.user.id
+    //const userRole = request.user.role
+    const userToDeactivate = await User.findByPk(userId)
     userToDeactivate.update({
         activated: false
     });

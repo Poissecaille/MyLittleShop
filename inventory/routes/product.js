@@ -118,4 +118,23 @@ router.get("/seller/products", async (request, response) => {
     }
 });
 
+// ADD A PRODUCT FOR SELLERS
+router.post("/seller/product", async (request, response) => {
+    try {
+        const newSellerProduct = new Product(
+            request.body
+        )
+        await newSellerProduct.save();
+        return response.status(201).json({
+            "response": "New product added"
+        });
+    } catch (error) {
+        if (error.name === "SequelizeUniqueConstraintError") {
+            return response.status(409).json({
+                "response": "Product already existant for current user"
+            });
+        }
+    }
+})
+
 module.exports = router;

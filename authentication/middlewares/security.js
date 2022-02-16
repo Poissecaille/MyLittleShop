@@ -16,6 +16,7 @@ const checkToken = (request, response, next) => {
         console.log("TOKEN", token)
         jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
             if (error) {
+                console.log(error)
                 response.status(403).json({ "response": "Invalid token" });
             } else {
                 request.user = user;
@@ -61,6 +62,7 @@ const checkPasswordWithId = async (request, response, next) => {
 }
 
 const checkIsAdmin = (request, response, next) => {
+    console.log(request)
     checkToken(request, response, async () => {
         if (request.user.role === "admin") {
             next();
@@ -90,40 +92,18 @@ const checkIsAdmin = (request, response, next) => {
 
 const checkIsAdminWithCorrectPassword = (request, response, next) => {
     checkToken(request, response, () => {
+        console.log("#####################")
+        console.log(request.user)
         if (request.user.role === "admin") {
             checkPasswordWithId(request, response, async () => {
-                console.log("####")
-                console.log(request)
+                next()
             }
             )
+            next()
+        } else {
+            return response.status(403).json({ "response": "Forbidden" });
         }
     })
 }
-// else if (request.user.id) {
-//     const requestedUser = await User.findOne(
-//         {
-//             where: { id: request.user.id }
-//         }
-//     );
-//     if (!requestedUser) {
-//         return response.status(403).json({ "response": "Forbidden" });
-//     } 
-//else {
-//  const originalPassword = requestedUser.password;
-//  request.password = originalPassword
-//TODO reimplement checkPassword directy on functions which need it
-// checkPassword(request, response, () => {
-//     console.log("WTFFFFFFFFFFF")
-//     next()
-// });
-//}
-// else {
-//     next()
-// }
-// } else {
-//     return response.status(403).json({ "response": "Forbidden" });
-// }
-// })
-//}
 
 module.exports = { checkIsAdmin, checkToken, checkIsAdminWithCorrectPassword, checkToken, checkPasswordWithEmail, checkPasswordWithId };
