@@ -23,11 +23,13 @@ const app = express();
 const users = require("./routes/users");
 const products = require("./routes/products");
 const cartProducts = require("./routes/cartProducts");
+const userAddresses = require("./routes/userAddresses");
 
 app.use(express.json());
 app.use("/", users);
 app.use("/", products);
 app.use("/", cartProducts);
+app.use("/", userAddresses);
 
 //NETWORK SETTINGS
 app.listen(process.env.APP_PORT, () => {

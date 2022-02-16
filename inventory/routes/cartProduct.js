@@ -115,7 +115,7 @@ router.put("/cartProduct", async (request, response) => {
         await cartProductToUpdate.save();
         return response.status(200).json({
             "response": cartProductToUpdate
-        })
+        });
 
     } catch (error) { console.log(error) }
 });

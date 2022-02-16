@@ -2,7 +2,7 @@ const router = require("express").Router();
 const User = require("../models/user");
 const CryptoJS = require("crypto-js")
 const jwt = require('jsonwebtoken');
-const { checkPassword } = require("../middlewares/security");
+const { checkPasswordWithEmail } = require("../middlewares/security");
 
 // REGISTER
 router.post("/register", async (request, response) => {
@@ -33,13 +33,13 @@ router.post("/register", async (request, response) => {
         if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Email already used"
-            })
+            });
         }
     }
 });
 
 // LOGIN
-router.post("/login", checkPassword, async (request, response) => {
+router.post("/login", checkPasswordWithEmail, async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
             "response": "Malformed request"

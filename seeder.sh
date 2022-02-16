@@ -3,6 +3,7 @@ start=$SECONDS
 cd authentication
 pwd
 npx sequelize-cli db:seed --seed 20220212150215-users.js
+npx sequelize-cli db:seed --seed 20220216092309-userAddresses.js
 cd ../inventory
 pwd
 npx sequelize-cli db:seed --seed 20220213104607-tags.js

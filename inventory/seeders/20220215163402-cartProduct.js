@@ -17,7 +17,10 @@ module.exports = {
       updatedAt: "2022-02-05 17:00:00",
     }
     ])
-  }
+  },
 
+  async down(queryInterface, Sequelize) {
+    return queryInterface.bulkDelete('cartProduct', null, {});
+  }
 
 };

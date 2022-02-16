@@ -1,11 +1,11 @@
 const router = require("express").Router();
 const User = require("../models/user");
-const { checkIsAdmin, checkToken, checkIsBuyerOrAdmin } = require("../middlewares/security")
+const { checkIsAdmin, checkIsAdminOrUserWithPCorrectPassword, checkToken } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
 // SIMPLE TOKEN CHECKING AND USER ID GETTER
-router.get("/checkToken",checkToken, async(request,response)=>{
+router.get("/checkToken", checkToken, async (request, response) => {
     console.log("#########")
     console.log(request.user)
     return response.status(200).json({
@@ -48,7 +48,7 @@ router.get("/sellers", checkToken, async (request, response) => {
 });
 
 // DISABLE ACCOUNT
-router.put("/disable", checkIsAdmin, async (request, response) => {
+router.put("/disable", checkIsAdminOrUserWithPCorrectPassword, async (request, response) => {
     const userToDisable = await User.findOne(
         {
             where: { email: request.query.email }
@@ -65,8 +65,9 @@ router.put("/disable", checkIsAdmin, async (request, response) => {
 })
 
 // DEACTIVATE ACCOUNT
+// TODO RETURN USER ID FROM SUBREQUEST?
 router.put("/deactivate", checkToken, async (request, response) => {
-    tokenUserID = request.user.id
+    const tokenUserID = request.user.id
     const userToDeactivate = await User.findByPk(tokenUserID)
     userToDeactivate.update({
         activated: false

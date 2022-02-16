@@ -6,6 +6,9 @@ module.exports = {
       name: "mariokart"
     }]);
   },
+  async down(queryInterface, Sequelize) {
+    return queryInterface.bulkDelete('productTag', null, {});
+  }
 
 
 };

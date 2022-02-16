@@ -6,5 +6,8 @@ module.exports = {
       name: 'stroller',
     }]);
   },
+  async down(queryInterface, Sequelize) {
+    return queryInterface.bulkDelete('productCategory', null, {});
+  }
 
 };

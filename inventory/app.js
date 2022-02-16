@@ -1,9 +1,9 @@
 const express = require("express");
 const env = require("dotenv").config();
 const db = require("./settings/database")
-const ProductCategory = require("./models/productCategory");
-const ProductTag = require("./models/productTag");
-const Product = require("./models/product");
+const productCategory = require("./models/productCategory");
+const productTag = require("./models/productTag");
+const product = require("./models/product");
 
 
 // DB CONNECTION
@@ -13,22 +13,8 @@ db.authenticate().
 
 
 // DB ASSOCIATIONS
-ProductCategory.hasMany(Product)
-ProductTag.hasMany(Product)
-
-// ProductCategory.sync({force:true}).then(() => { console.log("success1"), ProductTag.sync({force:true}) }
-// ).then(() => { console.log("success2"), Product.sync({force:true}) }).then(() => { console.log("success3") })
-// console.log("success4")
-
-//Product.sync()
-//Product.hasMany(ProductCategory)
-//// Product.hasMany(ProductTag)
-
-//console.log("ASSOCIATION!!!!!")
-//ProductCategory.hasMany(Product);
-// Product.belongsTo(ProductCategory);
-//ProductTag.hasMany(Product);
-// Product.belongsTo(ProductTag);
+productCategory.hasMany(product);
+productTag.hasMany(product);
 
 
 // DB SYNC

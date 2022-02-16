@@ -100,6 +100,7 @@ router.put("/cartProduct", async (request, response) => {
     }
 });
 
+// REMOVE PRODUCT FROM CART
 router.delete("/cartProduct", async (request, response) => {
     if (!request.body.productName) {
         return response.status(400).json({

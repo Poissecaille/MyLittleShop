@@ -2,7 +2,7 @@ const db = require("../settings/database");
 const { DataTypes } = require('sequelize');
 const roles = ["buyer", "seller", "admin"];
 
-const User = db.define('users', {
+const User = db.define('user', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -35,6 +35,9 @@ const User = db.define('users', {
     updatedAt: {
         type: DataTypes.DATE, allowNull: false
     },
+}, {
+    freezeTableName: true,
+    tableName: "user"
 });
 
 
