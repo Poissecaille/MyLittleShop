@@ -27,50 +27,54 @@ router.post("/cartProduct", async (request, response) => {
             "response": "Bad request format",
         });
     }
-
-    const availableProduct = await Product.findOne(
-        {
-            where: {
-                name: request.body.productName,
-                // availableQuantity: { [Op.gt]: 0 }
+    try {
+        const availableProduct = await Product.findOne(
+            {
+                where: {
+                    name: request.body.productName,
+                    availableQuantity: { [Op.gt]: 0 }
+                }
             }
+        );
+        if (!availableProduct) {
+            return response.status(404).json({
+                "response": "Product not found"
+            });
         }
-    );
-    if (!availableProduct) {
-        return response.status(404).json({
-            "response": "Product not found"
-        });
-    }
 
-    if (availableProduct.availableQuantity === 0 || availableProduct.availableQuantity < request.body.quantity) {
-        return response.status(400).json({
-            "response": "No product in stocks",
-        });
-    }
+        if (availableProduct.availableQuantity === 0 || availableProduct.availableQuantity < request.body.quantity) {
+            return response.status(400).json({
+                "response": "No product in stocks",
+            });
+        }
 
-    const cartProductExistant = await cartProduct.findOne(
-        {
-            where: {
+        const cartProductExistant = await cartProduct.findOne(
+            {
+                where: {
+                    ownerId: request.body.userId,
+                    productId: availableProduct.id,
+                }
+            }
+        );
+
+        if (!cartProductExistant) {
+            const newCartProduct = new cartProduct({
                 ownerId: request.body.userId,
                 productId: availableProduct.id,
-            }
+                quantity: request.body.quantity
+            });
+            await newCartProduct.save();
+            return response.status(201).json({
+                "response": "Product added to cart"
+            });
+        } else {
+            return response.status(409).json({
+                "response": "Product already in cart"
+            });
         }
-    );
 
-    if (!cartProductExistant) {
-        const newCartProduct = new cartProduct({
-            ownerId: request.body.userId,
-            productId: availableProduct.id,
-            quantity: request.body.quantity
-        });
-        await newCartProduct.save();
-        return response.status(201).json({
-            "response": "Product added to cart"
-        });
-    } else {
-        return response.status(409).json({
-            "response": "Product already in cart"
-        });
+    } catch (error) {
+        console.log(error)
     }
 });
 

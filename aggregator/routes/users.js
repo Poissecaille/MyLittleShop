@@ -56,6 +56,7 @@ router.post("/register", async (request, response) => {
             });
         }
     } catch (error) {
+        console.log(error)
         if (error.response.status === 409) {
             return response.status(409).json({
                 "response": error.response.statusText
