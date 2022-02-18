@@ -33,7 +33,6 @@ router.post("/register", async (request, response) => {
         createdAt: date,
         updatedAt: date
     });
-    console.log("WAT", newUser.password)
     try {
         await newUser.save();
         return response.status(201).json({
@@ -61,6 +60,11 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
                 email: request.body.email,
             }
         });
+        if (!user.activated) {
+            return response.status(403).json({
+                "response": "Account closed"
+            });
+        }
         const accessToken = jwt.sign({
             id: user.id,
             role: user.role
@@ -73,8 +77,9 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
             "token": accessToken
         });
     } catch (error) {
-        console.log(error)
-        return response.status(500).json(error);
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 });
 

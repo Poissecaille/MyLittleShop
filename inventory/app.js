@@ -4,6 +4,8 @@ const db = require("./settings/database")
 const productCategory = require("./models/productCategory");
 const productTag = require("./models/productTag");
 const product = require("./models/product");
+const cart = require("./models/cart");
+const cartProduct = require("./models/cartProduct");
 
 
 // DB CONNECTION
@@ -15,10 +17,10 @@ db.authenticate().
 // DB ASSOCIATIONS
 productCategory.hasMany(product);
 productTag.hasMany(product);
-
+cart.hasMany(cartProduct)
 
 // DB SYNC
-db.sync({ force: false }).
+db.sync({ force: true }).
     then(
         () => console.log(`database ${process.env.DB_NAME} synced!`)
     )

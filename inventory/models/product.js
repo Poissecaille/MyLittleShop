@@ -26,7 +26,7 @@ const Product = db.define('product', {
     availableQuantity: {
         type: DataTypes.INTEGER, allowNull: false
     },
-    ownerId: {
+    sellerId: {
         type: DataTypes.INTEGER, allowNull: false, unique: "compositePK"
     },
     onSale: {

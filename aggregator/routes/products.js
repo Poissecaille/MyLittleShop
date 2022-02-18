@@ -66,7 +66,7 @@ router.post("/product", async (request, response) => {
                     description: request.body.description,
                     unitPrice: request.body.unitPrice,
                     availableQuantity: request.body.availableQuantity,
-                    ownerId: userId
+                    sellerId: userId
                 }
             )
             return response.status(newProduct.status).json({

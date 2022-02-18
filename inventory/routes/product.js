@@ -103,7 +103,7 @@ router.get("/buyer/products", async (request, response) => {
                 { name: request.query.name ? { [Op.substring]: request.query.name } : { [Op.not]: null } },
                 { productCategoryId: categoriesIds == true ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
                 { productTagId: tagsIds == true ? { [Op.in]: tagsIds } : { [Op.not]: null } },
-                { ownerId: usersIds == true ? { [Op.in]: usersIds } : { [Op.not]: null } },
+                { sellerId: usersIds == true ? { [Op.in]: usersIds } : { [Op.not]: null } },
                 { unitPrice: { [Op.between]: [lowerPrice, higherPrice] } },
                 { condition: condition ? { [Op.eq]: condition } : { [Op.not]: null } },
                 { availableQuantity: { [Op.gt]: 0 } }
@@ -121,7 +121,7 @@ router.get("/buyer/products", async (request, response) => {
 router.get("/seller/products", async (request, response) => {
     const sellerProducts = await Product.findAll({
         where: {
-            ownerId: request.query.userId
+            sellerId: request.query.userId
         }
     });
     if (!sellerProducts) {
@@ -134,6 +134,24 @@ router.get("/seller/products", async (request, response) => {
         });
     }
 });
+
+// WITHDRAW FROM SELL THE PRODUCTS OWNED BY DIABLED SELLER ACCOUNTS
+router.put("/seller/products", async (request, response) => {
+    const productsToWithdraw = await Product.findAll({
+        where: {
+            sellerId: request.query.sellerId
+        }
+    });
+    productsToWithdraw.forEach((product) => {
+        product.update({
+            onSale: false
+        });
+    });
+    return response.status(200).json({
+        "response": "account deleted and products withdrawn from sale"
+    });
+});
+
 
 // ADD A PRODUCT FOR SELLERS
 router.post("/seller/product", async (request, response) => {

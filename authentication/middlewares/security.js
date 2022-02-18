@@ -4,27 +4,36 @@ const User = require("../models/user");
 
 const checkToken = (request, response, next) => {
     var header = undefined;
-    console.log("HEADER", request.headers.authorization)
+    // console.log("HEADER", request.headers.authorization)
+    // console.log("HEADER", request.body.headers.Authorization)
     //const header = request.headers.authorization ? request.headers.authorization !== "undefined" : request.body.headers.Authorization
-    if (request.headers.authorization) {
-        header = request.headers.authorization
-    } else if (request.body.headers.Authorization) {
-        header = request.body.headers.Authorization
-    }
-    if (header) {
-        const token = header.split(" ")[1];
-        console.log("TOKEN", token)
-        jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
-            if (error) {
-                console.log(error)
-                response.status(403).json({ "response": "Invalid token" });
-            } else {
-                request.user = user;
-                next();
-            }
-        })
-
-    } else {
+    try {
+        if (request.headers.authorization) {
+            header = request.headers.authorization
+        } else if (request.body.headers.Authorization) {
+            header = request.body.headers.Authorization
+        }
+        if (header) {
+            const token = header.split(" ")[1];
+            console.log("TOKEN", token)
+            jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
+                if (error instanceof jwt.TokenExpiredError) {
+                    response.status(403).json({ "response": "Token has expired" });
+                }
+                else if (error) {
+                    response.status(403).json({ "response": "Invalid token" });
+                }
+                else {
+                    request.user = user;
+                    console.log("######### USER ##########")
+                    console.log(user)
+                    next();
+                }
+            })
+        } else {
+            return response.status(401).json({ "response": "Unauthorized" });
+        }
+    } catch (error) {
         return response.status(401).json({ "response": "Unauthorized" });
     }
 }

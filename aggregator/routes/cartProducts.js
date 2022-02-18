@@ -2,7 +2,7 @@ const router = require("express").Router();
 const axios = require('axios');
 
 const roads = {
-    // CARTPRODUCT MICROSERVICE
+    // INVENTORY MICROSERVICE
     CART_URL: "http://localhost:5003/api/cartProduct",
 
     // USER MICROSERVICE

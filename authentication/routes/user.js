@@ -58,16 +58,22 @@ router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response
 })
 
 // DEACTIVATE ACCOUNT
-// TODO RETURN USER ID FROM SUBREQUEST?
 router.put("/deactivate", checkToken, async (request, response) => {
     const userId = request.user.id
-    //const userRole = request.user.role
+    const userRole = request.user.role
     const userToDeactivate = await User.findByPk(userId)
-    userToDeactivate.update({
-        activated: false
-    });
+    // if (!userToDeactivate.activated) {
+    //     return response.status(403).json({
+    //         "response": "Account closed"
+    //     });
+    // }
+    // userToDeactivate.update({
+    //     activated: false
+    // });
     return response.status(200).json({
-        "response": "Account deleted"
+        "response": "Account deleted",
+        "userId": userId,
+        "userRole": userRole
     });
 });
 

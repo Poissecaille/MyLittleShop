@@ -6,9 +6,12 @@ const roads = {
     CREATE_ACCOUNT_URL: "http://localhost:5002/api/register",
     LOGIN_ACCOUNT_URL: "http://localhost:5002/api/login",
     DISABLE_ACCOUNT_URL: "http://localhost:5002/api/disable",
-    DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate"
+    DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate",
+    // PRODUCT MICROSERVICE
+    WITHDRAW_SELLER_PRODUCTS_URL: "http://localhost:5003/api/sellers/products"
 }
-// BUYER LOGIN
+
+// LOGIN
 router.post("/login", async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
@@ -27,11 +30,14 @@ router.post("/login", async (request, response) => {
             });
         }
     } catch (error) {
-        if (error.response.status === 401) {
-            return response.status(401).json({
-                "response": error.response.statusText
-            });
-        }
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+        // if (error.response.status === 401) {
+        //     return response.status(401).json({
+        //         "response": error.response.statusText
+        //     });
+        // }
     }
 });
 // BUYER ACCOUNT CREATION
@@ -56,19 +62,21 @@ router.post("/register", async (request, response) => {
             });
         }
     } catch (error) {
-        console.log(error)
-        if (error.response.status === 409) {
-            return response.status(409).json({
-                "response": error.response.statusText
-            });
-        } else if (error.response.status === 400) {
-            return response.status(400).json({
-                "response": error.response.statusText
-            });
-        }
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });        // if (error.response.status === 409) {
+        //     return response.status(409).json({
+        //         "response": error.response.statusText
+        //     });
+        // } else if (error.response.status === 400) {
+        //     return response.status(400).json({
+        //         "response": error.response.statusText
+        //     });
+        // }
     }
 });
-// ADMIN ROAD FOR ACCOUNT DISABLING
+
+// ADMIN ROAD FOR ACCOUNT DISABLING //TODO DISABLE SELLERS PRODUCTS
 router.put("/disable", async (request, response) => {
     if (!request.body.password || !request.query.email) {
         return response.status(400).json({
@@ -90,26 +98,42 @@ router.put("/disable", async (request, response) => {
         });
     } catch (error) {
         console.log(error)
-        return response.status(400).json({
-            "response": error.response.statusText
+        response.status(error.response.status).json({
+            "response": error.response.data.response
         });
     }
 });
 
 router.put("/deactivate", async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).json({
-            "response": "Unauthorized"
-        });
-    }
-    const deactivatedAccount = await axios.put(roads.DEACTIVATE_ACCOUNT_URL, null, {
-        headers: {
-            'Authorization': request.headers.authorization
+    try {
+        if (!request.headers.authorization) {
+            return response.status(401).json({
+                "response": "Unauthorized"
+            });
         }
-    });
-    return response.status(200).json({
-        "response": deactivatedAccount.data.response
-    });
+        const deactivatedAccount = await axios.put(roads.DEACTIVATE_ACCOUNT_URL, null, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const sellerId = deactivatedAccount.data.userId
+        if (deactivatedAccount.data.userRole == "seller") {
+            const sellerProducts = await axios.put(roads.WITHDRAW_SELLER_PRODUCTS_URL + "?sellerId=" + sellerId)
+            return response.status(200).json({
+                "response": sellerProducts.data.response
+            });
+        } else {
+            return response.status(200).json({
+                "response": deactivatedAccount.data.response
+            });
+        }
+    } catch (error) {
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+
+    }
+
 
 });
 
