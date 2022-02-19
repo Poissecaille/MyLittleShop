@@ -17,11 +17,12 @@ const checkToken = (request, response, next) => {
             const token = header.split(" ")[1];
             console.log("TOKEN", token)
             jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
-                if (error instanceof jwt.TokenExpiredError) {
-                    response.status(403).json({ "response": "Token has expired" });
-                }
-                else if (error) {
-                    response.status(403).json({ "response": "Invalid token" });
+                if (error) {
+                    if (error instanceof jwt.TokenExpiredError) {
+                        return response.status(403).json({ "response": "Token has expired" });
+                    } else {
+                        return response.status(403).json({ "response": "Invalid token" });
+                    }
                 }
                 else {
                     request.user = user;

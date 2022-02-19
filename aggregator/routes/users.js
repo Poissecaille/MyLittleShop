@@ -42,12 +42,12 @@ router.post("/login", async (request, response) => {
 });
 // BUYER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
-    if (!request.body.email || !request.body.password) {
-        return response.status(400).json({
-            "response": "Bad json format"
-        });
-    }
     try {
+        if (!request.body.email || !request.body.password) {
+            return response.status(400).json({
+                "response": "Bad json format"
+            });
+        }
         const userToRegister = await axios.post(roads.CREATE_ACCOUNT_URL, {
             email: request.body.email,
             password: request.body.password,
@@ -131,10 +131,7 @@ router.put("/deactivate", async (request, response) => {
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
-
     }
-
-
 });
 
 

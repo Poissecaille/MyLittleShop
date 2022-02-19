@@ -20,7 +20,7 @@ productTag.hasMany(product);
 cart.hasMany(cartProduct)
 
 // DB SYNC
-db.sync({ force: true }).
+db.sync({ force: false }).
     then(
         () => console.log(`database ${process.env.DB_NAME} synced!`)
     )

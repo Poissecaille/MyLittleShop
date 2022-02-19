@@ -34,7 +34,7 @@ router.get("/cartProduct", async (request, response) => {
 
 // ADD PRODUCTS IN CART
 router.post("/cartProduct", async (request, response) => {
-    if (!request.body.productName || !request.body.quantity) {
+    if (!request.body.productName || !request.body.quantity || request.body.quantity == 0) {
         return response.status(400).json({
             "response": "Bad json format",
         });
@@ -68,27 +68,29 @@ router.post("/cartProduct", async (request, response) => {
 
 // MODIFY CART
 router.put("/cartProduct", async (request, response) => {
-    if (!request.body.productName || !request.body.quantity) {
-        return response.status(400).json({
-            "response": "Bad json format",
-        });
-    }
-    const user = await axios.get(roads.CHECK_TOKEN_URL, {
-        headers: {
-            'Authorization': request.headers.authorization
-        }
-    });
-    const userId = user.data.response.id
-    const userRole = user.data.response.role
     try {
+        if (!request.body.productName || !request.body.quantity || request.body.quantity == 0) {
+            return response.status(400).json({
+                "response": "Bad json format",
+            });
+        }
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
+
         if (userRole == "buyer") {
-            const newCart = await axios.put(roads.CART_URL, {
+            const cartToUpdate = await axios.put(roads.CART_URL, {
                 userId: userId,
                 productName: request.body.productName,
                 quantity: request.body.quantity
             });
-            return response.status(newCart.status).json({
-                "response": newCart.data.response
+            console.log(cartToUpdate.data)
+            return response.status(cartToUpdate.status).json({
+                "response": cartToUpdate.data.response
             });
         } else {
             return response.status(401).json({ "response": "Unauthorized" });
@@ -102,19 +104,20 @@ router.put("/cartProduct", async (request, response) => {
 
 // REMOVE PRODUCT FROM CART
 router.delete("/cartProduct", async (request, response) => {
-    if (!request.body.productName) {
-        return response.status(400).json({
-            "response": "Bad json format",
-        });
-    }
-    const user = await axios.get(roads.CHECK_TOKEN_URL, {
-        headers: {
-            'Authorization': request.headers.authorization
-        }
-    });
-    const userId = user.data.response.id
-    const userRole = user.data.response.role
     try {
+        if (!request.body.productName) {
+            return response.status(400).json({
+                "response": "Bad json format",
+            });
+        }
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
+
         if (userRole == "buyer") {
             const newCart = await axios.delete(roads.CART_URL, {
                 data: {

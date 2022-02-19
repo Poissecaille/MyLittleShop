@@ -6,11 +6,20 @@ const { checkPasswordWithEmail, checkToken } = require("../middlewares/security"
 
 // GIVE ACCESS TO BUYER REQUESTS
 router.get("/checkToken", checkToken, async (request, response) => {
-    console.log("#########")
-    console.log(request.user)
-    return response.status(200).json({
-        "response": request.user
-    });
+    // if (response == 403) {
+    //     return response.status(403).json({ "response": "Token has expired" });
+    // } else {
+    //     return response.status(200).json({
+    //         "response": request.user
+    //     });
+    // }
+    try {
+        return response.status(200).json({
+            "response": request.user
+        });
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 

@@ -8,7 +8,7 @@ const cart = db.define('cart', {
         autoIncrement: true
     },
     ownerId: {
-        type: DataTypes.INTEGER, allowNull: false
+        type: DataTypes.INTEGER, allowNull: false, unique: true
     }
 }, {
     freezeTableName: true,
