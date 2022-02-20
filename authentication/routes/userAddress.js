@@ -7,14 +7,12 @@ const Op = Sequelize.Op
 
 
 // GET ALL USER ADDRESSES
-router.get("/userAddresses", checkToken, async (request, response) => {
-    const userId = request.user.id
-    const userRole = request.user.role
+router.get("/userAddresses", async (request, response) => {
     if (userRole == "buyer") {
         try {
             const addresses = await UserAddress.findAll({
                 where: {
-                    userId: userId,
+                    userId: request.query.userId,
                 }
             });
             if (!addresses) {
@@ -23,7 +21,8 @@ router.get("/userAddresses", checkToken, async (request, response) => {
                 });
             } else {
                 return response.status(200).json({
-                    "response": addresses
+                    "response": addresses,
+                    "userRole": userRole
                 });
             }
         } catch (error) {
@@ -37,35 +36,30 @@ router.get("/userAddresses", checkToken, async (request, response) => {
 });
 
 // GET A USER ADDRESS
-router.get("/userAddress", checkToken, async (request, response) => {
-    const userId = request.user.id
-    const userRole = request.user.role
-    if (userRole == "buyer") {
-        try {
-            const address = await UserAddress.findOne({
-                where: {
-                    userId: userId,
-                    address1: request.query.address1
-                }
-            });
-            if (!address) {
-                return response.status(404).json({
-                    "response": "Address not found"
-                });
-            } else {
-                return response.status(200).json({
-                    "response": address
-                });
+router.get("/userAddress", async (request, response) => {
+    try {
+        const address = await UserAddress.findOne({
+            where: {
+                userId: request.query.userId,
+                address1: request.query.address1
             }
-
-        } catch (error) {
-            return response.status(error.response.status).json({
-                "response": error.response.data.response
+        });
+        if (!address) {
+            return response.status(404).json({
+                "response": "Address not found"
             });
-
+        } else {
+            return response.status(200).json({
+                "response": address,
+            });
         }
-    } else {
-        return response.status(401).json({ "response": "Unauthorized" });
+
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+
     }
 });
 

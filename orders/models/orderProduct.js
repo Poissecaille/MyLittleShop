@@ -7,13 +7,9 @@ const OrderProduct = db.define('orderProduct', {
         primaryKey: true,
         autoIncrement: true
     },
-    ownerId: {
-        type: DataTypes.INTEGER, allowNull: false, unique: "compositePK"
-    },
     productId: {
-        type: DataTypes.INTEGER, allowNull: false, unique: "compositePK"
-    },
-    quantity: {
+        type: DataTypes.INTEGER, allowNull: false
+    },    quantity: {
         type: DataTypes.INTEGER, allowNull: false
     },
     shipped: {

@@ -5,7 +5,7 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 const Op = Sequelize.Op
 
-router.get("/cartProduct", async (request, response) => {
+router.get("/cartProducts", async (request, response) => {
     try {
         if (!request.query.userId) {
             return response.status(400).json({
@@ -22,16 +22,21 @@ router.get("/cartProduct", async (request, response) => {
                 "response": "Cart not found"
             });
         }
+        console.log("ASSERTION", userCart.id)
         const cartProducts = await cartProduct.findAll({
             where: {
                 cartId: userCart.id
             }
         });
+        console.log("cartProducts", cartProducts)
+
         return response.status(200).json({
             "response": cartProducts
         });
     } catch (error) {
-        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 
 });
@@ -87,16 +92,26 @@ router.post("/cartProduct", async (request, response) => {
             }
         });
         console.log("PRODUCT IN CART EXISTS", productAlreadyInCart)
-        if (!productAlreadyInCart) {
+        const existantCart = await Cart.findOne({
+            where: {
+                ownerId: request.body.userId
+            }
+        });
+        var cartId;
+        if (!existantCart) {
             const newCart = new Cart({
                 ownerId: request.body.userId
-            })
+            });
             await newCart.save();
-            console.log("NEW CART ID", newCart.id)
+            cartId = newCart.id;
+        } else {
+            cartId = existantCart.id;
+        }
+        if (!productAlreadyInCart) {
             const newCartProduct = new cartProduct({
                 productId: availableProduct.id,
                 quantity: request.body.quantity,
-                cartId: newCart.id
+                cartId: cartId
             });
             newCartProduct.save();
             return response.status(201).json({

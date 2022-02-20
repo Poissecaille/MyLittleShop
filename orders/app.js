@@ -1,7 +1,8 @@
 const express = require("express");
 const env = require("dotenv").config();
-const db = require("./settings/database")
-
+const db = require("./settings/database");
+const order = require("./models/order")
+const orderProduct = require("./models/orderProduct");
 
 // DB CONNECTION
 db.authenticate().
@@ -10,7 +11,7 @@ db.authenticate().
 
 
 // DB ASSOCIATIONS
-
+order.hasMany(orderProduct)
 
 // DB SYNC
 db.sync({ force: false }).

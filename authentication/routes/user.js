@@ -39,6 +39,29 @@ const Op = Sequelize.Op
 //     } catch (error) { console.log(error) }
 // });
 
+//GET USER DATA FOR AGGREGATOR AND ORDER SERVICE
+//TODO move check token  higher in addresses
+//router.get("/userData", checkToken, async (request, response) => {
+    router.get("/userData", async (request, response) => {
+        try {
+        // const userId = user.data.response.id
+        // const userRole = user.data.response.role
+        console.log("DATA")
+        const userId = request.user.id
+        console.log(userId)
+        const userData = await User.findByPk(userId)
+        console.log(userData)
+        return response.status(200).json({
+            "response": userData
+        });
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 // DISABLE ACCOUNT
 router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response) => {
     console.log(request.data)
