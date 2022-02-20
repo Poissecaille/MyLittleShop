@@ -8,9 +8,46 @@ const roads = {
     GET_ONE_USER_ADDRESSE_URL: "http://localhost:5002/api/userAddress",
     //PRODUCT MICROSERVICE
     CART_URL: "http://localhost:5003/api/cartProducts",
+    SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products",
     //ORDER MICROSERVICE
-    ORDER_URL: "http://localhost:5001/api/orderProduct"
+    CREATE_ORDER_URL: "http://localhost:5001/api/orderProduct",
+    GET_ORDERS_URL: "http://localhost:5001/api/orderProducts"
+
 }
+
+// GET ORDERS FOR SELLERS
+router.get("/orders", async (request, response) => {
+    try {
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        })
+        const userId = user.data.response.id;
+        const userRole = user.data.response.role;
+        if (userRole == "seller") {
+            var sellerProductsIds = []
+            const sellerProducts = await axios.get(roads.SELLER_PRODUCTS_URL, {
+                params: {
+                    sellerId: userId
+                }
+            });
+            console.log("8888",sellerProducts.response)
+            // const sellerOrderProducts = await axios.get(roads.GET_ORDERS_URL,{
+            //     params:{
+            //         productId:sellerProducts.data
+            //     }
+            // })
+            
+
+        }
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 // MAKE AN ORDER
 router.post("/order", async (request, response) => {
@@ -48,7 +85,7 @@ router.post("/order", async (request, response) => {
             console.log(userRole)
             console.log(productsInCart.data.response)
             console.log(userAddressToUse.data.response)
-            const ordersProducts = await axios.post(roads.ORDER_URL, {
+            const ordersProducts = await axios.post(roads.CREATE_ORDER_URL, {
                 cartProductsData: productsInCart.data.response,
                 userAddress: userAddressToUse.data.response,
                 userId: userId

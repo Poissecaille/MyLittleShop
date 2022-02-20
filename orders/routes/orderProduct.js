@@ -4,6 +4,20 @@ const OrderProduct = require("../models/orderProduct");
 const Order = require("../models/Order");
 const Op = Sequelize.Op
 
+// GET ORDERS BY PRODUCT ID FOR SELLER ORDERS
+router.get("/orderProducts", async (request, response) => {
+    try{
+        const orderProducts = await OrderProduct.findAll({
+            where:{
+                productId:{
+                    [Op.in]:request.query.
+                }
+            }
+        })
+    }
+}
+
+
 
 // CREATE ORDER
 router.post("/orderProduct", async (request, response) => {
@@ -16,7 +30,7 @@ router.post("/orderProduct", async (request, response) => {
             }
         })
         if (!existantOrder) {
-            const order = await new Order({
+            var order = await new Order({
                 ownerId: request.body.userId,
                 userAddress: request.body.userAddress.id
             }).save();
