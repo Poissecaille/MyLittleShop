@@ -43,17 +43,18 @@ router.post("/login", async (request, response) => {
 // BUYER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
     try {
-        if (!request.body.email || !request.body.password) {
-            return response.status(400).json({
-                "response": "Bad json format"
-            });
-        }
+        // if (!request.body.email || !request.body.password) {
+        //     return response.status(400).json({
+        //         "response": "Bad json format"
+        //     });
+        // }
         const userToRegister = await axios.post(roads.CREATE_ACCOUNT_URL, {
             email: request.body.email,
             password: request.body.password,
             firstName: request.body.firstName,
             lastName: request.body.lastName,
-            birthDate: request.body.birthDate
+            birthDate: request.body.birthDate,
+            role: request.body.role
         });
 
         if (userToRegister.status === 201) {

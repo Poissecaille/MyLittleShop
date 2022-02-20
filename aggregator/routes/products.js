@@ -5,6 +5,7 @@ const roads = {
     // PRODUCT MICROSERVICE
     SEARCH_PRODUCTS_BUYER_URL: "http://localhost:5003/api/buyer/products",
     SEARCH_PRODUCTS_SELLER_URL: "http://localhost:5003/api/seller/products",
+    CREATE_PRODUCT_SELLER_URL: "http://localhost:5003/api/seller/product",
     // USER MICROSERVICE
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken"
 }
@@ -44,12 +45,12 @@ router.get("/products", async (request, response) => {
 });
 
 router.post("/product", async (request, response) => {
-    if (!request.body.name || request.body.label || request.body.condition || request.body.description || request.body.unitPrice || request.body.availableQuantity) {
-        return response.status(400).json({
-            "response": "Bad request format",
-        });
-    }
     try {
+        if (!request.body.name || !request.body.label || !request.body.condition || !request.body.description || !request.body.unitPrice || !request.body.availableQuantity) {
+            return response.status(400).json({
+                "response": "Bad request format",
+            });
+        }
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -58,7 +59,7 @@ router.post("/product", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "seller") {
-            const newProduct = await axios.post(roads.SEARCH_PRODUCTS_SELLER_URL,
+            const newProduct = await axios.post(roads.CREATE_PRODUCT_SELLER_URL,
                 {
                     name: request.body.name,
                     label: request.body.label,
@@ -69,6 +70,8 @@ router.post("/product", async (request, response) => {
                     sellerId: userId
                 }
             )
+            console.log("OK")
+
             return response.status(newProduct.status).json({
                 "response": newProduct.data.response
             });

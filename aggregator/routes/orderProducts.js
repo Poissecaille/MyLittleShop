@@ -23,6 +23,7 @@ router.get("/orders", async (request, response) => {
                 'Authorization': request.headers.authorization
             }
         })
+        console.log("ok")
         const userId = user.data.response.id;
         const userRole = user.data.response.role;
         if (userRole == "seller") {
@@ -32,14 +33,28 @@ router.get("/orders", async (request, response) => {
                     sellerId: userId
                 }
             });
-            console.log("8888",sellerProducts.response)
-            // const sellerOrderProducts = await axios.get(roads.GET_ORDERS_URL,{
-            //     params:{
-            //         productId:sellerProducts.data
-            //     }
-            // })
-            
+            console.log("ok")
 
+            sellerProducts.data.response.forEach((product) => {
+                sellerProductsIds.push(product.id)
+            });
+            if (!sellerProducts) {
+                return response.status(404).json({
+                    "response": "No products added to sells for current user"
+                });
+            }
+            console.log(userId)
+            console.log(sellerProducts.data.response)
+            const sellerOrderProducts = await axios.get(roads.GET_ORDERS_URL, {
+                params: {
+                    productsIds: sellerProductsIds
+                }
+            });
+            console.log(sellerOrderProducts.data.response)
+
+            return response.status(200).json({
+                "response": sellerOrderProducts.data.response
+            });
         }
     } catch (error) {
         console.log(error)

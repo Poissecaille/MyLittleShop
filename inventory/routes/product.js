@@ -121,7 +121,7 @@ router.get("/buyer/products", async (request, response) => {
 router.get("/seller/products", async (request, response) => {
     const sellerProducts = await Product.findAll({
         where: {
-            sellerId: request.query.userId
+            sellerId: request.query.sellerId
         }
     });
     if (!sellerProducts) {
@@ -135,7 +135,7 @@ router.get("/seller/products", async (request, response) => {
     }
 });
 
-// WITHDRAW FROM SELL THE PRODUCTS OWNED BY DIABLED SELLER ACCOUNTS
+// WITHDRAW FROM SELL THE PRODUCTS OWNED BY DISABLED SELLER ACCOUNTS
 router.put("/seller/products", async (request, response) => {
     const productsToWithdraw = await Product.findAll({
         where: {
@@ -153,7 +153,7 @@ router.put("/seller/products", async (request, response) => {
 });
 
 
-// ADD A PRODUCT FOR SELLERS
+// ADD A PRODUCT FOR SELLERS //TODO HANDLE PRODUCT CATEGOEY AND TAG FOR PUT AND POST
 router.post("/seller/product", async (request, response) => {
     try {
         const newSellerProduct = new Product(

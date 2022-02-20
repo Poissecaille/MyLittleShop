@@ -25,30 +25,36 @@ router.get("/checkToken", checkToken, async (request, response) => {
 
 // REGISTER
 router.post("/register", async (request, response) => {
-    if (!request.body.email || !request.body.firstName || !request.body.lastName || !request.body.password || !request.body.birthDate) {
-        return response.status(400).json({
-            "response": "Bad json format"
-        });
-    }
-    var date = new Date();
-    date = date.toISOString().split("T");
-    date = date[0] + " " + date[1].split(".")[0];
-    const newUser = new User({
-        email: request.body.email,
-        firstName: request.body.firstName,
-        lastName: request.body.lastName,
-        password: CryptoJS.AES.encrypt(request.body.password, process.env.PASSWORD_SECRET).toString(),
-        birthDate: request.body.birthDate,
-        createdAt: date,
-        updatedAt: date
-    });
     try {
+        if (!request.body.email || !request.body.firstName || !request.body.lastName || !request.body.password || !request.body.birthDate || !request.body.role || request.body.role == "admin", request.body.role !== "buyer", request.body.role !== "seller") {
+            return response.status(400).json({
+                "response": "Bad json format"
+            });
+        }
+        var date = new Date();
+        date = date.toISOString().split("T");
+        date = date[0] + " " + date[1].split(".")[0];
+        const newUser = new User({
+            email: request.body.email,
+            firstName: request.body.firstName,
+            lastName: request.body.lastName,
+            password: CryptoJS.AES.encrypt(request.body.password, process.env.PASSWORD_SECRET).toString(),
+            birthDate: request.body.birthDate,
+            role: request.body.role,
+            createdAt: date,
+            updatedAt: date
+        });
         await newUser.save();
         return response.status(201).json({
             "response": "Signed in"
         });
     } catch (error) {
-        if (error.name === "SequelizeUniqueConstraintError") {
+        console.log(error)
+        if (error.name === "SequelizeDatabaseError") {
+            return response.status(409).json({
+                "response": "Bad json format"
+            });
+        } else if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Email already used"
             });
