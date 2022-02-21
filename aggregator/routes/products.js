@@ -10,6 +10,26 @@ const roads = {
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken"
 }
 
+//EVALUATE A BOUGHT PRODUCT
+// router.post("/product/evaluation",async(request,response)=>{
+//     try{
+//         if (!request.body.productName){
+//             return response.status(400).json({
+//                 "response": "Bad json format",
+//             });    
+//         }
+//         const user = await axios.get(roads.CHECK_TOKEN_URL, {
+//             headers: {
+//                 'Authorization': request.headers.authorization
+//             }
+//         });
+//         const userId = user.data.response.id
+//         const userRole = user.data.response.role
+//         if (userRole == "buyer") {
+//             const productToEvaluate = await axios.get(roads.)
+//     }
+// })
+
 //GET PRODUCTS FOR BUYERS AND SELLERS
 router.get("/products", async (request, response) => {
     try {

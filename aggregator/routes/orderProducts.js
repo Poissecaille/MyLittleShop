@@ -96,6 +96,7 @@ router.post("/order", async (request, response) => {
                     userId: userId
                 }
             });
+            //TODO CHECK QUANTITY HERE FOREACH PRODUCT
             console.log(userId)
             console.log(userRole)
             console.log(productsInCart.data.response)
@@ -106,6 +107,7 @@ router.post("/order", async (request, response) => {
             )
             console.log(productsInCart.data.response)
             console.log("STOCK UPDATED!!!!")
+            //TODO DELETE CART PRODUCT AFTER ORDER
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
                 { data: productsInCart.data.response }
             )
