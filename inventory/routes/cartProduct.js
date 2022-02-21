@@ -42,11 +42,11 @@ router.get("/cartProducts", async (request, response) => {
 });
 
 router.post("/cartProduct", async (request, response) => {
-    if (!request.body.userId) {
-        return response.status(400).json({
-            "response": "Bad request format",
-        });
-    }
+    // if (!request.body.userId) {
+    //     return response.status(400).json({
+    //         "response": "Bad request format",
+    //     });
+    // }
     try {
         const availableProduct = await Product.findOne(
             {
@@ -57,12 +57,18 @@ router.post("/cartProduct", async (request, response) => {
                 }
             }
         );
+
         if (!availableProduct) {
             return response.status(404).json({
                 "response": "Product not found"
             });
         }
+        if (availableProduct.availableQuantity < request.body.quantity) {
+            return response.status(400).json({
+                "response": "Not enough products in stock"
+            });
 
+        }
         // if (availableProduct.availableQuantity === 0 || availableProduct.availableQuantity < request.body.quantity) {
         //     return response.status(400).json({
         //         "response": "No product in stocks",
@@ -113,7 +119,7 @@ router.post("/cartProduct", async (request, response) => {
                 quantity: request.body.quantity,
                 cartId: cartId
             });
-            newCartProduct.save();
+            await newCartProduct.save();
             return response.status(201).json({
                 "response": "Product added to cart"
             });
@@ -142,6 +148,9 @@ router.post("/cartProduct", async (request, response) => {
 
     } catch (error) {
         console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
         if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Product already existant in current user cart"
@@ -162,7 +171,13 @@ router.put("/cartProduct", async (request, response) => {
             where: {
                 name: request.body.productName
             }
-        })
+        });
+
+        if (product.availableQuantity < request.body.quantity) {
+            return response.status(400).json({
+                "response": "Not enough products in stock"
+            });
+        }
         const userCart = await Cart.findOne({
             where: {
                 ownerId: request.body.userId,
@@ -291,5 +306,26 @@ router.delete("/cartProduct", async (request, response) => {
     //     "response": "product deleted from cart"
     // });
 });
+
+
+router.delete("/cartProduct", async (request, response) => {
+    try {
+        console.log("BODY", request.body)
+        request.body.forEach(async (cartProduct) => {
+            console.log("productId: ", cartProduct.productId)
+            console.log("quantity: ", cartProduct.quantity)
+            var productToDelete = await cartProduct.findByPk(cartProduct.id)
+            productToDelete.destroy()
+        })
+        return response.status(200).json({
+            "response": "Products removed from cart"
+        });
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+})
 
 module.exports = router;

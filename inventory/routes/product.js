@@ -152,6 +152,30 @@ router.put("/seller/products", async (request, response) => {
     });
 });
 
+// ROAD FOR PRODUCTS QUANTITY UPDATE AFTER ORDER CREATION
+router.put("/products", async (request, response) => {
+    try {
+        console.log("BODY", request.body)
+        request.body.forEach(async (cartProduct) => {
+            console.log("productId: ", cartProduct.productId)
+            console.log("quantity: ", cartProduct.quantity)
+            var productToUpdate = await Product.findByPk(cartProduct.productId)
+            productToUpdate.update({
+                availableQuantity: productToUpdate.availableQuantity - cartProduct.quantity
+            });
+        })
+        return response.status(200).json({
+            "response": "Stocks updated"
+        });
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+    //const productToUpdate = await Product.fin
+})
+
 
 // ADD A PRODUCT FOR SELLERS //TODO HANDLE PRODUCT CATEGOEY AND TAG FOR PUT AND POST
 router.post("/seller/product", async (request, response) => {

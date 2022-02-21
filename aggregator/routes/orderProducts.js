@@ -3,12 +3,12 @@ const axios = require('axios');
 
 const roads = {
     // USER MICROSERVICE
-    //GET_USER_DATA_URL: "http://localhost:5002/api/userData",
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
     GET_ONE_USER_ADDRESSE_URL: "http://localhost:5002/api/userAddress",
     //PRODUCT MICROSERVICE
     CART_URL: "http://localhost:5003/api/cartProducts",
     SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products",
+    UPDATE_PRODUCTS_STOCKS: "http://localhost:5003/api/products",
     //ORDER MICROSERVICE
     CREATE_ORDER_URL: "http://localhost:5001/api/orderProduct",
     GET_ORDERS_URL: "http://localhost:5001/api/orderProducts"
@@ -100,14 +100,31 @@ router.post("/order", async (request, response) => {
             console.log(userRole)
             console.log(productsInCart.data.response)
             console.log(userAddressToUse.data.response)
-            const ordersProducts = await axios.post(roads.CREATE_ORDER_URL, {
-                cartProductsData: productsInCart.data.response,
-                userAddress: userAddressToUse.data.response,
-                userId: userId
-            });
-            return response.status(200).json({
-                "response": ordersProducts.data.response
-            });
+
+            const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
+                productsInCart.data.response
+            )
+
+            const cartProductsToDelete = await axios.delete(roads.CART_URL,
+                productsInCart.data.response
+            )
+
+            if (stockUpdate.status == 200 && cartProductsToDelete.status == 200) {
+                const ordersProducts = await axios.post(roads.CREATE_ORDER_URL, {
+                    cartProductsData: productsInCart.data.response,
+                    userAddress: userAddressToUse.data.response,
+                    userId: userId
+                });
+                return response.status(200).json({
+                    "response": ordersProducts.data.response
+                });
+            }
+            else {
+                return response.status(400).json({
+                    "response": "order cancelled"
+                });
+                //TODO ROLLBACK
+            }
         }
     } catch (error) {
         console.log(error)

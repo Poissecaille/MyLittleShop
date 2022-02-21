@@ -60,6 +60,7 @@ router.post("/cartProduct", async (request, response) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
+        console.log(error)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });

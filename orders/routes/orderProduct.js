@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Sequelize = require('sequelize');
 const OrderProduct = require("../models/orderProduct");
-const Order = require("../models/Order");
+const Order = require("../models/order");
 const Op = Sequelize.Op
 
 // GET ORDERS BY PRODUCT ID FOR SELLER ORDERS
@@ -46,7 +46,6 @@ router.post("/orderProduct", async (request, response) => {
         } else {
             order = existantOrder
         }
-        console.log("44444")
         for (var cartProduct of request.body.cartProductsData) {
             console.log(cartProduct)
             var existantOrderProduct = await OrderProduct.findOne({
