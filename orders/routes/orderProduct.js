@@ -29,43 +29,47 @@ router.get("/orderProducts", async (request, response) => {
 // CREATE ORDER
 router.post("/orderProduct", async (request, response) => {
     try {
-        var order;
+        //var order;
         var ordersProducts = [];
         console.log(request.body.userId)
-        const existantOrder = await Order.findOne({
-            where: {
-                ownerId: request.body.userId
-            }
-        })
-        if (!existantOrder) {
-            var order = await new Order({
-                ownerId: request.body.userId,
-                userAddress: request.body.userAddress.id
-            }).save();
-            console.log(order)
-        } else {
-            order = existantOrder
-        }
-        for (var cartProduct of request.body.cartProductsData) {
+        // const existantOrder = await Order.findOne({
+        //     where: {
+        //         ownerId: request.body.userId,
+        //         createdAt
+        //     }
+        // })
+        // if (!existantOrder) {
+        //     order = new Order({
+        //         ownerId: request.body.userId,
+        //         userAddress: request.body.userAddress.id
+        //     });
+        //     await order.save();
+        //     console.log(order)
+        // } else {
+        //     order = existantOrder
+        // }
+        request.body.cartProductsData.forEach(async (cartProduct) => {
+
             console.log(cartProduct)
             var existantOrderProduct = await OrderProduct.findOne({
                 where: {
                     productId: cartProduct.id,
                     quantity: cartProduct.quantity,
-                    orderId: order.id
+                    shipped: "preparation"
+                    //orderId: order.id
                 }
             });
             if (!existantOrderProduct) {
-                var orderProduct = await new OrderProduct({
+                var orderProduct = new OrderProduct({
                     productId: cartProduct.productId,
                     quantity: cartProduct.quantity,
-                    orderId: order.id
-                }).save();
+                });
+                await orderProduct.save()
                 console.log("ITERATION *****")
                 ordersProducts.push(orderProduct);
                 console.log(ordersProducts)
             }
-        }
+        });
         return response.status(200).json({
             "response": ordersProducts
         });

@@ -1,6 +1,8 @@
 const db = require("../settings/database");
 const { DataTypes } = require('sequelize');
 
+const deliveryStatus = ["preparation", "shipped", 'delivred']
+
 const OrderProduct = db.define('orderProduct', {
     id: {
         type: DataTypes.INTEGER,
@@ -9,11 +11,11 @@ const OrderProduct = db.define('orderProduct', {
     },
     productId: {
         type: DataTypes.INTEGER, allowNull: false
-    },    quantity: {
+    }, quantity: {
         type: DataTypes.INTEGER, allowNull: false
     },
     shipped: {
-        type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false
+        type: DataTypes.ENUM(deliveryStatus), allowNull: false, defaultValue: deliveryStatus[0]
     },
     shipping_date: {
         type: DataTypes.DATE, allowNull: true

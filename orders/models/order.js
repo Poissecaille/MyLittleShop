@@ -8,7 +8,7 @@ const Order = db.define('order', {
         autoIncrement: true
     },
     ownerId: {
-        type: DataTypes.INTEGER, allowNull: false, unique: true
+        type: DataTypes.INTEGER, allowNull: false
     },
     userAddress: {
         type: DataTypes.STRING, allowNull: false

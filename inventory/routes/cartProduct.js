@@ -307,15 +307,16 @@ router.delete("/cartProduct", async (request, response) => {
     // });
 });
 
-
-router.delete("/cartProduct", async (request, response) => {
+router.delete("/cartProducts", async (request, response) => {
     try {
-        console.log("BODY", request.body)
-        request.body.forEach(async (cartProduct) => {
-            console.log("productId: ", cartProduct.productId)
-            console.log("quantity: ", cartProduct.quantity)
-            var productToDelete = await cartProduct.findByPk(cartProduct.id)
-            productToDelete.destroy()
+        console.log("BODY??", request.body)
+        request.body.forEach(async (productInCart) => {
+            console.log("productId: ", productInCart.productId)
+            console.log("quantity: ", productInCart.quantity)
+            //TODO fix this
+            var cartProductToDelete = await cartProduct.findByPk(productInCart.id)
+            console.log("DELETE!!!!",cartProductToDelete)
+            cartProductToDelete.destroy()
         })
         return response.status(200).json({
             "response": "Products removed from cart"

@@ -104,9 +104,10 @@ router.post("/order", async (request, response) => {
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
-
+            console.log(productsInCart.data.response)
+            console.log("STOCK UPDATED!!!!")
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
-                productsInCart.data.response
+                { data: productsInCart.data.response }
             )
 
             if (stockUpdate.status == 200 && cartProductsToDelete.status == 200) {
@@ -123,7 +124,7 @@ router.post("/order", async (request, response) => {
                 return response.status(400).json({
                     "response": "order cancelled"
                 });
-                //TODO ROLLBACK
+                //TODO ROLLBACK IF NECESSARY
             }
         }
     } catch (error) {
