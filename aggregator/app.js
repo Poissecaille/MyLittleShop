@@ -1,7 +1,14 @@
 const express = require("express");
 const env = require("dotenv").config();
-const db = require("./settings/database");
+const { sequelizeDev, sequelizeTest } = require("./settings/database")
 
+// ENVIRONNEMENT SELECTION
+var db;
+if (process.env.NODE_ENV === "dev") {
+    db = sequelizeDev
+} else {
+    db = sequelizeTest
+}
 
 // DB CONNECTION
 db.authenticate().
@@ -9,11 +16,12 @@ db.authenticate().
     .catch((error) => console.log(error));
 
 // DB SYNC
-db.sync({ force: false }).
+db.sync().
     then(
         () => console.log(`database ${process.env.DB_NAME} synced!`)
     )
     .catch((error) => console.log(error));
+
 
 
 const app = express();
@@ -37,3 +45,4 @@ app.use("/", orderProducts);
 app.listen(process.env.APP_PORT, () => {
     console.log(`Backend is running on port ${process.env.APP_PORT}`);
 });
+
