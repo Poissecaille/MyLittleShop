@@ -43,11 +43,11 @@ const Op = Sequelize.Op
 router.get("/userData", async (request, response) => {
     try {
         const userData = await User.findOne({
-            where:{
-                userName:request.query.sellerUsername
+            where: {
+                userName: request.query.sellerUsername
             }
         });
-        if (!userData){
+        if (!userData) {
             return response.status(404).json({
                 "response": "No product found"
             });
@@ -87,6 +87,8 @@ router.put("/deactivate", checkToken, async (request, response) => {
         const userId = request.user.id
         const userRole = request.user.role
         const userActivated = request.user.activated
+        console.log(userActivated, "8888888")
+        console.log(request.user)
         if (!userActivated) {
             return response.status(403).json({
                 "response": "Account closed"
@@ -96,6 +98,8 @@ router.put("/deactivate", checkToken, async (request, response) => {
         userToDeactivate.update({
             activated: false
         });
+        await userToDeactivate.save();
+        console.log("userToDeactivate", userToDeactivate)
         return response.status(200).json({
             "response": "Account deleted",
             "userId": userId,

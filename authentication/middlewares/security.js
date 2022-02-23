@@ -51,7 +51,7 @@ const checkPasswordWithEmail = async (request, response, next) => {
     if (originalPassword === request.body.password) {
         next();
     } else {
-        return response.status(401).json({ "response": "Bad credentials" });
+        return response.status(403).json({ "response": "Bad credentials" });
     }
 }
 
