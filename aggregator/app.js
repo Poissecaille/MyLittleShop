@@ -9,29 +9,6 @@ const cartProducts = require("./routes/cartProducts");
 const userAddresses = require("./routes/userAddresses");
 const orderProducts = require("./routes/orderProducts");
 
-// ENVIRONNEMENT SELECTION
-var db;
-var dbName;
-if (process.env.NODE_ENV === "dev") {
-    db = sequelizeDev
-    dbName=process.env.DB_NAME
-} else {
-    db = sequelizeTest
-    dbName = process.env.DBTEST_NAME
-}
-
-// DB CONNECTION
-db.authenticate().
-    then(() => console.log(`Connected to data base ${dbName}...`))
-    .catch((error) => console.log(error));
-
-// DB SYNC
-db.sync().
-    then(
-        () => console.log(`database ${dbName} synced!`)
-    )
-    .catch((error) => console.log(error));
-
 const app = express();
 
 app.use(express.json());

@@ -11,13 +11,18 @@ const { sequelizeDev, sequelizeTest } = require("./settings/database")
 // ENVIRONNEMENT SELECTION
 var db;
 var dbName;
+var force;
+
 if (process.env.NODE_ENV === "dev") {
     db = sequelizeDev
-    dbName=process.env.DB_NAME
-} else {
+    dbName = process.env.DB_NAME
+    force = false
+} else if (process.env.NODE_ENV === "test") {
     db = sequelizeTest
     dbName = process.env.DBTEST_NAME
+    force = true
 }
+
 
 // DB CONNECTION
 db.authenticate().
@@ -30,7 +35,7 @@ productTag.hasMany(product);
 //cart.hasMany(cartProduct)
 
 // DB SYNC
-db.sync({ force: false }).
+db.sync({ force: force }).
     then(
         () => console.log(`database ${dbName} synced!`)
     )
