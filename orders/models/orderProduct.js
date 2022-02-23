@@ -1,8 +1,9 @@
-const db = require("../settings/database");
+var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
+process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
+
 
 const deliveryStatus = ["preparation", "shipped", 'delivred']
-
 const OrderProduct = db.define('orderProduct', {
     id: {
         type: DataTypes.INTEGER,
@@ -11,7 +12,8 @@ const OrderProduct = db.define('orderProduct', {
     },
     productId: {
         type: DataTypes.INTEGER, allowNull: false
-    }, quantity: {
+    },
+    quantity: {
         type: DataTypes.INTEGER, allowNull: false
     },
     shipped: {

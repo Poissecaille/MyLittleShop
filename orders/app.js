@@ -1,14 +1,24 @@
 const express = require("express");
 const env = require("dotenv").config();
-const db = require("./settings/database");
 const order = require("./models/order")
 const orderProduct = require("./models/orderProduct");
+const { sequelizeDev, sequelizeTest } = require("./settings/database")
+
+// ENVIRONNEMENT SELECTION
+var db;
+var dbName;
+if (process.env.NODE_ENV === "dev") {
+    db = sequelizeDev
+    dbName=process.env.DB_NAME
+} else {
+    db = sequelizeTest
+    dbName = process.env.DBTEST_NAME
+}
 
 // DB CONNECTION
 db.authenticate().
-    then(() => console.log(`Connected to data base ${process.env.DB_NAME}...`))
+    then(() => console.log(`Connected to data base ${dbName}...`))
     .catch((error) => console.log(error));
-
 
 // DB ASSOCIATIONS
 order.hasMany(orderProduct)
@@ -16,7 +26,7 @@ order.hasMany(orderProduct)
 // DB SYNC
 db.sync({ force: false }).
     then(
-        () => console.log(`database ${process.env.DB_NAME} synced!`)
+        () => console.log(`database ${dbName} synced!`)
     )
     .catch((error) => console.log(error));
 
@@ -28,6 +38,6 @@ app.use(express.json());
 app.use("/api/", orderProducts);
 
 //NETWORK SETTINGS
-app.listen(process.env.APP_PORT, () => {
-    console.log(`Backend is running on port ${process.env.APP_PORT}`);
+app.listen(process.env.APP_ORDER_PORT, () => {
+    console.log(`Backend is running on port ${process.env.APP_ORDER_PORT}`);
 });

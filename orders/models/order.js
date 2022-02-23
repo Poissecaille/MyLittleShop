@@ -1,5 +1,6 @@
-const db = require("../settings/database");
+var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
+process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
 
 const Order = db.define('order', {
     id: {

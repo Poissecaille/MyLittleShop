@@ -1,6 +1,7 @@
-const db = require("../settings/database");
+var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
 const condition = ["new", "occasion", "renovated"];
+process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
 
 const Product = db.define('product', {
     id: {

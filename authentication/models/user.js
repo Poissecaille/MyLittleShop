@@ -1,6 +1,7 @@
-const db = require("../settings/database");
+var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
 const roles = ["buyer", "seller", "admin"];
+process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
 
 const User = db.define('user', {
     id: {
@@ -10,6 +11,9 @@ const User = db.define('user', {
     },
     email: {
         type: DataTypes.STRING, unique: true, allowNull: false
+    },
+    userName: {
+        type: DataTypes.STRING(50), unique: true, allowNull: false
     },
     firstName: {
         type: DataTypes.STRING(50), allowNull: false

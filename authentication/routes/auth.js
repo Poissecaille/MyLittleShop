@@ -26,11 +26,6 @@ router.get("/checkToken", checkToken, async (request, response) => {
 // REGISTER
 router.post("/register", async (request, response) => {
     try {
-        if (!request.body.email || !request.body.firstName || !request.body.lastName || !request.body.password || !request.body.birthDate || !request.body.role || request.body.role == "admin", request.body.role !== "buyer", request.body.role !== "seller") {
-            return response.status(400).json({
-                "response": "Bad json format"
-            });
-        }
         var date = new Date();
         date = date.toISOString().split("T");
         date = date[0] + " " + date[1].split(".")[0];
@@ -38,6 +33,7 @@ router.post("/register", async (request, response) => {
             email: request.body.email,
             firstName: request.body.firstName,
             lastName: request.body.lastName,
+            userName: request.body.userName,
             password: CryptoJS.AES.encrypt(request.body.password, process.env.PASSWORD_SECRET).toString(),
             birthDate: request.body.birthDate,
             role: request.body.role,
@@ -51,12 +47,12 @@ router.post("/register", async (request, response) => {
     } catch (error) {
         console.log(error)
         if (error.name === "SequelizeDatabaseError") {
-            return response.status(409).json({
+            return response.status(400).json({
                 "response": "Bad json format"
             });
         } else if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
-                "response": "Email already used"
+                "response": "User already existant"
             });
         }
     }
@@ -76,13 +72,12 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
             }
         });
         if (!user.activated) {
-            return response.status(403).json({
-                "response": "Account closed"
-            });
+            return response.status(401).json({ "response": "Unauthorized" });
         }
         const accessToken = jwt.sign({
             id: user.id,
-            role: user.role
+            role: user.role,
+            activated: user.activated
         }, process.env.JWT_SECRET, {
             expiresIn: "3d"
         });

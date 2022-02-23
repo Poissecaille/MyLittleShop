@@ -39,18 +39,19 @@ const Op = Sequelize.Op
 //     } catch (error) { console.log(error) }
 // });
 
-//GET USER DATA FOR AGGREGATOR AND ORDER SERVICE
-//TODO move check token  higher in addresses
-//router.get("/userData", checkToken, async (request, response) => {
-    router.get("/userData", async (request, response) => {
-        try {
-        // const userId = user.data.response.id
-        // const userRole = user.data.response.role
-        console.log("DATA")
-        const userId = request.user.id
-        console.log(userId)
-        const userData = await User.findByPk(userId)
-        console.log(userData)
+//GET USER DATA FOR AGGREGATOR
+router.get("/userData", async (request, response) => {
+    try {
+        const userData = await User.findOne({
+            where:{
+                userName:request.query.sellerUsername
+            }
+        });
+        if (!userData){
+            return response.status(404).json({
+                "response": "No product found"
+            });
+        }
         return response.status(200).json({
             "response": userData
         });
@@ -82,22 +83,30 @@ router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response
 
 // DEACTIVATE ACCOUNT
 router.put("/deactivate", checkToken, async (request, response) => {
-    const userId = request.user.id
-    const userRole = request.user.role
-    const userToDeactivate = await User.findByPk(userId)
-    // if (!userToDeactivate.activated) {
-    //     return response.status(403).json({
-    //         "response": "Account closed"
-    //     });
-    // }
-    // userToDeactivate.update({
-    //     activated: false
-    // });
-    return response.status(200).json({
-        "response": "Account deleted",
-        "userId": userId,
-        "userRole": userRole
-    });
+    try {
+        const userId = request.user.id
+        const userRole = request.user.role
+        const userActivated = request.user.activated
+        if (!userActivated) {
+            return response.status(403).json({
+                "response": "Account closed"
+            });
+        }
+        const userToDeactivate = await User.findByPk(userId)
+        userToDeactivate.update({
+            activated: false
+        });
+        return response.status(200).json({
+            "response": "Account deleted",
+            "userId": userId,
+            "userRole": userRole
+        });
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
 });
 
 module.exports = router;

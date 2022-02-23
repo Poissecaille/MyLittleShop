@@ -6,26 +6,16 @@ const Cart = require("../models/cart");
 const Op = Sequelize.Op
 
 router.get("/cartProducts", async (request, response) => {
+    //TODO ALLOW ROADS FOR ADMIN ALSO?
     try {
         if (!request.query.userId) {
             return response.status(400).json({
                 "response": "Bad request format",
             });
         }
-        const userCart = await Cart.findOne({
-            where: {
-                ownerId: request.query.userId
-            }
-        });
-        if (!userCart) {
-            return response.status(404).json({
-                "response": "Cart not found"
-            });
-        }
-        console.log("ASSERTION", userCart.id)
         const cartProducts = await cartProduct.findAll({
             where: {
-                cartId: userCart.id
+                ownerId: request.query.userId
             }
         });
         console.log("cartProducts", cartProducts)
@@ -42,82 +32,39 @@ router.get("/cartProducts", async (request, response) => {
 });
 
 router.post("/cartProduct", async (request, response) => {
-    // if (!request.body.userId) {
-    //     return response.status(400).json({
-    //         "response": "Bad request format",
-    //     });
-    // }
     try {
+        console.log("TEST!!!!!!!!!!!!!!!!",request.body)
         const availableProduct = await Product.findOne(
             {
                 where: {
                     name: request.body.productName,
-                    availableQuantity: { [Op.gt]: 0 },
+                    sellerId: request.body.sellerId,
+                    availableQuantity: { [Op.gte]: request.body.quantity },
                     onSale: true
                 }
             }
         );
-
         if (!availableProduct) {
             return response.status(404).json({
-                "response": "Product not found"
+                "response": "Product not found or not in stock"
             });
         }
-        if (availableProduct.availableQuantity < request.body.quantity) {
-            return response.status(400).json({
-                "response": "Not enough products in stock"
-            });
-
-        }
-        // if (availableProduct.availableQuantity === 0 || availableProduct.availableQuantity < request.body.quantity) {
-        //     return response.status(400).json({
-        //         "response": "No product in stocks",
-        //     });
-        // }
-
-        // const cartProductExistant = await cartProduct.findOne(
-        //     {
-        //         where: {
-        //             ownerId: request.body.userId,
-        //             productId: availableProduct.id,
-        //         }
-        //     }
-        // );
         const productAlreadyInCart = await cartProduct.findOne({
             where: {
-                [Op.and]: [
-                    {
-                        productId: {
-                            [Op.eq]: availableProduct.id
-                        },
-                        cartId: {
-                            [Op.ne]: 0
-                        }
-                    }
-                ]
+                productId: {
+                    [Op.eq]: availableProduct.id
+                },
+                ownerId: {
+                    [Op.ne]: request.body.userId
+                }
             }
         });
         console.log("PRODUCT IN CART EXISTS", productAlreadyInCart)
-        const existantCart = await Cart.findOne({
-            where: {
-                ownerId: request.body.userId
-            }
-        });
-        var cartId;
-        if (!existantCart) {
-            const newCart = new Cart({
-                ownerId: request.body.userId
-            });
-            await newCart.save();
-            cartId = newCart.id;
-        } else {
-            cartId = existantCart.id;
-        }
         if (!productAlreadyInCart) {
             const newCartProduct = new cartProduct({
                 productId: availableProduct.id,
                 quantity: request.body.quantity,
-                cartId: cartId
+                ownerId: request.body.userId
             });
             await newCartProduct.save();
             return response.status(201).json({
@@ -128,24 +75,6 @@ router.post("/cartProduct", async (request, response) => {
                 "response": "Product already in cart"
             });
         }
-        // if (!cartProductExistant) {
-        //     const newCartProduct = new cartProduct({
-        //         ownerId: request.body.userId,
-        //         productId: availableProduct.id,
-        //         quantity: request.body.quantity
-        //     });
-        //     await newCartProduct.save();
-        //     return response.status(201).json({
-        //         "response": "Product added to cart"
-        //     });
-        // } else {
-        //     return response.status(409).json({
-        //         "response": "Product already in cart"
-        //     });
-        // }
-
-
-
     } catch (error) {
         console.log(error)
         response.status(error.response.status).json({
@@ -155,43 +84,34 @@ router.post("/cartProduct", async (request, response) => {
             return response.status(409).json({
                 "response": "Product already existant in current user cart"
             });
-
         }
     }
 });
 
 router.put("/cartProduct", async (request, response) => {
-    // if (!request.body.productName || !request.body.userId || !request.body.quantity  || request.body.quantity == 0) {
-    //     return response.status(400).json({
-    //         "response": "bad json format"
-    //     });
-    // }
     try {
-        const product = await Product.findOne({
+        const availableProduct = await Product.findOne({
             where: {
-                name: request.body.productName
+                name: request.body.productName,
+                sellerId: request.body.sellerId,
+                availableQuantity: { [Op.gte]: request.body.quantity }
             }
         });
-
-        if (product.availableQuantity < request.body.quantity) {
+        if (!availableProduct) {
+            return response.status(404).json({
+                "response": "product not found"
+            });
+        }
+        if (availableProduct.availableQuantity < request.body.quantity) {
             return response.status(400).json({
                 "response": "Not enough products in stock"
             });
         }
-        const userCart = await Cart.findOne({
-            where: {
-                ownerId: request.body.userId,
-            }
-        });
-        if (!userCart) {
-            return response.status(404).json({
-                "response": "no cart for current user"
-            });
-        }
+      
         const productInCart = await cartProduct.findOne({
             where: {
-                cartId: userCart.id,
-                productId: product.id
+                ownerId: request.body.userId,
+                productId: availableProduct.id
             }
         });
         if (!productInCart) {
@@ -206,64 +126,16 @@ router.put("/cartProduct", async (request, response) => {
         return response.status(200).json({
             "response": productInCart
         })
-
-
-        // const product = await Product.findOne({
-        //     where: {
-        //         name: request.body.productName,
-        //         onSale: true,
-        //         availableQuantity: { [Op.gt]: 0 }
-        //     }
-        // });
-        // console.log("###", product.id)
-        // const cartProductToUpdate = await cartProduct.findOne(
-        //     {
-        //         where: {
-        //             ownerId: request.body.userId,
-        //             productId: product.id
-        //         }
-        //     }
-        // )
-
-        // if (!cartProductToUpdate) {
-        //     return response.status(404).json({
-        //         "response": "Item not found in cart",
-        //     });
-        // }
-
-        // cartProductToUpdate.set({
-        //     quantity: request.body.quantity,
-        //     productName: request.body.productName
-        // })
-        // await cartProductToUpdate.save();
-        // return response.status(200).json({
-        //     "response": cartProductToUpdate
-        // });
-
     } catch (error) { console.log(error) }
 });
 
 router.delete("/cartProduct", async (request, response) => {
-    // if (!request.body.productName || !request.body.userId) {
-    //     return response.status(400).json({
-    //         "response": "bad json format"
-    //     });
-    // }
     const product = await Product.findOne({
         where: {
-            name: request.body.productName
-        }
-    })
-    const userCart = await Cart.findOne({
-        where: {
-            ownerId: request.body.userId,
+            name: request.body.productName,
+            sellerUsername: request.body.sellerUsername
         }
     });
-    if (!userCart) {
-        return response.status(404).json({
-            "response": "no cart for current user"
-        });
-    }
     const productInCartToDelete = await cartProduct.findOne({
         where: {
             cartId: userCart.id,
@@ -279,32 +151,6 @@ router.delete("/cartProduct", async (request, response) => {
     return response.status(200).json({
         "response": "product deleted from cart"
     });
-
-    // const product = await Product.findOne({
-    //     where: {
-    //         name: request.body.productName
-    //     }
-    // });
-    // if (!product) {
-    //     return response.status(404).json({
-    //         "response": "product not found"
-    //     })
-    // }
-    // const cartProductToDelete = await cartProduct.findOne({
-    //     where: {
-    //         ownerId: request.body.userId,
-    //         productId: product.id
-    //     }
-    // });
-    // if (!cartProductToDelete) {
-    //     return response.status(404).json({
-    //         "response": "product not found"
-    //     })
-    // }
-    // await cartProductToDelete.destroy();
-    // return response.status(200).json({
-    //     "response": "product deleted from cart"
-    // });
 });
 
 router.delete("/cartProducts", async (request, response) => {
@@ -315,7 +161,7 @@ router.delete("/cartProducts", async (request, response) => {
             console.log("quantity: ", productInCart.quantity)
             //TODO fix this
             var cartProductToDelete = await cartProduct.findByPk(productInCart.id)
-            console.log("DELETE!!!!",cartProductToDelete)
+            console.log("DELETE!!!!", cartProductToDelete)
             cartProductToDelete.destroy()
         })
         return response.status(200).json({

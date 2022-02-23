@@ -1,5 +1,6 @@
-const db = require("../settings/database");
+var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
+process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
 
 const cartProduct = db.define('cartProduct', {
     id: {
@@ -12,6 +13,9 @@ const cartProduct = db.define('cartProduct', {
     },
     quantity: {
         type: DataTypes.INTEGER, allowNull: false
+    },
+    ownerId: {
+        type: DataTypes.INTEGER, allowNull: false, unique: true
     }
 }, {
     freezeTableName: true,

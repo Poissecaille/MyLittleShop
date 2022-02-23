@@ -139,9 +139,15 @@ router.get("/seller/products", async (request, response) => {
 router.put("/seller/products", async (request, response) => {
     const productsToWithdraw = await Product.findAll({
         where: {
-            sellerId: request.query.sellerId
+            sellerId: request.query.sellerId,
+            onSale: true
         }
     });
+    if (productsToWithdraw.length == 0) {
+        return response.status(200).json({
+            "response": "account deleted"
+        });
+    }
     productsToWithdraw.forEach((product) => {
         product.update({
             onSale: false
