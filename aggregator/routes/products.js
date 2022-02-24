@@ -42,23 +42,57 @@ router.get("/products", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
-            if (!request.query.sellerUsername || request.query.sellerUsername.length == 0) {
-                return response.status(400).json({
-                    "response": "Bad json format",
-                });
-            }
-            const sellerData = await axios.get(roads.USER_DATA_URL,{
-                params:{
-                    sellerUsername:request.query.sellerUsername
+            // if(!request.query.productName || !request.query.sellerUsername){
+            //     return response.status(400).json({
+            //         "response": "Bad json format",
+            //     });
+            // }
+            // if (request.query.sellerUsername.length == 0 && request.query.productName.length == 0) {
+            //     return response.status(400).json({
+            //         "response": "Bad json format",
+            //     });
+            // }
+            var filter;
+            var sellerData = undefined;
+            if (request.query.condition) {
+                if (request.query.condition != "new" && request.query.condition != "occasion" && request.query.condition != "renovated") {
+                    return response.status(400).json({
+                        "response": "Bad json format"
+                    });
                 }
-            })
-            console.log("#####################")
-            console.log(sellerData.id)
-            console.log("#####################")
+            }
+            if (!request.query.filter) {
+                filter = "unitPrice";
+            } else if (request.query.filter != "unitPrice" && request.query.filter != "condition") {
+                return response.status(400).json({
+                    "response": "Bad json format"
+                });
+            } else {
+                filter = request.query.filter;
+            }
+            if (request.query.sellerUsername) {
+                if (request.query.sellerUsername.length > 0) {
+                    sellerData = await axios.get(roads.USER_DATA_URL, {
+                        params: {
+                            sellerUsername: request.query.sellerUsername
+                        }
+                    })
+                    console.log("#####################")
+                    console.log(sellerData.data.response)
+                    console.log("#####################")
+                }
+            }
+            console.log("999", request.query.lowerPrice ? request.query.lowerPrice : 0)
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
-
-                    sellerId: sellerId
+                    sellerId: sellerData ? sellerData.data.response.id : null,
+                    productName: request.query.productName ? request.query.productName : null,
+                    category: request.query.category ? request.query.category : null,
+                    tag: request.query.tag ? request.query.tag : null,
+                    lowerPrice: request.query.lowerPrice ? request.query.lowerPrice : 0,
+                    higherPrice: request.query.higherPrice ? request.query.higherPrice : Infinity,
+                    condition: request.query.condition ? request.query.condition : null,
+                    filter: filter
                 }
             });
             return response.status(products.status).json({
@@ -80,7 +114,7 @@ router.get("/products", async (request, response) => {
         if (error.code == "ERR_HTTP_INVALID_HEADER_VALUE") {
             return response.status(401).json({ "response": "Unauthorized" });
         }
-        console.log(error.code)
+        console.log(error)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });

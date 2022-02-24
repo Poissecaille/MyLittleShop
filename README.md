@@ -38,7 +38,7 @@ jest
 
 ## environements
 The test environnement is setup when NODE_ENV variable is equal to test.
-The def environnement is setup when NODE_ENV variable is equal to def.
+The dev environnement is setup when NODE_ENV variable is equal to dev.
 
 ## seeder
 A the root of the project excecute this script to download data into database:  

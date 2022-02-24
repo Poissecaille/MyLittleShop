@@ -24,103 +24,71 @@ const Op = Sequelize.Op
 
 // CONSULT PRODUCTS FOR BUYERS
 router.get("/buyer/products", async (request, response) => {
-    var condition;
-    var lowerPrice;
-    var higherPrice;
-    var filter;
-    if (!request.query.lowerPrice) {
-        lowerPrice = 0;
-    } else {
-        lowerPrice = request.query.lowerPrice;
-    }
-    if (!request.query.higherPrice) {
-        higherPrice = Infinity;
-    } else {
-        higherPrice = request.query.higherPrice;
-    }
-    if (!request.query.filter) {
-        filter = "unitPrice";
-    } else {
-        filter = request.query.filter;
-    }
-    // if (Array.isArray(request.query.sellerUsername)) {
-    //    var sellersUsernames = [];
-    //     request.query.sellerUsername.forEach(
-    //         (username) => {
-    //             sellersUsernames.push(username)
-    //         }
-    //     )
-    // }
-    var usersIds = []
-    if (Array.isArray(request.query.userId)) {
-        request.query.userId.forEach(
-            (id) => {
-                usersIds.push(parseInt(id))
+    try {
+        var sellersIds =[];
+        var categoriesIds = [];
+        var tagsIds = [];
+
+        if (Array.isArray(request.query.sellerId)) {
+            request.query.userId.forEach(
+                (id) => {
+                    sellersIds.push(parseInt(id))
+                }
+            )
+        } else {
+            sellersIds.push(parseInt(request.query.sellerId))
+        }
+        const categories = await ProductCategory.findAll({
+            where:
+            {
+                name: {
+                    [Op.substring]: request.query.category,
+                }
             }
-        )
-    } else {
-        usersIds.push(parseInt(request.query.userId))
+        });
+        const tags = await ProductTag.findAll({
+            where:
+            {
+                name: {
+                    [Op.substring]: request.query.tag,
+                }
+            }
+        });
+        await tags.forEach(
+            (tag) => {
+                tagsIds.push(tag.id)
+            }
+        );
+        await categories.forEach(
+            (category) => {
+                categoriesIds.push(category.id)
+            }
+        );
+        const products = await Product.findAndCountAll({
+            where: {
+                [Op.and]: [
+                    { name: request.query.productName !== undefined ? { [Op.substring]: request.query.productName } : { [Op.not]: null } },
+                    { productCategoryId: request.query.category !== undefined ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
+                    { productTagId: request.query.tag !== undefined ? { [Op.in]: tagsIds } : { [Op.not]: null } },
+                    { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },
+                    { unitPrice: { [Op.between]: [request.query.lowerPrice, request.query.higherPrice] } },
+                    { condition: request.query.condition !== undefined ? { [Op.eq]: request.query.condition } : { [Op.not]: null } },
+                    { availableQuantity: { [Op.gt]: 0 } }
+                ]
+            }, sort: [[request.query.filter, "ASC"]]
+        });
+        return response.status(200).json({
+            "response": products.rows,
+            "rows": products.count
+        });
+    } catch (error) {
+        console.log(error)
+        if (error.name == "SequelizeDatabaseError") {
+            return response.status(400).json({
+                "response": "Bad json format",
+            });
+        }
     }
-
-    var categoriesIds = []
-    const categories = await ProductCategory.findAll({
-        where:
-        {
-            name: {
-                [Op.substring]: request.query.category,
-            }
-        }
-    });
-
-    var tagsIds = []
-    const tags = await ProductTag.findAll({
-        where:
-        {
-            name: {
-                [Op.substring]: request.query.tag,
-            }
-        }
-    });
-
-    await tags.forEach(
-        (tag) => {
-            tagsIds.push(tag.id)
-        }
-    );
-    await categories.forEach(
-        (category) => {
-            categoriesIds.push(category.id)
-        }
-    );
-
-    console.log("####################")
-    console.log(categoriesIds)
-    console.log(tagsIds)
-    console.log(usersIds)
-    console.log(lowerPrice)
-    console.log(higherPrice)
-    console.log(condition)
-    console.log(request.query)
-    console.log("####################")
-
-    const products = await Product.findAndCountAll({
-        where: {
-            [Op.and]: [
-                { name: request.query.name ? { [Op.substring]: request.query.name } : { [Op.not]: null } },
-                { productCategoryId: categoriesIds == true ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
-                { productTagId: tagsIds == true ? { [Op.in]: tagsIds } : { [Op.not]: null } },
-                { sellerId: usersIds == true ? { [Op.in]: usersIds } : { [Op.not]: null } },
-                { unitPrice: { [Op.between]: [lowerPrice, higherPrice] } },
-                { condition: condition ? { [Op.eq]: condition } : { [Op.not]: null } },
-                { availableQuantity: { [Op.gt]: 0 } }
-            ]
-        }, sort: [[filter, "ASC"]]
-    });
-    return response.status(200).json({
-        "response": products.rows,
-        "rows": products.count
-    });
-
 });
 
 // CONSULT PRODUCTS FOR SELLERS

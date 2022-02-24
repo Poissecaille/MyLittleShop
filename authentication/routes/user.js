@@ -44,17 +44,36 @@ router.get("/userData", async (request, response) => {
     try {
         var userData;
         if (Array.isArray(request.query.sellerUsername)) {
-            userData = await User.findAll({
-                where: {
-                    [Op.contains]: request.query.sellerUsername
-                }
+            userData = []
+            request.query.sellerUsername.forEach(async (username) => {
+                console.log("***************************")
+                console.log(username.data)
+                var user = await User.findOne({
+                    where: {
+                        username: username.data.response
+                    }
+                });
+                userData.push(user)
             });
+            // userData = await User.findAll({
+            //     where: {
+            //         [Op.like]: {
+            //             [Op.any]: request.query.sellerUsername
+            //         }
+            //     }
+            // });
+            console.log("777777", "777777")
+            console.log(userData)
         }
-        userData = await User.findOne({
-            where: {
-                username: request.query.sellerUsername
-            }
-        });
+        else {
+            console.log("***************************")
+            console.log(request.query.sellerUsername)
+            userData = await User.findOne({
+                where: {
+                    username: request.query.sellerUsername
+                }
+            })
+        }
         if (!userData || userData.length == 0) {
             return response.status(404).json({
                 "response": "No user found"

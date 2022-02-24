@@ -3,7 +3,7 @@ const app = require('../app');
 
 var buyerToken;
 var sellerToken;
-var sellerName;
+var sellerName = "alexx";
 
 describe('POST /register', () => {
   it('register with correct json and create buyer account', (done) => {
@@ -433,7 +433,8 @@ describe('GET /products', () => {
         "condition": "new",
         "lowerPrice": 0,
         "higherPrice": 200,
-        "filter": "unitPrice"
+        "filter": "unitPrice",
+        "sellerUsername": sellerName
       })
       .set('Authorization', `Bearer ${buyerToken}`)
       .expect(200)
