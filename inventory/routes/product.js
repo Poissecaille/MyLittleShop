@@ -28,7 +28,6 @@ router.get("/buyer/products", async (request, response) => {
     var lowerPrice;
     var higherPrice;
     var filter;
-
     if (!request.query.lowerPrice) {
         lowerPrice = 0;
     } else {
@@ -44,10 +43,17 @@ router.get("/buyer/products", async (request, response) => {
     } else {
         filter = request.query.filter;
     }
-
+    // if (Array.isArray(request.query.sellerUsername)) {
+    //    var sellersUsernames = [];
+    //     request.query.sellerUsername.forEach(
+    //         (username) => {
+    //             sellersUsernames.push(username)
+    //         }
+    //     )
+    // }
     var usersIds = []
     if (Array.isArray(request.query.userId)) {
-        await request.query.userId.forEach(
+        request.query.userId.forEach(
             (id) => {
                 usersIds.push(parseInt(id))
             }
@@ -119,9 +125,11 @@ router.get("/buyer/products", async (request, response) => {
 
 // CONSULT PRODUCTS FOR SELLERS
 router.get("/seller/products", async (request, response) => {
+    console.log(request.query)
+    console.log("#####################")
     const sellerProducts = await Product.findAll({
         where: {
-            sellerId: request.query.sellerId
+            sellerId: request.query.userId
         }
     });
     if (!sellerProducts) {
@@ -139,7 +147,7 @@ router.get("/seller/products", async (request, response) => {
 router.put("/seller/products", async (request, response) => {
     const productsToWithdraw = await Product.findAll({
         where: {
-            sellerId: request.query.sellerId,
+            sellerId: request.query.userId,
             onSale: true
         }
     });
@@ -194,7 +202,7 @@ router.post("/seller/product", async (request, response) => {
             "response": "New product added"
         });
     } catch (error) {
-        if (error.name ==="SequelizeDatabaseError"){
+        if (error.name === "SequelizeDatabaseError") {
             return response.status(400).json({
                 "response": "Bad json format"
             });

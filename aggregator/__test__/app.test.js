@@ -3,14 +3,15 @@ const app = require('../app');
 
 var buyerToken;
 var sellerToken;
+var sellerName;
 
-describe('POST /users', () => {
+describe('POST /register', () => {
   it('register with correct json and create buyer account', (done) => {
     request(app)
       .post('/register')
       .send({
         "email": "alexboury@etna-alternance.net",
-        "userName": "alex",
+        "username": "alex",
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "alpha",
@@ -31,7 +32,7 @@ describe('POST /users', () => {
       .post('/register')
       .send({
         "email": "alexxboury@etna-alternance.net",
-        "userName": "alexx",
+        "username": "alexx",
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "beta",
@@ -52,7 +53,7 @@ describe('POST /users', () => {
       .post('/register')
       .send({
         "email": "alexboury@etna-alternance.net",
-        "userName": "alex",
+        "username": "alex",
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "alpha",
@@ -71,7 +72,7 @@ describe('POST /users', () => {
     request(app)
       .post('/register')
       .send({
-        "userName": "alex",
+        "username": "alex",
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "alpha",
@@ -88,7 +89,7 @@ describe('POST /users', () => {
   });
 });
 
-describe('POST /users', () => {
+describe('POST /login', () => {
   it('correct buyer login responds with json and token', (done) => {
     request(app)
       .post('/login')
@@ -213,7 +214,7 @@ describe('POST /users', () => {
 
 });
 
-describe('POST /users', () => {
+describe('POST /deactivate', () => {
   it('deactivate responds with json and user is deactivated', (done) => {
     request(app)
       .put('/deactivate')
@@ -231,7 +232,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('responds with failure when deactivate another time the same account', (done) => {
+  it('deactivate responds with failure when deactivate another time the same account', (done) => {
     request(app)
       .put('/deactivate')
       .send({
@@ -248,7 +249,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('responds with failure when no token is in the header', (done) => {
+  it('deactivate responds with failure when no token is in the header', (done) => {
     request(app)
       .put('/deactivate')
       .send({
@@ -264,7 +265,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('responds with failure when token is wrong', (done) => {
+  it('deactivate responds with failure when token is wrong', (done) => {
     request(app)
       .put('/deactivate')
       .send({
@@ -283,7 +284,7 @@ describe('POST /users', () => {
   });
 });
 
-describe('POST /users', () => {
+describe('POST /product', () => {
   it('correctly add product to the catalog responds with json', (done) => {
     request(app)
       .post('/product')
@@ -305,7 +306,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('responds with failure when add twice the same product for the same user', (done) => {
+  it('add product responds with failure when add twice the same product for the same user', (done) => {
     request(app)
       .post('/product')
       .send({
@@ -326,7 +327,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('successfully add another product', (done) => {
+  it('add product successfully add another product', (done) => {
     request(app)
       .post('/product')
       .send({
@@ -347,7 +348,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('response with failure when using a buyer token', (done) => {
+  it('add product response with failure when using a buyer token', (done) => {
     request(app)
       .post('/product')
       .send({
@@ -368,7 +369,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('response with failure lack json data', (done) => {
+  it('add product response with failure lack json data', (done) => {
     request(app)
       .post('/product')
       .send({
@@ -388,7 +389,7 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-  it('response with failure wrong enum value', (done) => {
+  it('add product response with failure wrong enum value', (done) => {
     request(app)
       .post('/product')
       .send({
@@ -410,3 +411,38 @@ describe('POST /users', () => {
       .catch(err => done(err))
   });
 });
+describe('GET /products', () => {
+  it('get seller products response with json', (done) => {
+    request(app)
+      .get('/products')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('buyer get products response with json', (done) => {
+    request(app)
+      .get('/products')
+      .set('Accept', 'application/json')
+      .query({
+        "condition": "new",
+        "lowerPrice": 0,
+        "higherPrice": 200,
+        "filter": "unitPrice"
+      })
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        console.log(response.body.response)
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err))
+  });
+})

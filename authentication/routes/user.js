@@ -42,14 +42,22 @@ const Op = Sequelize.Op
 //GET USER DATA FOR AGGREGATOR
 router.get("/userData", async (request, response) => {
     try {
-        const userData = await User.findOne({
+        var userData;
+        if (Array.isArray(request.query.sellerUsername)) {
+            userData = await User.findAll({
+                where: {
+                    [Op.contains]: request.query.sellerUsername
+                }
+            });
+        }
+        userData = await User.findOne({
             where: {
-                userName: request.query.sellerUsername
+                username: request.query.sellerUsername
             }
         });
-        if (!userData) {
+        if (!userData || userData.length == 0) {
             return response.status(404).json({
-                "response": "No product found"
+                "response": "No user found"
             });
         }
         return response.status(200).json({
@@ -92,11 +100,11 @@ router.put("/deactivate", checkToken, async (request, response) => {
             });
         }
         const userToDeactivate = await User.findByPk(userId)
-       if (!userToDeactivate){
-           return response.status(404).json({
-               "response":"User not found"
-           });
-       }
+        if (!userToDeactivate) {
+            return response.status(404).json({
+                "response": "User not found"
+            });
+        }
         userToDeactivate.update({
             activated: false
         });

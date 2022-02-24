@@ -7,7 +7,8 @@ const roads = {
     SEARCH_PRODUCTS_SELLER_URL: "http://localhost:5003/api/seller/products",
     CREATE_PRODUCT_SELLER_URL: "http://localhost:5003/api/seller/product",
     // USER MICROSERVICE
-    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken"
+    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
+    USER_DATA_URL: "http://localhost:5002/api/userData"
 }
 
 //EVALUATE A BOUGHT PRODUCT
@@ -41,16 +42,34 @@ router.get("/products", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
+            if (!request.query.sellerUsername || request.query.sellerUsername.length == 0) {
+                return response.status(400).json({
+                    "response": "Bad json format",
+                });
+            }
+            const sellerData = await axios.get(roads.USER_DATA_URL,{
+                params:{
+                    sellerUsername:request.query.sellerUsername
+                }
+            })
+            console.log("#####################")
+            console.log(sellerData.id)
+            console.log("#####################")
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
-                params: userId
+                params: {
+
+                    sellerId: sellerId
+                }
             });
             return response.status(products.status).json({
                 "response": products.data.response
             });
         } else if (userRole == "seller") {
             const products = await axios.get(roads.SEARCH_PRODUCTS_SELLER_URL, {
-                params: userId
-            })
+                params: {
+                    userId: userId
+                }
+            });
             return response.status(products.status).json({
                 "response": products.data.response
             });
@@ -58,6 +77,10 @@ router.get("/products", async (request, response) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
+        if (error.code == "ERR_HTTP_INVALID_HEADER_VALUE") {
+            return response.status(401).json({ "response": "Unauthorized" });
+        }
+        console.log(error.code)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });

@@ -33,7 +33,7 @@ router.post("/register", async (request, response) => {
             email: request.body.email,
             firstName: request.body.firstName,
             lastName: request.body.lastName,
-            userName: request.body.userName,
+            username: request.body.username,
             password: CryptoJS.AES.encrypt(request.body.password, process.env.PASSWORD_SECRET).toString(),
             birthDate: request.body.birthDate,
             role: request.body.role,

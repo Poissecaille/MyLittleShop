@@ -43,7 +43,7 @@ router.post("/login", async (request, response) => {
 // BUYER/SELLER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
     try {
-        if (!request.body.email || !request.body.password || !request.body.firstName || !request.body.lastName || !request.body.birthDate || !request.body.userName) {
+        if (!request.body.email || !request.body.password || !request.body.firstName || !request.body.lastName || !request.body.birthDate || !request.body.username) {
             return response.status(400).json({
                 "response": "Bad json format"
             });
@@ -53,7 +53,7 @@ router.post("/register", async (request, response) => {
             password: request.body.password,
             firstName: request.body.firstName,
             lastName: request.body.lastName,
-            userName: request.body.userName,
+            username: request.body.username,
             birthDate: request.body.birthDate,
             role: request.body.role
         })
