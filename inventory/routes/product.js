@@ -194,7 +194,12 @@ router.post("/seller/product", async (request, response) => {
             "response": "New product added"
         });
     } catch (error) {
-        if (error.name === "SequelizeUniqueConstraintError") {
+        if (error.name ==="SequelizeDatabaseError"){
+            return response.status(400).json({
+                "response": "Bad json format"
+            });
+        }
+        else if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Product already existant for current user"
             });

@@ -31,7 +31,7 @@ router.get("/userAddress", async (request, response) => {
     try {
         if (!request.query.address1) {
             return response.status(400).json({
-                "response": "Bad request format",
+                "response": "Bad json format",
             });
         }
         const address = await axios.get(roads.USER_ADDRESS_URL, {
@@ -57,7 +57,7 @@ router.post("/userAddress", async (request, response) => {
     try {
         if (!request.body.address1 || !request.body.address2 || !request.body.address3 || !request.body.city || !request.body.region || !request.body.country || !request.body.postalCode) {
             return response.status(400).json({
-                "response": "Bad request format",
+                "response": "Bad json format",
             });
         }
         const newAddress = await axios.post(roads.USER_ADDRESS_URL, {
@@ -87,7 +87,7 @@ router.put("/userAddress", async (request, response) => {
     try {
         if (!request.body.address1) {
             return response.status(400).json({
-                "response": "Bad request format",
+                "response": "Bad json format",
             });
         }
         const userAddressToUpdate = await axios.put(roads.USER_ADDRESS_URL, request.body, {
@@ -111,7 +111,7 @@ router.delete("/userAddress", async (request, response) => {
     try {
         if (!request.body.address1) {
             return response.status(400).json({
-                "response": "Bad request format",
+                "response": "Bad json format",
             });
         }
         const userAddressToDelete = await axios.delete(roads.USER_ADDRESS_URL, {

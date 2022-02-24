@@ -68,7 +68,12 @@ router.post("/product", async (request, response) => {
     try {
         if (!request.body.name || !request.body.label || !request.body.condition || !request.body.description || !request.body.unitPrice || !request.body.availableQuantity) {
             return response.status(400).json({
-                "response": "Bad request format",
+                "response": "Bad json format",
+            });
+        }
+        if (request.body.condition != "new" && request.body.condition != "occasion" && request.body.condition != "renovated") {
+            return response.status(400).json({
+                "response": "Bad json format",
             });
         }
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
@@ -90,10 +95,13 @@ router.post("/product", async (request, response) => {
                     sellerId: userId
                 }
             )
-            console.log("OK")
 
             return response.status(newProduct.status).json({
                 "response": newProduct.data.response
+            });
+        } else {
+            return response.status(403).json({
+                "response": "Forbidden action"
             });
         }
     }

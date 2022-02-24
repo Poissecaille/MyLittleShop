@@ -118,7 +118,6 @@ router.put("/deactivate", async (request, response) => {
                 'Authorization': request.headers.authorization
             }
         });
-        console.log("deactivatedAccount",deactivatedAccount.data.response)
         const sellerId = deactivatedAccount.data.userId
         if (deactivatedAccount.data.userRole == "seller") {
             console.log(roads.WITHDRAW_SELLER_PRODUCTS_URL + "?sellerId=" + sellerId)

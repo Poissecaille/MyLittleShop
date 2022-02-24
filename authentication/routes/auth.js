@@ -77,7 +77,7 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
         const accessToken = jwt.sign({
             id: user.id,
             role: user.role,
-            activated: user.activated
+            //activated: user.activated
         }, process.env.JWT_SECRET, {
             expiresIn: "3d"
         });

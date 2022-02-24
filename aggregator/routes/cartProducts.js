@@ -51,14 +51,11 @@ router.post("/cartProduct", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
-            console.log(request.body.sellerUsername)
             const sellerData = await axios.get(roads.USER_DATA_URL, {
                 params: {
                     sellerUsername: request.body.sellerUsername
                 }
             });
-            console.log(sellerData.data.response.id)
-
             const newCart = await axios.post(roads.CART_MANAGEMENT_URL, {
                 userId: userId,
                 sellerId: sellerData.data.response.id,
@@ -108,7 +105,6 @@ router.put("/cartProduct", async (request, response) => {
                 sellerId: sellerData.data.response.id,
                 quantity: request.body.quantity
             });
-            console.log(cartToUpdate.data)
             return response.status(cartToUpdate.status).json({
                 "response": cartToUpdate.data.response
             });

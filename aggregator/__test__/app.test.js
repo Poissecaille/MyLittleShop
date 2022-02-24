@@ -1,7 +1,8 @@
 const request = require('supertest');
 const app = require('../app');
 
-var token;
+var buyerToken;
+var sellerToken;
 
 describe('POST /users', () => {
   it('register with correct json and create buyer account', (done) => {
@@ -88,7 +89,7 @@ describe('POST /users', () => {
 });
 
 describe('POST /users', () => {
-  it('correct login responds with json and token', (done) => {
+  it('correct buyer login responds with json and token', (done) => {
     request(app)
       .post('/login')
       .send({
@@ -101,7 +102,25 @@ describe('POST /users', () => {
       .then(response => {
         expect(response.body.response).toEqual("Logged in");
         expect(response.body.token).toBeDefined();
-        token = response.body.token
+        buyerToken = response.body.token
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('correct seller login responds with json and token', (done) => {
+    request(app)
+      .post('/login')
+      .send({
+        "email": "alexxboury@etna-alternance.net",
+        "password": "beta"
+      })
+      .set('Accept', 'application/json')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Logged in");
+        expect(response.body.token).toBeDefined();
+        sellerToken = response.body.token
         done();
       })
       .catch(err => done(err))
@@ -196,7 +215,6 @@ describe('POST /users', () => {
 
 describe('POST /users', () => {
   it('deactivate responds with json and user is deactivated', (done) => {
-    console.log("TOKKKK",token)
     request(app)
       .put('/deactivate')
       .send({
@@ -204,7 +222,7 @@ describe('POST /users', () => {
         "password": "alpha"
       })
       .set('Accept', 'application/json')
-      .set('Authorization', token)
+      .set('Authorization', `Bearer ${buyerToken}`)
       .expect(200)
       .expect('Content-Type', /json/)
       .then(response => {
@@ -221,7 +239,7 @@ describe('POST /users', () => {
         "password": "alpha"
       })
       .set('Accept', 'application/json')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${buyerToken}`)
       .expect(403)
       .expect('Content-Type', /json/)
       .then(response => {
@@ -246,4 +264,149 @@ describe('POST /users', () => {
       })
       .catch(err => done(err))
   });
-})
+  it('responds with failure when token is wrong', (done) => {
+    request(app)
+      .put('/deactivate')
+      .send({
+        "email": "random@etna-alternance.net",
+        "password": "alpha"
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer token`)
+      .expect(403)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Invalid token");
+        done();
+      })
+      .catch(err => done(err))
+  });
+});
+
+describe('POST /users', () => {
+  it('correctly add product to the catalog responds with json', (done) => {
+    request(app)
+      .post('/product')
+      .send({
+        "name": "product1",
+        "label": "testProduct",
+        "condition": "new",
+        "description": "nice product",
+        "unitPrice": 10.99,
+        "availableQuantity": 5
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("New product added");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('responds with failure when add twice the same product for the same user', (done) => {
+    request(app)
+      .post('/product')
+      .send({
+        "name": "product1",
+        "label": "testProduct",
+        "condition": "new",
+        "description": "nice product",
+        "unitPrice": 10.99,
+        "availableQuantity": 5
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(409)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product already existant for current user");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('successfully add another product', (done) => {
+    request(app)
+      .post('/product')
+      .send({
+        "name": "product2",
+        "label": "testProduct",
+        "condition": "new",
+        "description": "nice product",
+        "unitPrice": 100.99,
+        "availableQuantity": 10
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("New product added");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('response with failure when using a buyer token', (done) => {
+    request(app)
+      .post('/product')
+      .send({
+        "name": "product1",
+        "label": "testProduct",
+        "condition": "new",
+        "description": "nice product",
+        "unitPrice": 100.99,
+        "availableQuantity": 10
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(403)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Forbidden action");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('response with failure lack json data', (done) => {
+    request(app)
+      .post('/product')
+      .send({
+        "name": "product1",
+        "label": "testProduct",
+        "condition": "new",
+        "description": "nice product",
+        "unitPrice": 100.99,
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('response with failure wrong enum value', (done) => {
+    request(app)
+      .post('/product')
+      .send({
+        "name": "product1",
+        "label": "testProduct",
+        "condition": "good",
+        "description": "nice product",
+        "unitPrice": 100.99,
+        "availableQuantity": 10
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err))
+  });
+});

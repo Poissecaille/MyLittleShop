@@ -15,7 +15,6 @@ const checkToken = (request, response, next) => {
         }
         if (header) {
             const token = header.split(" ")[1];
-            console.log("TOKEN", token)
             jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
                 if (error) {
                     if (error instanceof jwt.TokenExpiredError) {
@@ -26,8 +25,6 @@ const checkToken = (request, response, next) => {
                 }
                 else {
                     request.user = user;
-                    console.log("######### USER ##########")
-                    console.log(user)
                     next();
                 }
             })

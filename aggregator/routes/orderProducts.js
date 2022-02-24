@@ -23,7 +23,6 @@ router.get("/orders", async (request, response) => {
                 'Authorization': request.headers.authorization
             }
         })
-        console.log("ok")
         const userId = user.data.response.id;
         const userRole = user.data.response.role;
         if (userRole == "seller") {
@@ -33,8 +32,6 @@ router.get("/orders", async (request, response) => {
                     sellerId: userId
                 }
             });
-            console.log("ok")
-
             sellerProducts.data.response.forEach((product) => {
                 sellerProductsIds.push(product.id)
             });
@@ -43,8 +40,6 @@ router.get("/orders", async (request, response) => {
                     "response": "No products added to sells for current user"
                 });
             }
-            console.log(userId)
-            console.log(sellerProducts.data.response)
             const sellerOrderProducts = await axios.get(roads.GET_ORDERS_URL, {
                 params: {
                     productsIds: sellerProductsIds
@@ -97,16 +92,10 @@ router.post("/order", async (request, response) => {
                 }
             });
             //TODO CHECK QUANTITY HERE FOREACH PRODUCT
-            console.log(userId)
-            console.log(userRole)
-            console.log(productsInCart.data.response)
-            console.log(userAddressToUse.data.response)
 
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
-            console.log(productsInCart.data.response)
-            console.log("STOCK UPDATED!!!!")
             //TODO DELETE CART PRODUCT AFTER ORDER
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
                 { data: productsInCart.data.response }

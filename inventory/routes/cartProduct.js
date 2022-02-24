@@ -10,7 +10,7 @@ router.get("/cartProducts", async (request, response) => {
     try {
         if (!request.query.userId) {
             return response.status(400).json({
-                "response": "Bad request format",
+                "response": "Bad json format",
             });
         }
         const cartProducts = await cartProduct.findAll({

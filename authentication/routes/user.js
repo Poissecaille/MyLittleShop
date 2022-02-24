@@ -65,7 +65,6 @@ router.get("/userData", async (request, response) => {
 
 // DISABLE ACCOUNT
 router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response) => {
-    console.log(request.data)
     const userToDisable = await User.findOne(
         {
             where: { email: request.query.email }
@@ -86,15 +85,18 @@ router.put("/deactivate", checkToken, async (request, response) => {
     try {
         const userId = request.user.id
         const userRole = request.user.role
-        const userActivated = request.user.activated
-        console.log(userActivated, "8888888")
-        console.log(request.user)
-        if (!userActivated) {
+        const userActivated = await User.findByPk(userId)
+        if (!userActivated.activated) {
             return response.status(403).json({
                 "response": "Account closed"
             });
         }
         const userToDeactivate = await User.findByPk(userId)
+       if (!userToDeactivate){
+           return response.status(404).json({
+               "response":"User not found"
+           });
+       }
         userToDeactivate.update({
             activated: false
         });
