@@ -33,7 +33,7 @@ router.get("/cartProducts", async (request, response) => {
 
 router.post("/cartProduct", async (request, response) => {
     try {
-        console.log("TEST!!!!!!!!!!!!!!!!",request.body)
+        console.log("TEST!!!!!!!!!!!!!!!!", request.body)
         const availableProduct = await Product.findOne(
             {
                 where: {
@@ -49,14 +49,20 @@ router.post("/cartProduct", async (request, response) => {
                 "response": "Product not found or not in stock"
             });
         }
+        console.log("TEST2!!!!!", availableProduct.id)
         const productAlreadyInCart = await cartProduct.findOne({
             where: {
-                productId: {
-                    [Op.eq]: availableProduct.id
-                },
-                ownerId: {
-                    [Op.ne]: request.body.userId
-                }
+                [Op.and]: [
+                    {
+                        productId: {
+                            [Op.eq]: availableProduct.id
+                        }
+                    }, {
+                        ownerId: {
+                            [Op.eq]: request.body.userId
+                        }
+                    }
+                ]
             }
         });
         console.log("PRODUCT IN CART EXISTS", productAlreadyInCart)
@@ -77,14 +83,15 @@ router.post("/cartProduct", async (request, response) => {
         }
     } catch (error) {
         console.log(error)
+
+        if (error.name === "SequelizeUniqueConstraintError") {
+            return response.status(409).json({
+                "response": "Product already in cart"
+            });
+        }
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
-        if (error.name === "SequelizeUniqueConstraintError") {
-            return response.status(409).json({
-                "response": "Product already existant in current user cart"
-            });
-        }
     }
 });
 
@@ -107,7 +114,7 @@ router.put("/cartProduct", async (request, response) => {
                 "response": "Not enough products in stock"
             });
         }
-      
+
         const productInCart = await cartProduct.findOne({
             where: {
                 ownerId: request.body.userId,

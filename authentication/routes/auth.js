@@ -19,6 +19,9 @@ router.get("/checkToken", checkToken, async (request, response) => {
         });
     } catch (error) {
         console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 })
 

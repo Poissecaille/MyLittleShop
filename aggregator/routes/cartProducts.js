@@ -43,6 +43,7 @@ router.post("/cartProduct", async (request, response) => {
                 "response": "Bad json format",
             });
         }
+        console.log("---------------------------")
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -50,20 +51,21 @@ router.post("/cartProduct", async (request, response) => {
         });
         const userId = user.data.response.id
         const userRole = user.data.response.role
+        console.log("---------------------------")
         if (userRole == "buyer") {
             const sellerData = await axios.get(roads.USER_DATA_URL, {
                 params: {
                     sellerUsername: request.body.sellerUsername
                 }
             });
-            const newCart = await axios.post(roads.CART_MANAGEMENT_URL, {
+            const newCartProduct = await axios.post(roads.CART_MANAGEMENT_URL, {
                 userId: userId,
                 sellerId: sellerData.data.response.id,
                 productName: request.body.productName,
                 quantity: request.body.quantity,
             });
-            return response.status(newCart.status).json({
-                "response": newCart.data.response
+            return response.status(newCartProduct.status).json({
+                "response": newCartProduct.data.response
             });
         } else {
             return response.status(401).json({ "response": "Unauthorized" });

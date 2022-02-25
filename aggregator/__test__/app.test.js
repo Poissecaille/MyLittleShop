@@ -4,7 +4,8 @@ const app = require('../app');
 var buyerToken;
 var sellerToken;
 var sellerName = "alexx";
-
+var productNames = ["product1", "product2"];
+var availableQuantity = 5;
 describe('POST /register', () => {
   it('register with correct json and create buyer account', (done) => {
     request(app)
@@ -289,12 +290,12 @@ describe('POST /product', () => {
     request(app)
       .post('/product')
       .send({
-        "name": "product1",
+        "name": productNames[0],
         "label": "testProduct",
         "condition": "new",
         "description": "nice product",
         "unitPrice": 10.99,
-        "availableQuantity": 5
+        "availableQuantity": availableQuantity
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${sellerToken}`)
@@ -310,12 +311,12 @@ describe('POST /product', () => {
     request(app)
       .post('/product')
       .send({
-        "name": "product1",
+        "name": productNames[0],
         "label": "testProduct",
         "condition": "new",
         "description": "nice product",
         "unitPrice": 10.99,
-        "availableQuantity": 5
+        "availableQuantity": availableQuantity
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${sellerToken}`)
@@ -331,12 +332,12 @@ describe('POST /product', () => {
     request(app)
       .post('/product')
       .send({
-        "name": "product2",
+        "name": productNames[1],
         "label": "testProduct",
         "condition": "new",
         "description": "nice product",
         "unitPrice": 100.99,
-        "availableQuantity": 10
+        "availableQuantity": availableQuantity
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${sellerToken}`)
@@ -352,12 +353,12 @@ describe('POST /product', () => {
     request(app)
       .post('/product')
       .send({
-        "name": "product1",
+        "name": "product",
         "label": "testProduct",
         "condition": "new",
         "description": "nice product",
         "unitPrice": 100.99,
-        "availableQuantity": 10
+        "availableQuantity": availableQuantity
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${buyerToken}`)
@@ -373,7 +374,7 @@ describe('POST /product', () => {
     request(app)
       .post('/product')
       .send({
-        "name": "product1",
+        "name": "product",
         "label": "testProduct",
         "condition": "new",
         "description": "nice product",
@@ -393,12 +394,12 @@ describe('POST /product', () => {
     request(app)
       .post('/product')
       .send({
-        "name": "product1",
+        "name": "product",
         "label": "testProduct",
         "condition": "good",
         "description": "nice product",
         "unitPrice": 100.99,
-        "availableQuantity": 10
+        "availableQuantity": availableQuantity
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${sellerToken}`)
@@ -425,6 +426,7 @@ describe('GET /products', () => {
       })
       .catch(err => done(err))
   });
+
   it('buyer get products response with json', (done) => {
     request(app)
       .get('/products')
@@ -446,4 +448,115 @@ describe('GET /products', () => {
       })
       .catch(err => done(err))
   });
-})
+});
+
+describe('POST /cartProduct', () => {
+  it('correctly add product to cart responds with json', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[0],
+        "quantity": availableQuantity,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product added to cart");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('fails to add product to cart due to bad json format', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[0],
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('fails to add twice the same product to cart', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[0],
+        "quantity": availableQuantity,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(409)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product already in cart");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('fails to add product to cart due to lack of stocks', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[1],
+        "quantity": availableQuantity + 1,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product not found or not in stock");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('fails to add product to cart due to seller token', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[1],
+        "quantity": availableQuantity,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err));
+  });
+
+  it('fails to add product to cart no token', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[1],
+        "quantity": availableQuantity,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err));
+  });
+
+});

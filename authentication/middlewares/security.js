@@ -3,10 +3,8 @@ const CryptoJS = require("crypto-js")
 const User = require("../models/user");
 
 const checkToken = (request, response, next) => {
+    console.log("---------------------------")
     var header;
-    // console.log("HEADER", request.headers.authorization)
-    // console.log("HEADER", request.body.headers.Authorization)
-    //const header = request.headers.authorization ? request.headers.authorization !== "undefined" : request.body.headers.Authorization
     try {
         if (request.headers.authorization) {
             header = request.headers.authorization
@@ -32,6 +30,7 @@ const checkToken = (request, response, next) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
+        console.log(error)
         return response.status(401).json({ "response": "Unauthorized" });
     }
 }

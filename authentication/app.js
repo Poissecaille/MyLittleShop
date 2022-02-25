@@ -29,7 +29,7 @@ db.authenticate().
 user.hasMany(userAddress);
 
 // DB SYNC
-db.sync({ force: false }).
+db.sync({ force: force }).
     then(
         () => console.log(`database ${dbName} synced!`)
     )

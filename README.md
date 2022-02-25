@@ -2,6 +2,7 @@
 ## .env variables
 ```
 HOST=HOST
+APP_MAILER_PORT=APP_MAILER_PORT
 APP_AGGREGATOR_PORT=APP_AGGREGATOR_PORT
 APP_AUTHENTICATION_PORT=APP_AUTHENTICATION_PORT
 APP_INVENTORY_PORT=APP_INVENTORY_PORT
@@ -34,6 +35,7 @@ axios
 concurrently
 supertest
 jest 
+nodemailer
 ```
 
 ## environements
