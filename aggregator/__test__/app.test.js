@@ -2,17 +2,23 @@ const request = require('supertest');
 const app = require('../app');
 
 var buyerToken;
+var buyerToken2;
 var sellerToken;
+var sellerToken2;
 var sellerName = "alexx";
+var sellerName2 = "alexxxx";
+var buyerName = "alex";
+var buyerName2 = "alexxx";
 var productNames = ["product1", "product2"];
 var availableQuantity = 5;
+
 describe('POST /register', () => {
   it('register with correct json and create buyer account', (done) => {
     request(app)
       .post('/register')
       .send({
         "email": "alexboury@etna-alternance.net",
-        "username": "alex",
+        "username": buyerName,
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "alpha",
@@ -28,12 +34,55 @@ describe('POST /register', () => {
       })
       .catch(err => done(err))
   });
+  it('register with correct json and create buyer account', (done) => {
+    request(app)
+      .post('/register')
+      .send({
+        "email": "alexboury@etna-alternance.com",
+        "username": buyerName2,
+        "firstName": "Alex",
+        "lastName": "Boury",
+        "password": "alpha",
+        "birthDate": "1994-03-31",
+        "role": "buyer"
+      })
+      .set('Accept', 'application/json')
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Signed in");
+        done();
+      })
+      .catch(err => done(err))
+  });
+
   it('register with correct json and create seller account', (done) => {
     request(app)
       .post('/register')
       .send({
         "email": "alexxboury@etna-alternance.net",
-        "username": "alexx",
+        "username": sellerName,
+        "firstName": "Alex",
+        "lastName": "Boury",
+        "password": "beta",
+        "birthDate": "1994-03-31",
+        "role": "seller"
+      })
+      .set('Accept', 'application/json')
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Signed in");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('register with correct json and create seller account', (done) => {
+    request(app)
+      .post('/register')
+      .send({
+        "email": "random@etna-alternance.fr",
+        "username": sellerName2,
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "beta",
@@ -54,7 +103,7 @@ describe('POST /register', () => {
       .post('/register')
       .send({
         "email": "alexboury@etna-alternance.net",
-        "username": "alex",
+        "username": buyerName,
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "alpha",
@@ -73,7 +122,7 @@ describe('POST /register', () => {
     request(app)
       .post('/register')
       .send({
-        "username": "alex",
+        "username": "random",
         "firstName": "Alex",
         "lastName": "Boury",
         "password": "alpha",
@@ -109,6 +158,24 @@ describe('POST /login', () => {
       })
       .catch(err => done(err))
   });
+  it('correct buyer login responds with json and token', (done) => {
+    request(app)
+      .post('/login')
+      .send({
+        "email": "alexboury@etna-alternance.com",
+        "password": "alpha"
+      })
+      .set('Accept', 'application/json')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Logged in");
+        expect(response.body.token).toBeDefined();
+        buyerToken2 = response.body.token
+        done();
+      })
+      .catch(err => done(err))
+  });
   it('correct seller login responds with json and token', (done) => {
     request(app)
       .post('/login')
@@ -127,11 +194,11 @@ describe('POST /login', () => {
       })
       .catch(err => done(err))
   });
-  it('correct login responds with json and token', (done) => {
+  it('correct seller login responds with json and token', (done) => {
     request(app)
       .post('/login')
       .send({
-        "email": "alexxboury@etna-alternance.net",
+        "email": "random@etna-alternance.fr",
         "password": "beta"
       })
       .set('Accept', 'application/json')
@@ -140,6 +207,7 @@ describe('POST /login', () => {
       .then(response => {
         expect(response.body.response).toEqual("Logged in");
         expect(response.body.token).toBeDefined();
+        sellerToken2 = response.body.token
         done();
       })
       .catch(err => done(err))
@@ -284,6 +352,26 @@ describe('POST /deactivate', () => {
       .catch(err => done(err))
   });
 });
+describe('POST /login', () => {
+  it('login when account is deactivated', (done) => {
+    request(app)
+      .post('/login')
+      .send({
+        "email": "alexboury@etna-alternance.net",
+        "password": "alpha"
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer token`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err))
+  });
+});
+
 
 describe('POST /product', () => {
   it('correctly add product to the catalog responds with json', (done) => {
@@ -307,6 +395,28 @@ describe('POST /product', () => {
       })
       .catch(err => done(err))
   });
+  it('correctly add product to the catalog responds with json', (done) => {
+    request(app)
+      .post('/product')
+      .send({
+        "name": productNames[0],
+        "label": "testProduct",
+        "condition": "new",
+        "description": "nice product",
+        "unitPrice": 10.99,
+        "availableQuantity": availableQuantity
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken2}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("New product added");
+        done();
+      })
+      .catch(err => done(err))
+  });
+
   it('add product responds with failure when add twice the same product for the same user', (done) => {
     request(app)
       .post('/product')
@@ -412,8 +522,17 @@ describe('POST /product', () => {
       .catch(err => done(err))
   });
 });
+
+describe('PUT /product', () => {
+  it('modify seller product succeeds', (done) => {
+    
+  });
+
+});
+
+
 describe('GET /products', () => {
-  it('get seller products response with json', (done) => {
+  it('get seller products responds with json', (done) => {
     request(app)
       .get('/products')
       .set('Accept', 'application/json')
@@ -541,15 +660,170 @@ describe('POST /cartProduct', () => {
       .catch(err => done(err));
   });
 
-  it('fails to add product to cart no token', (done) => {
+  // it('fails to add product to cart no token', (done) => {
+  //   request(app)
+  //     .post('/cartProduct')
+  //     .send({
+  //       "productName": productNames[1],
+  //       "quantity": availableQuantity,
+  //       "sellerUsername": sellerName
+  //     })
+  //     .set('Accept', 'application/json')
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err));
+  // });
+});
+
+describe('GET /cartProduct', () => {
+  it('get products from cart successfully responds with json', (done) => {
     request(app)
-      .post('/cartProduct')
+      .get("/cartProduct")
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('get products from cart returns empty array due to no product in cart', (done) => {
+    request(app)
+      .get("/cartProduct")
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual([]);
+        done();
+      })
+      .catch(err => done(err));
+  });
+  // it('no token', (done) => {
+  //   request(app)
+  //     .get("/cartProduct")
+  //     .set('Accept', 'application/json')
+  //     .expect(200)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toBeDefined();
+  //       done();
+  //     })
+  //     .catch(err => done(err));
+  // });
+  it('get products from cart fails with seller token', (done) => {
+    request(app)
+      .get("/cartProduct")
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err));
+  });
+});
+describe('PUT /cartProduct', () => {
+  it('modify a product quantity from cart successfuly done', (done) => {
+    request(app)
+      .put("/cartProduct")
       .send({
-        "productName": productNames[1],
-        "quantity": availableQuantity,
+        "productName": productNames[0],
+        "quantity": availableQuantity - 1,
         "sellerUsername": sellerName
       })
       .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        expect(response.body.response.quantity = availableQuantity - 1)
+        //var owner1 = response.body.response.ownerId;
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('modify a product from cart fails due to bad json format', (done) => {
+    request(app)
+      .put("/cartProduct")
+      .send({
+        "productName": productNames[0],
+        "quantity": availableQuantity - 1,
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        expect(response.body.response.quantity = availableQuantity - 1)
+        //var owner1 = response.body.response.ownerId;
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('modify a product quantity from cart fails because exceed stocks', (done) => {
+    request(app)
+      .put("/cartProduct")
+      .send({
+        "productName": productNames[0],
+        "quantity": availableQuantity + 1,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product not found or not in stock");
+        //var owner1 = response.body.response.ownerId;
+        done();
+      })
+      .catch(err => done(err));
+  });
+
+  it('modify a product seller in buyer cart fails because product not in cart', (done) => {
+    request(app)
+      .put("/cartProduct")
+      .send({
+        "productName": productNames[0],
+        "quantity": availableQuantity - 1,
+        "sellerUsername": sellerName2
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        //var owner2 = response.body.response.ownerId;
+        //if (owner1 == owner2) {
+        //  throw new Error("SellerId has not been changed")
+        //}
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('modify a product quantity from cart fails because of seller token', (done) => {
+    request(app)
+      .put("/cartProduct")
+      .send({
+        "productName": productNames[0],
+        "quantity": availableQuantity - 1,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
       .expect(401)
       .expect('Content-Type', /json/)
       .then(response => {
@@ -559,4 +833,107 @@ describe('POST /cartProduct', () => {
       .catch(err => done(err));
   });
 
+  // it('modify a product quantity from cart fails due to no token', (done) => {
+  //   request(app)
+  //     .put("/cartProduct")
+  //     .send({
+  //       "productName": productNames[0],
+  //       "quantity": availableQuantity - 1,
+  //       "sellerUsername": sellerName
+  //     })
+  //     .set('Accept', 'application/json')
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       expect(response.body.response.quantity = availableQuantity - 1)
+  //       done();
+  //     })
+  //     .catch(err => done(err));
+  // });
 });
+describe('DELETE /cartProduct', () => {
+  it('successfully delete product from cart responds with json', (done) => {
+    request(app)
+      .delete("/cartProduct")
+      .send({
+        "productName": productNames[0],
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product removed from cart");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('delete product from cart fails because of bad json format', (done) => {
+    request(app)
+      .delete("/cartProduct")
+      .send({
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('delete product from cart fails because product is not in cart', (done) => {
+    request(app)
+      .delete("/cartProduct")
+      .send({
+        "productName": "randomProduct",
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product not found in current user cart");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('delete product from cart fails because of seller token', (done) => {
+    request(app)
+      .delete("/cartProduct")
+      .send({
+        "productName": "randomProduct",
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  // it('delete product from cart fails due to no token', (done) => {
+  //   request(app)
+  //     .delete("/cartProduct")
+  //     .send({
+  //       "productName": "randomProduct",
+  //       "sellerUsername": sellerName
+  //     })
+  //     .set('Accept', 'application/json')
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err));
+  // });
+})

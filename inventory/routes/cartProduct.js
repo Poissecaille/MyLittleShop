@@ -106,15 +106,14 @@ router.put("/cartProduct", async (request, response) => {
         });
         if (!availableProduct) {
             return response.status(404).json({
-                "response": "product not found"
+                "response": "Product not found or not in stock"
             });
         }
-        if (availableProduct.availableQuantity < request.body.quantity) {
-            return response.status(400).json({
-                "response": "Not enough products in stock"
-            });
-        }
-
+        // if (availableProduct.availableQuantity < request.body.quantity) {
+        //     return response.status(404).json({
+        //         "response": "Not enough products in stock"
+        //     });
+        // }
         const productInCart = await cartProduct.findOne({
             where: {
                 ownerId: request.body.userId,
@@ -137,26 +136,34 @@ router.put("/cartProduct", async (request, response) => {
 });
 
 router.delete("/cartProduct", async (request, response) => {
+    console.log(request.body)
     const product = await Product.findOne({
         where: {
             name: request.body.productName,
-            sellerUsername: request.body.sellerUsername
+            sellerId: request.body.sellerId
         }
     });
+    if (!product) {
+        return response.status(404).json({
+            "response": "Product not found in current user cart"
+        });
+    }
     const productInCartToDelete = await cartProduct.findOne({
         where: {
-            cartId: userCart.id,
+            ownerId: request.body.userId,
             productId: product.id
         }
     });
+    console.log("WTFFFFFFFFFFF")
+    console.log(productInCartToDelete)
     if (!productInCartToDelete) {
         return response.status(404).json({
-            "response": "product not found in current user cart"
+            "response": "Product not found in current user cart"
         });
     }
     await productInCartToDelete.destroy();
     return response.status(200).json({
-        "response": "product deleted from cart"
+        "response": "Product removed from cart"
     });
 });
 

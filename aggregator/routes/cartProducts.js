@@ -43,7 +43,6 @@ router.post("/cartProduct", async (request, response) => {
                 "response": "Bad json format",
             });
         }
-        console.log("---------------------------")
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -51,7 +50,6 @@ router.post("/cartProduct", async (request, response) => {
         });
         const userId = user.data.response.id
         const userRole = user.data.response.role
-        console.log("---------------------------")
         if (userRole == "buyer") {
             const sellerData = await axios.get(roads.USER_DATA_URL, {
                 params: {
@@ -72,6 +70,11 @@ router.post("/cartProduct", async (request, response) => {
         }
     } catch (error) {
         console.log(error)
+        if (error instanceof TypeError && error.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
+            return response.status(401).json({
+                "response": "Unauthorized"
+            });
+        }
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -123,7 +126,7 @@ router.put("/cartProduct", async (request, response) => {
 // REMOVE PRODUCT FROM CART
 router.delete("/cartProduct", async (request, response) => {
     try {
-        if (!request.body.productName) {
+        if (!request.body.productName || !request.body.sellerUsername) {
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -156,6 +159,7 @@ router.delete("/cartProduct", async (request, response) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
+        console.log(error)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });

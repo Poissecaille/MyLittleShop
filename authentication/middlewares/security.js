@@ -3,7 +3,6 @@ const CryptoJS = require("crypto-js")
 const User = require("../models/user");
 
 const checkToken = (request, response, next) => {
-    console.log("---------------------------")
     var header;
     try {
         if (request.headers.authorization) {
