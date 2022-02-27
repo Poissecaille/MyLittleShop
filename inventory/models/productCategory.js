@@ -9,13 +9,13 @@ const ProductCategory = db.define('productCategory', {
         autoIncrement: true
     },
     name: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING, unique: false
     }, //freezeTableName: true
 },
     {
-        freezeTableName:true,
+        freezeTableName: true,
         tableName: "productCategory",
-        timestamps:false
+        timestamps: false
     }
 );
 module.exports = ProductCategory;

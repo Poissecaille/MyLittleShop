@@ -25,7 +25,7 @@ const OrderProduct = db.define('orderProduct', {
     shipped: {
         type: DataTypes.ENUM(deliveryStatus), allowNull: false, defaultValue: deliveryStatus[0]
     },
-    shipping_date: {
+    shippingDate: {
         type: DataTypes.DATE, allowNull: true
     }
 }, {

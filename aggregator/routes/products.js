@@ -82,7 +82,7 @@ router.get("/products", async (request, response) => {
                     console.log("#####################")
                 }
             }
-            console.log("999", request.query.lowerPrice ? request.query.lowerPrice : 0)
+
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
                     sellerId: sellerData ? sellerData.data.response.id : null,
@@ -101,7 +101,7 @@ router.get("/products", async (request, response) => {
         } else if (userRole == "seller") {
             const products = await axios.get(roads.SEARCH_PRODUCTS_SELLER_URL, {
                 params: {
-                    userId: userId
+                    sellerId: userId
                 }
             });
             return response.status(products.status).json({
@@ -149,7 +149,7 @@ router.post("/product", async (request, response) => {
                     description: request.body.description,
                     unitPrice: request.body.unitPrice,
                     availableQuantity: request.body.availableQuantity,
-                    sellerId: userId
+                    sellerId: userId,
                 }
             )
 

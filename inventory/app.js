@@ -30,8 +30,11 @@ db.authenticate().
     .catch((error) => console.log(error));
 
 // DB ASSOCIATIONS
-productCategory.hasMany(product);
-productTag.hasMany(product);
+//productCategory.hasMany(product);
+//productTag.hasMany(product);
+product.hasMany(productCategory);
+product.hasMany(productTag);
+
 //cart.hasMany(cartProduct)
 
 // DB SYNC

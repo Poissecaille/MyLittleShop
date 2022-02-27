@@ -68,10 +68,32 @@ router.post("/orderProducts", async (request, response) => {
         });
     } catch (error) {
         console.log(error)
-        response.status(error.response.status).json({
+        return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }
+});
+
+router.put("/seller/orderProduct", async (request, response) => {
+    const orderToUpdate = await OrderProduct.findOne({
+        where: {
+            ownerId: request.body.ownerId,
+            productId: request.body.productId,
+            addressId: request.body.addressId
+        }
+    });
+    if (!orderToUpdate) {
+        return response.status(404).json({
+            "response": "Order not found"
+        });
+    }
+    orderToUpdate.update({
+        shipped: request.body.shipped,
+        shippingDate: request.body.shippingDate
+    });
+    return response.status(200).json({
+        "response": orderToUpdate
+    });
 });
 
 module.exports = router;

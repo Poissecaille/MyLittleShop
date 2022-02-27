@@ -99,7 +99,7 @@ router.post("/orderProducts", async (request, response) => {
             });
             console.log("#########PRODUCT############")
             console.log(productsInCart.data.response)
-            if (productsInCart.length == 0) {
+            if (productsInCart.data.response.length == 0) {
                 return response.status(404).json({
                     "response": "No product found in user cart"
                 });
@@ -129,6 +129,69 @@ router.post("/orderProducts", async (request, response) => {
                 });
                 //TODO ROLLBACK IF NECESSARY
             }
+        } else {
+            return response.status(401).json({
+                "response": "Unauthorized"
+            });
+        }
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
+//UPDATE DELIVERY STATUS FOR SELLERS
+router.put("/orderProduct", async (request, response) => {
+    try {
+        if (!request.body.productName || !request.body.ownerId || !request.body.addressName || !request.body.shipped || !request.body.shippingDate) {
+            if (request.body.shipped !== "preparation" && request.body.shipped !== "shipped" && request.body.shipped !== "delivred") {
+                return response.status(400).json({
+                    "response": "Bad json format"
+                });
+            }
+            if (request.body.shippingDate < Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' '))) {
+                return response.status(400).json({
+                    "response": "Bad json format"
+                });
+            }
+            return response.status(400).json({
+                "response": "Bad json format"
+            });
+        }
+        const address = await axios.get(roads.GET_ONE_USER_ADDRESS_URL, {
+            params: {
+                address1: request.body.addressName
+            }
+        });
+        // const user = await axios.get(roads.CHECK_TOKEN_URL, {
+        //     headers: {
+        //         'Authorization': request.headers.authorization
+        //     }
+        // })
+        const userId = address.data.id;
+        const userRole = address.data.role;
+        if (userRole == "seller") {
+            const sellerProduct = await axios.get(roads.SELLER_PRODUCTS_URL, {
+                params: {
+                    sellerId: userId,
+                    productName: request.body.productName
+                }
+            });
+            if (!sellerProduct) {
+                return response.status(404).json({
+                    "response": "No products added to sells for current user"
+                });
+            }
+            const orderProductToUpdate = await axios.put(roads.SELLER_PRODUCTS_URL, {
+                ownerId: userId,
+                productId: sellerProduct.data.response.id,
+                addressId: address.data.response.id
+            })
+            return response.status(orderProductToUpdate.status).json({
+                "response": orderProductToUpdate.data.response
+            });
         } else {
             return response.status(401).json({
                 "response": "Unauthorized"

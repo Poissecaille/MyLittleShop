@@ -26,9 +26,9 @@ const Op = Sequelize.Op
 router.get("/buyer/products", async (request, response) => {
     try {
         var sellersIds = [];
-        var categoriesIds = [];
-        var tagsIds = [];
-
+        // var categoriesIds = [];
+        // var tagsIds = [];
+        var productsIds = [];
         if (Array.isArray(request.query.sellerId)) {
             request.query.userId.forEach(
                 (id) => {
@@ -56,20 +56,24 @@ router.get("/buyer/products", async (request, response) => {
         });
         await tags.forEach(
             (tag) => {
-                tagsIds.push(tag.id)
+                productsIds.push(tag.productId)
             }
         );
         await categories.forEach(
             (category) => {
-                categoriesIds.push(category.id)
+                if (productsIds.indexOf(category.productId) === -1) {
+                    productsIds.push(category.productId)
+                }
             }
         );
+        console.log("ASSERTION_TEST", productsIds)
         const products = await Product.findAndCountAll({
             where: {
                 [Op.and]: [
+                    { id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
                     { name: request.query.productName !== undefined ? { [Op.substring]: request.query.productName } : { [Op.not]: null } },
-                    { productCategoryId: request.query.category !== undefined ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
-                    { productTagId: request.query.tag !== undefined ? { [Op.in]: tagsIds } : { [Op.not]: null } },
+                    // { productCategoryId: request.query.category !== undefined ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
+                    // { productTagId: request.query.tag !== undefined ? { [Op.in]: tagsIds } : { [Op.not]: null } },
                     { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },
                     { unitPrice: { [Op.between]: [request.query.lowerPrice, request.query.higherPrice] } },
                     { condition: request.query.condition !== undefined ? { [Op.eq]: request.query.condition } : { [Op.not]: null } },
@@ -93,21 +97,52 @@ router.get("/buyer/products", async (request, response) => {
 
 // CONSULT PRODUCTS FOR SELLERS
 router.get("/seller/products", async (request, response) => {
-    console.log(request.query)
-    console.log("#####################")
-    const sellerProducts = await Product.findAll({
-        where: {
-            sellerId: request.query.userId
+    try {
+        console.log(request.query)
+        console.log("##########chap###########")
+        console.log(request.query.sellerId)
+        const sellerProducts = await Product.findAll({
+            where: {
+                sellerId: request.query.sellerId,
+            }
+        });
+        if (!sellerProducts) {
+            return response.status(404).json({
+                "response": "No product to sell for the current user"
+            });
+        } else {
+            return response.status(200).json({
+                "response": sellerProducts
+            });
         }
-    });
-    if (!sellerProducts) {
-        return response.status(404).json({
-            "response": "No product to sell for the current user"
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+// CONSULT ONE PRODUCT FOR SELLERS ORDERS
+router.get("/seller/product", async (request, response) => {
+    try {
+        console.log(request.query)
+        console.log("##########chap###########")
+        console.log(request.query.sellerId)
+        const sellerProducts = await Product.findOne({
+            where: {
+                sellerId: request.query.sellerId,
+                name: request.query.productName
+            }
         });
-    } else {
-        return response.status(200).json({
-            "response": sellerProducts
-        });
+        if (!sellerProducts) {
+            return response.status(404).json({
+                "response": "No product to sell for the current user"
+            });
+        } else {
+            return response.status(200).json({
+                "response": sellerProducts
+            });
+        }
+    } catch (error) {
+        console.log(error)
     }
 });
 
@@ -162,9 +197,15 @@ router.put("/products", async (request, response) => {
 // ADD A PRODUCT FOR SELLERS //TODO HANDLE PRODUCT CATEGOEY AND TAG FOR PUT AND POST
 router.post("/seller/product", async (request, response) => {
     try {
-        const newSellerProduct = new Product(
-            request.body
-        )
+        const newSellerProduct = new Product({
+            name: request.body.name,
+            label: request.body.label,
+            condition: request.body.condition,
+            description: request.body.description,
+            unitPrice: request.body.unitPrice,
+            availableQuantity: request.body.availableQuantity,
+            sellerId: request.body.sellerId,
+        })
         await newSellerProduct.save();
         return response.status(201).json({
             "response": "New product added"

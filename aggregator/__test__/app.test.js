@@ -1585,7 +1585,7 @@ describe('POST /orderProducts', () => {
       })
       .catch(err => done(err));
   });
-  it('create order succeeds even with no cart and responds with json', (done) => {
+  it('create order twice fails because user has no cart and responds with json', (done) => {
     request(app)
       .post("/orderProducts")
       .send({
@@ -1593,10 +1593,116 @@ describe('POST /orderProducts', () => {
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${buyerToken3}`)
-      .expect(201)
+      .expect(404)
       .expect('Content-Type', /json/)
       .then(response => {
-        expect(response.body.response).toEqual("Order created");
+        expect(response.body.response).toEqual("No product found in user cart");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('create order fails because user address is inexistant', (done) => {
+    request(app)
+      .post("/orderProducts")
+      .send({
+        "address1": "addressThatDoesntExist"
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken3}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Address not found");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('create order fails due to bad json format', (done) => {
+    request(app)
+      .post("/orderProducts")
+      .send({
+        "address": "President Obama"
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken3}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('create order fails due to seller token', (done) => {
+    request(app)
+      .post("/orderProducts")
+      .send({
+        "address1": "President Obama"
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  // it('create order fails due to no token', (done) => {
+  //   request(app)
+  //     .post("/orderProducts")
+  //     .send({
+  //       "address1": "President Obama"
+  //     })
+  //     .set('Accept', 'application/json')
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err));
+  // });
+});
+describe('GET /orderProducts', () => {
+  it('get product ordered succeeds buyer side and responds with json', (done) => {
+    request(app)
+      .get("/orderProducts")
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken3}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('get product ordered succeeds buyer side even without any order and responds with json', (done) => {
+    request(app)
+      .get("/orderProducts")
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        expect(response.body.response).toEqual([]);
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('get product ordered succeeds seller side and responds with json', (done) => {
+    request(app)
+      .get("/orderProducts")
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken2}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        expect(response.body.response).toEqual([]);
         done();
       })
       .catch(err => done(err));
