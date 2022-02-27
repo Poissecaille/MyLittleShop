@@ -40,6 +40,7 @@ router.get("/userAddresses", checkToken, async (request, response) => {
 // GET A USER ADDRESS FOR ORDERS
 router.get("/userAddress", checkToken, async (request, response) => {
     try {
+        console.log("ERRORDETECTION",request.query.address1)
         const userId = request.user.id
         const userRole = request.user.role
         if (userRole == "buyer") {

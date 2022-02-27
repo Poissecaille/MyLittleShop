@@ -3,12 +3,14 @@ const app = require('../app');
 
 var buyerToken;
 var buyerToken2;
+var buyerToken3;
 var sellerToken;
 var sellerToken2;
 var sellerName = "alexx";
 var sellerName2 = "alexxxx";
 var buyerName = "alex";
 var buyerName2 = "alexxx";
+var buyerName3 = "alexxxxx";
 var productNames = ["product1", "product2"];
 var availableQuantity = 5;
 var newProductName = "greatProductName";
@@ -55,7 +57,27 @@ describe('POST /register', () => {
       })
       .catch(err => done(err))
   });
-
+  it('register with correct json and create buyer account', (done) => {
+    request(app)
+      .post('/register')
+      .send({
+        "email": "alexboury@etna-alternance.fr",
+        "username": buyerName3,
+        "firstName": "Alex",
+        "lastName": "Boury",
+        "password": "alpha",
+        "birthDate": "1994-03-31",
+        "role": "buyer"
+      })
+      .set('Accept', 'application/json')
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Signed in");
+        done();
+      })
+      .catch(err => done(err))
+  });
   it('register with correct json and create seller account', (done) => {
     request(app)
       .post('/register')
@@ -172,6 +194,24 @@ describe('POST /login', () => {
         expect(response.body.response).toEqual("Logged in");
         expect(response.body.token).toBeDefined();
         buyerToken2 = response.body.token
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('correct buyer login responds with json and token', (done) => {
+    request(app)
+      .post('/login')
+      .send({
+        "email": "alexboury@etna-alternance.fr",
+        "password": "alpha"
+      })
+      .set('Accept', 'application/json')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Logged in");
+        expect(response.body.token).toBeDefined();
+        buyerToken3 = response.body.token
         done();
       })
       .catch(err => done(err))
@@ -384,6 +424,50 @@ describe('POST /userAddress', () => {
         "region": "DC",
         "country": "US",
         "postalCode": 20500
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken3}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("New address added");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('correctly add user address responds with json', (done) => {
+    request(app)
+      .post('/userAddress')
+      .send({
+        "address1": "President Obama",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("New address added");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('correctly add another user address responds with json', (done) => {
+    request(app)
+      .post('/userAddress')
+      .send({
+        "address1": "President Chirac",
+        "address2": "2 Avenue Champs Elyses",
+        "address3": null,
+        "city": "Paris",
+        "region": "Ile de France",
+        "country": "FR",
+        "postalCode": 75000
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${buyerToken2}`)
@@ -1079,6 +1163,43 @@ describe('POST /cartProduct', () => {
       })
       .catch(err => done(err));
   });
+  it('correctly add product to cart responds with json', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[0],
+        "quantity": 1,
+        "sellerUsername": sellerName2
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product added to cart");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('correctly add product to cart responds with json', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": newProductName,
+        "quantity": 5,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken3}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product added to cart");
+        done();
+      })
+      .catch(err => done(err));
+  });
+
   it('fails to add a product to cart because it was removed from sale by seller', (done) => {
     request(app)
       .post('/cartProduct')
@@ -1447,6 +1568,37 @@ describe('DELETE /cartProduct', () => {
   //     .catch(err => done(err));
   // });
 });
-// describe('POST /order', () => {
-
-// })
+describe('POST /orderProducts', () => {
+  it('create order succeeds and responds with json', (done) => {
+    request(app)
+      .post("/orderProducts")
+      .send({
+        "address1": "President Obama"
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken3}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Order created");
+        done();
+      })
+      .catch(err => done(err));
+  });
+  it('create order succeeds even with no cart and responds with json', (done) => {
+    request(app)
+      .post("/orderProducts")
+      .send({
+        "address1": "President Obama"
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken3}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Order created");
+        done();
+      })
+      .catch(err => done(err));
+  });
+});

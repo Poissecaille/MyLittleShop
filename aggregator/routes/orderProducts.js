@@ -5,18 +5,19 @@ const roads = {
     // USER MICROSERVICE
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
     GET_ONE_USER_ADDRESS_URL: "http://localhost:5002/api/userAddress",
-    //PRODUCT MICROSERVICE
+    //INVENTORY MICROSERVICE
     CART_URL: "http://localhost:5003/api/cartProducts",
+    BUYER_PRODUCT_URL: "http://localhost:5003/api/buyer/products",
     SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products",
     UPDATE_PRODUCTS_STOCKS: "http://localhost:5003/api/products",
     //ORDER MICROSERVICE
-    CREATE_ORDER_URL: "http://localhost:5001/api/orderProduct",
-    GET_ORDERS_URL: "http://localhost:5001/api/orderProducts"
-
+    CREATE_ORDER_URL: "http://localhost:5001/api/orderProducts",
+    GET_SELLER_ORDERS_URL: "http://localhost:5001/api/seller/orderProducts",
+    GET_BUYER_ORDERS_URL: "http://localhost:5001/api/buyer/orderProducts"
 }
 
 // GET ORDERS FOR SELLERS
-router.get("/orders", async (request, response) => {
+router.get("/orderProducts", async (request, response) => {
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -25,6 +26,7 @@ router.get("/orders", async (request, response) => {
         })
         const userId = user.data.response.id;
         const userRole = user.data.response.role;
+
         if (userRole == "seller") {
             var sellerProductsIds = []
             const sellerProducts = await axios.get(roads.SELLER_PRODUCTS_URL, {
@@ -40,7 +42,7 @@ router.get("/orders", async (request, response) => {
                     "response": "No products added to sells for current user"
                 });
             }
-            const sellerOrderProducts = await axios.get(roads.GET_ORDERS_URL, {
+            const sellerOrderProducts = await axios.get(roads.GET_SELLER_ORDERS_URL, {
                 params: {
                     productsIds: sellerProductsIds
                 }
@@ -49,6 +51,15 @@ router.get("/orders", async (request, response) => {
 
             return response.status(200).json({
                 "response": sellerOrderProducts.data.response
+            });
+        } else if (userRole == "buyer") {
+            const buyerOrders = await axios.get(roads.GET_BUYER_ORDERS_URL, {
+                params: {
+                    ownerId: userId
+                }
+            })
+            return response.status(200).json({
+                "response": buyerOrders.data.response
             });
         }
     } catch (error) {
@@ -60,23 +71,24 @@ router.get("/orders", async (request, response) => {
 });
 
 // MAKE AN ORDER
-router.post("/order", async (request, response) => {
-    if (!request.body.userAddressName) {
-        return response.status(400).json({
-            "response": "Bad json format",
-        });
-    }
+router.post("/orderProducts", async (request, response) => {
     try {
+        if (!request.body.address1) {
+            return response.status(400).json({
+                "response": "Bad json format",
+            });
+        }
         const userAddressToUse = await axios.get(roads.GET_ONE_USER_ADDRESS_URL,
             {
                 params: {
-                    address1: request.body.userAddressName
+                    address1: request.body.address1
                 },
                 headers: {
                     'Authorization': request.headers.authorization
                 }
             }
         );
+        console.log("#########PRODUCT############")
         const userId = userAddressToUse.data.userId;
         const userRole = userAddressToUse.data.userRole;
         if (userRole == "buyer") {
@@ -85,19 +97,29 @@ router.post("/order", async (request, response) => {
                     userId: userId
                 }
             });
+            console.log("#########PRODUCT############")
+            console.log(productsInCart.data.response)
+            if (productsInCart.length == 0) {
+                return response.status(404).json({
+                    "response": "No product found in user cart"
+                });
+            }
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
                 { data: productsInCart.data.response }
             )
+            // console.log("#########PRODUCT############")
+            // console.log(productsInCart.data.response)
+
             if (stockUpdate.status == 200 && cartProductsToDelete.status == 200) {
                 const ordersProducts = await axios.post(roads.CREATE_ORDER_URL, {
                     cartProductsData: productsInCart.data.response,
-                    userAddress: userAddressToUse.data.response,
-                    userId: userId
+                    userAddressId: userAddressToUse.data.response.id,
+                    ownerId: userId
                 });
-                return response.status(200).json({
+                return response.status(ordersProducts.status).json({
                     "response": ordersProducts.data.response
                 });
             }

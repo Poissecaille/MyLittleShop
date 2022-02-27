@@ -10,7 +10,13 @@ const OrderProduct = db.define('orderProduct', {
         primaryKey: true,
         autoIncrement: true
     },
+    ownerId: {
+        type: DataTypes.INTEGER, allowNull: false
+    },
     productId: {
+        type: DataTypes.INTEGER, allowNull: false
+    },
+    addressId: {
         type: DataTypes.INTEGER, allowNull: false
     },
     quantity: {
