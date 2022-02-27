@@ -20,63 +20,57 @@ router.get("/userAddresses", async (request, response) => {
         });
     }
     catch (error) {
-        response.status(error.response.status).json({
+        return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }
 })
 
-// CONSULT A USER ADDRESS
-router.get("/userAddress", async (request, response) => {
-    try {
-        if (!request.query.address1) {
-            return response.status(400).json({
-                "response": "Bad json format",
-            });
-        }
-        const address = await axios.get(roads.USER_ADDRESS_URL, {
-            headers: {
-                'Authorization': request.headers.authorization
-            },
-            params: {
-                address1: request.query.address1
-            }
-        });
-        return response.status(address.status).json({
-            "response": address.data.response
-        });
-    } catch (error) {
-        response.status(error.response.status).json({
-            "response": error.response.data.response
-        });
-    }
-});
+// // CONSULT A USER ADDRESS
+// router.get("/userAddress", async (request, response) => {
+//     try {
+//         if (!request.query.address1) {
+//             return response.status(400).json({
+//                 "response": "Bad json format",
+//             });
+//         }
+//         const address = await axios.get(roads.USER_ADDRESS_URL, {
+//             headers: {
+//                 'Authorization': request.headers.authorization
+//             },
+//             params: {
+//                 address1: request.query.address1
+//             }
+//         });
+//         return response.status(address.status).json({
+//             "response": address.data.response
+//         });
+//     } catch (error) {
+//         return response.status(error.response.status).json({
+//             "response": error.response.data.response
+//         });
+//     }
+// });
 
 //CREATE A USER ADDRESS
 router.post("/userAddress", async (request, response) => {
     try {
-        if (!request.body.address1 || !request.body.address2 || !request.body.address3 || !request.body.city || !request.body.region || !request.body.country || !request.body.postalCode) {
+        if (!request.body.address1 || !request.body.address2 || !request.body.city || !request.body.region || !request.body.country || !request.body.postalCode) {
             return response.status(400).json({
                 "response": "Bad json format",
             });
         }
-        const newAddress = await axios.post(roads.USER_ADDRESS_URL, {
+        const newAddress = await axios.post(roads.USER_ADDRESS_URL, request.body, {
             headers: {
                 'Authorization': request.headers.authorization
             },
-            address1: request.body.address1,
-            address2: request.body.address2,
-            address3: request.body.address3,
-            city: request.body.city,
-            region: request.body.region,
-            country: request.body.country,
-            postalCode: request.body.postalCode
         });
+        console.log(newAddress)
         return response.status(newAddress.status).json({
             "response": newAddress.data.response
         });
     } catch (error) {
-        response.status(error.response.status).json({
+        return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }
@@ -85,7 +79,7 @@ router.post("/userAddress", async (request, response) => {
 //MODIFY A USER ADDRESS
 router.put("/userAddress", async (request, response) => {
     try {
-        if (!request.body.address1) {
+        if (!request.body.address1 || request.body.postalCode.toString().length != 5) {
             return response.status(400).json({
                 "response": "Bad json format",
             });

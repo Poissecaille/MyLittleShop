@@ -6,7 +6,6 @@ const Cart = require("../models/cart");
 const Op = Sequelize.Op
 
 router.get("/cartProducts", async (request, response) => {
-    //TODO ALLOW ROADS FOR ADMIN ALSO?
     try {
         if (!request.query.userId) {
             return response.status(400).json({

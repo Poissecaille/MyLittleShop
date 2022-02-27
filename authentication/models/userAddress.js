@@ -12,7 +12,7 @@ const userAddress = db.define('userAddress', {
         type: DataTypes.STRING, unique: false, allowNull: false,
     },
     address2: {
-        type: DataTypes.STRING, unique: false, allowNull: true,
+        type: DataTypes.STRING, unique: false, allowNull: false,
     },
     address3: {
         type: DataTypes.STRING, unique: false, allowNull: true,

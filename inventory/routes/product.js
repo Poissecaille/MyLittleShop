@@ -25,7 +25,7 @@ const Op = Sequelize.Op
 // CONSULT PRODUCTS FOR BUYERS
 router.get("/buyer/products", async (request, response) => {
     try {
-        var sellersIds =[];
+        var sellersIds = [];
         var categoriesIds = [];
         var tagsIds = [];
 
@@ -181,6 +181,69 @@ router.post("/seller/product", async (request, response) => {
             });
         }
     }
-})
+});
+router.put("/seller/product", async (request, response) => {
+    try {
+        const productToUpdate = await Product.findOne({
+            where: {
+                name: request.body.name,
+                sellerId: request.body.userId
+            }
+        });
+        if (!productToUpdate) {
+            return response.status(404).json({
+                "response": "Product not found for current user"
+            });
+        }
+        if (request.body.categoryNames) {
+            var categoryIds = []
+            request.body.categoryNames.forEach(async (categoryName) => {
+                await ProductCategory.findOne({
+                    where: {
+                        name: categoryName
+                    }
+                });
+                categoryIds.push(categoryName.id)
+            })
+        }
+        if (request.body.tagNames) {
+            var tagsIds = []
+            request.body.tagNames.forEach(async (tagName) => {
+                await ProductTag.findOne({
+                    where: {
+                        name: tagName
+                    }
+                });
+                tagsIds.push(tagName.id)
+            })
+        }
+        if (request.body.availableQuantity !== undefined && request.body.availableQuantity == 0) {
+            if (request.body.onSale == true)
+                return response.status(400).json({
+                    "response": "Bad json format",
+                });
+            request.body.onSale = false
+        }
+        productToUpdate.update({
+            name: request.body.newName !== undefined ? request.body.newName : productToUpdate.name,
+            label: request.body.label !== undefined ? request.body.label : productToUpdate.label,
+            condition: request.body.condition !== undefined ? request.body.condition : productToUpdate.condition,
+            description: request.body.description !== undefined ? request.body.description : productToUpdate.description,
+            unitPrice: request.body.unitPrice !== undefined ? request.body.unitPrice : productToUpdate.unitPrice,
+            availableQuantity: request.body.availableQuantity !== undefined ? request.body.availableQuantity : productToUpdate.availableQuantity,
+            productCategoryId: categoryIds !== undefined ? categoryIds : productToUpdate.productCategoryId,
+            productTagId: tagsIds !== undefined ? tagsIds : productToUpdate.productTagId,
+            onSale: request.body.onSale !== undefined ? request.body.onSale : productToUpdate.onSale
+        });
+        return response.status(200).json({
+            "response": productToUpdate.dataValues
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 module.exports = router;

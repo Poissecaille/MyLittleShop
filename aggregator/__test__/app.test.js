@@ -11,7 +11,7 @@ var buyerName = "alex";
 var buyerName2 = "alexxx";
 var productNames = ["product1", "product2"];
 var availableQuantity = 5;
-
+var newProductName = "greatProductName";
 describe('POST /register', () => {
   it('register with correct json and create buyer account', (done) => {
     request(app)
@@ -372,6 +372,389 @@ describe('POST /login', () => {
   });
 });
 
+describe('POST /userAddress', () => {
+  it('correctly add user address responds with json', (done) => {
+    request(app)
+      .post('/userAddress')
+      .send({
+        "address1": "President Obama",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(201)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("New address added");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('fails to add twice the same address for the same user', (done) => {
+    request(app)
+      .post('/userAddress')
+      .send({
+        "address1": "President Obama",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(409)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Address already existant for the current user");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('fails to add user address because of bad json format', (done) => {
+    request(app)
+      .post('/userAddress')
+      .send({
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('fails to add user address because of seller token', (done) => {
+    request(app)
+      .post('/userAddress')
+      .send({
+        "address1": "President Obama",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  // it('fails to add user address due to no token', (done) => {
+  //   request(app)
+  //     .post('/userAddress')
+  //     .send({
+  //       "address1": "President Obama",
+  //       "address2": "1600 Pennsylvania Avenue NW",
+  //       "address3": null,
+  //       "city": "Washington",
+  //       "region": "DC",
+  //       "country": "US",
+  //       "postalCode": 20500
+  //     })
+  //     .set('Accept', 'application/json')
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err))
+  // });
+});
+
+describe('PUT /userAddress', () => {
+  it('modify address succeeds and responds with json', (done) => {
+    request(app)
+      .put('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address1": "President Obama",
+        "newAddress1": "President Bush",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('modify address fails because address does not exist', (done) => {
+    request(app)
+      .put('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address1": "President Alex",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20700
+      })
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Address not found");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('modify address fails because postal code is wrong', (done) => {
+    request(app)
+      .put('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address1": "President Obama",
+        "newAddress1": "President Bush",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 10000000
+      })
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('modify address fails because of bad json format', (done) => {
+    request(app)
+      .put('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "newAddress1": "President Obama",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('modify address fails because of seller token', (done) => {
+    request(app)
+      .put('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address1": "President Bush",
+        "newAddress1": "President Obama",
+        "address2": "1600 Pennsylvania Avenue NW",
+        "address3": null,
+        "city": "Washington",
+        "region": "DC",
+        "country": "US",
+        "postalCode": 20500
+      })
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  // it('modify address fails due to no token', (done) => {
+  //   request(app)
+  //     .put('/userAddress')
+  //     .set('Accept', 'application/json')
+  //     .send({
+  //       "address1": "President Bush",
+  //       "newAddress1": "President Obama",
+  //       "address2": "1600 Pennsylvania Avenue NW",
+  //       "address3": null,
+  //       "city": "Washington",
+  //       "region": "DC",
+  //       "country": "US",
+  //       "postalCode": 20500
+  //     })
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err))
+  // });
+});
+describe('DELETE /userAddress', () => {
+  it('delete successfully address and responds with json', (done) => {
+    request(app)
+      .delete('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address1": "President Bush",
+      })
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Address deleted");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('delete twice fails because address does not exist', (done) => {
+    request(app)
+      .delete('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address1": "President Bush",
+      })
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Address not found");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('delete twice fails because of bad json format', (done) => {
+    request(app)
+      .delete('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address2": "President Bush",
+      })
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('delete twice fails because of seller token', (done) => {
+    request(app)
+      .delete('/userAddress')
+      .set('Accept', 'application/json')
+      .send({
+        "address1": "President Bush",
+      })
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  // it('delete twice fails due to no token', (done) => {
+  //   request(app)
+  //     .delete('/userAddress')
+  //     .set('Accept', 'application/json')
+  //     .send({
+  //       "address1": "President Bush",
+  //     })
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err))
+  // });
+});
+
+describe('GET /userAddresses', () => {
+  it('get addresses succeeds and responds with json', (done) => {
+    request(app)
+      .get('/userAddresses')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken2}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('get addresses with no address succeeds and responds with json', (done) => {
+    request(app)
+      .get('/userAddresses')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual([]);
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('get addresses fails with sellerToken', (done) => {
+    request(app)
+      .get('/userAddresses')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  // it('get addresses fails due to no token', (done) => {
+  //   request(app)
+  //     .get('/userAddresses')
+  //     .set('Accept', 'application/json')
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err))
+  // });
+});
 
 describe('POST /product', () => {
   it('correctly add product to the catalog responds with json', (done) => {
@@ -416,7 +799,6 @@ describe('POST /product', () => {
       })
       .catch(err => done(err))
   });
-
   it('add product responds with failure when add twice the same product for the same user', (done) => {
     request(app)
       .post('/product')
@@ -472,10 +854,10 @@ describe('POST /product', () => {
       })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${buyerToken}`)
-      .expect(403)
+      .expect(401)
       .expect('Content-Type', /json/)
       .then(response => {
-        expect(response.body.response).toEqual("Forbidden action");
+        expect(response.body.response).toEqual("Unauthorized");
         done();
       })
       .catch(err => done(err))
@@ -524,10 +906,119 @@ describe('POST /product', () => {
 });
 
 describe('PUT /product', () => {
-  it('modify seller product succeeds', (done) => {
-    
+  it('modify seller product succeeds and responds with json', (done) => {
+    availableQuantity = availableQuantity + 100
+    request(app)
+      .put("/product")
+      .set('Accept', 'application/json')
+      .send({
+        "name": productNames[0],
+        "newName": newProductName,
+        "label": "great label",
+        "condition": "renovated",
+        "description": "not so nice product",
+        "unitPrice": 10000,
+        "availableQuantity": availableQuantity,
+        "onSale": true
+      })
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err))
+  });
+  it('modify seller product succeeds and responds with json', (done) => {
+    availableQuantity = availableQuantity + 100
+    request(app)
+      .put("/product")
+      .set('Accept', 'application/json')
+      .send({
+        "name": productNames[1],
+        "onSale": false
+      })
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toBeDefined();
+        done();
+      })
+      .catch(err => done(err))
   });
 
+  it('modify seller product fails because quantity manually set to zero and manually set to onsale', (done) => {
+    request(app)
+      .put("/product")
+      .set('Accept', 'application/json')
+      .send({
+        "name": newProductName,
+        "label": "great label",
+        "condition": "renovated",
+        "description": "not so nice product",
+        "unitPrice": 10000,
+        "availableQuantity": 0,
+        "onSale": true
+      })
+      .set('Authorization', `Bearer ${sellerToken}`)
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Bad json format");
+        done();
+      })
+      .catch(err => done(err))
+  });
+
+  it('modify seller product fails because of buyer token', (done) => {
+    availableQuantity = availableQuantity + 100
+    request(app)
+      .put("/product")
+      .set('Accept', 'application/json')
+      .send({
+        "name": productNames[0],
+        "newName": newProductName,
+        "label": "great label",
+        "condition": "renovated",
+        "description": "not so nice product",
+        "unitPrice": 10000,
+        "availableQuantity": availableQuantity,
+        "onSale": true
+      })
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Unauthorized");
+        done();
+      })
+      .catch(err => done(err))
+  });
+  // it('modify seller product fails due to no token', (done) => {
+  //   availableQuantity = availableQuantity + 100
+  //   request(app)
+  //     .put("/product")
+  //     .set('Accept', 'application/json')
+  //     .send({
+  //       "name": productNames[0],
+  //       "newName": newProductName,
+  //       "label": "great label",
+  //       "condition": "renovated",
+  //       "description": "not so nice product",
+  //       "unitPrice": 10000,
+  //       "availableQuantity": availableQuantity,
+  //       "onSale": true
+  //     })
+  //     .expect(401)
+  //     .expect('Content-Type', /json/)
+  //     .then(response => {
+  //       expect(response.body.response).toEqual("Unauthorized");
+  //       done();
+  //     })
+  //     .catch(err => done(err))
+  // });
 });
 
 
@@ -574,8 +1065,8 @@ describe('POST /cartProduct', () => {
     request(app)
       .post('/cartProduct')
       .send({
-        "productName": productNames[0],
-        "quantity": availableQuantity,
+        "productName": newProductName,
+        "quantity": 5,
         "sellerUsername": sellerName
       })
       .set('Accept', 'application/json')
@@ -588,11 +1079,30 @@ describe('POST /cartProduct', () => {
       })
       .catch(err => done(err));
   });
+  it('fails to add a product to cart because it was removed from sale by seller', (done) => {
+    request(app)
+      .post('/cartProduct')
+      .send({
+        "productName": productNames[1],
+        "quantity": 1,
+        "sellerUsername": sellerName
+      })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(response => {
+        expect(response.body.response).toEqual("Product not found or not in stock");
+        done();
+      })
+      .catch(err => done(err));
+  });
+
   it('fails to add product to cart due to bad json format', (done) => {
     request(app)
       .post('/cartProduct')
       .send({
-        "productName": productNames[0],
+        "productName": newProductName,
         "sellerUsername": sellerName
       })
       .set('Accept', 'application/json')
@@ -609,8 +1119,8 @@ describe('POST /cartProduct', () => {
     request(app)
       .post('/cartProduct')
       .send({
-        "productName": productNames[0],
-        "quantity": availableQuantity,
+        "productName": newProductName,
+        "quantity": 5,
         "sellerUsername": sellerName
       })
       .set('Accept', 'application/json')
@@ -737,8 +1247,8 @@ describe('PUT /cartProduct', () => {
     request(app)
       .put("/cartProduct")
       .send({
-        "productName": productNames[0],
-        "quantity": availableQuantity - 1,
+        "productName": newProductName,
+        "quantity": 8,
         "sellerUsername": sellerName
       })
       .set('Accept', 'application/json')
@@ -757,7 +1267,7 @@ describe('PUT /cartProduct', () => {
     request(app)
       .put("/cartProduct")
       .send({
-        "productName": productNames[0],
+        "productName": newProductName,
         "quantity": availableQuantity - 1,
       })
       .set('Accept', 'application/json')
@@ -776,7 +1286,7 @@ describe('PUT /cartProduct', () => {
     request(app)
       .put("/cartProduct")
       .send({
-        "productName": productNames[0],
+        "productName": newProductName,
         "quantity": availableQuantity + 1,
         "sellerUsername": sellerName
       })
@@ -796,7 +1306,7 @@ describe('PUT /cartProduct', () => {
     request(app)
       .put("/cartProduct")
       .send({
-        "productName": productNames[0],
+        "productName": newProductName,
         "quantity": availableQuantity - 1,
         "sellerUsername": sellerName2
       })
@@ -818,7 +1328,7 @@ describe('PUT /cartProduct', () => {
     request(app)
       .put("/cartProduct")
       .send({
-        "productName": productNames[0],
+        "productName": newProductName,
         "quantity": availableQuantity - 1,
         "sellerUsername": sellerName
       })
@@ -857,7 +1367,7 @@ describe('DELETE /cartProduct', () => {
     request(app)
       .delete("/cartProduct")
       .send({
-        "productName": productNames[0],
+        "productName": newProductName,
         "sellerUsername": sellerName
       })
       .set('Accept', 'application/json')
@@ -936,4 +1446,7 @@ describe('DELETE /cartProduct', () => {
   //     })
   //     .catch(err => done(err));
   // });
-})
+});
+// describe('POST /order', () => {
+
+// })

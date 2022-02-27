@@ -4,7 +4,7 @@ const axios = require('axios');
 const roads = {
     // USER MICROSERVICE
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
-    GET_ONE_USER_ADDRESSE_URL: "http://localhost:5002/api/userAddress",
+    GET_ONE_USER_ADDRESS_URL: "http://localhost:5002/api/userAddress",
     //PRODUCT MICROSERVICE
     CART_URL: "http://localhost:5003/api/cartProducts",
     SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products",
@@ -67,40 +67,30 @@ router.post("/order", async (request, response) => {
         });
     }
     try {
-        const user = await axios.get(roads.CHECK_TOKEN_URL, {
-            headers: {
-                'Authorization': request.headers.authorization
-            }
-        })
-        const userId = user.data.response.id;
-        const userRole = user.data.response.role;
-        const userAddressToUse = await axios.get(roads.GET_ONE_USER_ADDRESSE_URL,
+        const userAddressToUse = await axios.get(roads.GET_ONE_USER_ADDRESS_URL,
             {
                 params: {
-                    address1: request.body.userAddressName,
-                    userId: userId
+                    address1: request.body.userAddressName
                 },
                 headers: {
                     'Authorization': request.headers.authorization
                 }
             }
         );
+        const userId = userAddressToUse.data.userId;
+        const userRole = userAddressToUse.data.userRole;
         if (userRole == "buyer") {
             const productsInCart = await axios.get(roads.CART_URL, {
                 params: {
                     userId: userId
                 }
             });
-            //TODO CHECK QUANTITY HERE FOREACH PRODUCT
-
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
-            //TODO DELETE CART PRODUCT AFTER ORDER
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
                 { data: productsInCart.data.response }
             )
-
             if (stockUpdate.status == 200 && cartProductsToDelete.status == 200) {
                 const ordersProducts = await axios.post(roads.CREATE_ORDER_URL, {
                     cartProductsData: productsInCart.data.response,
@@ -117,6 +107,10 @@ router.post("/order", async (request, response) => {
                 });
                 //TODO ROLLBACK IF NECESSARY
             }
+        } else {
+            return response.status(401).json({
+                "response": "Unauthorized"
+            });
         }
     } catch (error) {
         console.log(error)
