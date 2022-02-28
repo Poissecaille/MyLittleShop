@@ -2,6 +2,7 @@ const express = require("express");
 const env = require("dotenv").config();
 const order = require("./models/order")
 const orderProduct = require("./models/orderProduct");
+const quotationProduct = require('./models/quotationProduct');
 const { sequelizeDev, sequelizeTest } = require("./settings/database")
 
 // ENVIRONNEMENT SELECTION
@@ -30,7 +31,7 @@ db.authenticate().
 
 // DB SYNC
 db.sync({ force: force }).
-//db.sync({ force: false }).
+    //db.sync({ force: false }).
     then(
         () => console.log(`database ${dbName} synced!`)
     )

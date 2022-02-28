@@ -8,7 +8,9 @@ const roads = {
     PRODUCT_SELLER_URL: "http://localhost:5003/api/seller/product",
     // USER MICROSERVICE
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
-    USER_DATA_URL: "http://localhost:5002/api/userData"
+    USER_DATA_URL: "http://localhost:5002/api/userData",
+    // MAILER SERVICE
+    MAILER_URL: "http://localhost:5004/api/mailer"
 }
 
 //EVALUATE A BOUGHT PRODUCT
@@ -171,6 +173,13 @@ router.post("/product", async (request, response) => {
 
 router.put("/product", async (request, response) => {
     try {
+        if (process.env.NODE_ENV == "dev") {
+            if (!request.body.mailRecipient || !request.body.mailSubject || !request.body.mailContent) {
+                return response.status(400).json({
+                    "response": "Bad json format",
+                });
+            }
+        }
         if (!request.body.name) {
             return response.status(400).json({
                 "response": "Bad json format",
@@ -186,7 +195,15 @@ router.put("/product", async (request, response) => {
         request.body.userId = userId;
         if (userRole == "seller") {
             const productToUpdate = await axios.put(roads.PRODUCT_SELLER_URL, request.body)
-            return response.status(200).json({
+            //TODO MAILER
+            if (productToUpdate.status == 200) {
+                await axios.post(roads.MAILER_URL, {
+                    mailRecipient: request.body.mailRecipient,
+                    mailSubject: request.body.mailSubject,
+                    mailContent: request.body.mailContent
+                });
+            }
+            return response.status(productToUpdate.status).json({
                 "response": productToUpdate.data.response
             });
         }

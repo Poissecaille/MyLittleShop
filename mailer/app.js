@@ -25,7 +25,7 @@ app.post('/api/mail', async (request, response) => {
             });
             var mailSettings = {
                 from: process.env.APP_MAILER_USER,
-                to: request.body.recipient,
+                to: request.body.mailRecipient,
                 subject: request.body.mailSubject,
                 text: request.body.mailContent
             };
@@ -37,7 +37,7 @@ app.post('/api/mail', async (request, response) => {
                     })
                 } else {
                     console.log(info)
-                    console.log(`Email sent to ${request.body.recipient} about ${request.body.mailSubject}`)
+                    console.log(`Email sent to ${request.body.mailRecipient} about ${request.body.mailSubject}`)
                     resolve()
                 }
             });

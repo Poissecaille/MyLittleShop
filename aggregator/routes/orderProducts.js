@@ -13,7 +13,9 @@ const roads = {
     //ORDER MICROSERVICE
     CREATE_ORDER_URL: "http://localhost:5001/api/orderProducts",
     GET_SELLER_ORDERS_URL: "http://localhost:5001/api/seller/orderProducts",
-    GET_BUYER_ORDERS_URL: "http://localhost:5001/api/buyer/orderProducts"
+    GET_BUYER_ORDERS_URL: "http://localhost:5001/api/buyer/orderProducts",
+    //MAILER SERVICE
+    MAILER_URL: "http://localhost:5004/api/mail"
 }
 
 // GET ORDERS FOR SELLERS
@@ -52,7 +54,7 @@ router.get("/orderProducts", async (request, response) => {
             return response.status(200).json({
                 "response": sellerOrderProducts.data.response
             });
-        } else if (userRole == "buyer") {
+        } else {
             const buyerOrders = await axios.get(roads.GET_BUYER_ORDERS_URL, {
                 params: {
                     ownerId: userId
@@ -73,6 +75,13 @@ router.get("/orderProducts", async (request, response) => {
 // MAKE AN ORDER
 router.post("/orderProducts", async (request, response) => {
     try {
+        if (process.env.NODE_ENV == "dev") {
+            if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
+                return response.status(400).json({
+                    "response": "Bad json format"
+                });
+            }
+        }
         if (!request.body.address1) {
             return response.status(400).json({
                 "response": "Bad json format",
@@ -119,6 +128,13 @@ router.post("/orderProducts", async (request, response) => {
                     userAddressId: userAddressToUse.data.response.id,
                     ownerId: userId
                 });
+                if (ordersProducts.status == 200) {
+                    await axios.post(roads.MAILER_URL, {
+                        mailRecipient: request.body.mailRecipient,
+                        mailSubject: request.body.mailSubject,
+                        mailContent: request.body.mailContent
+                    });
+                }
                 return response.status(ordersProducts.status).json({
                     "response": ordersProducts.data.response
                 });
@@ -145,8 +161,15 @@ router.post("/orderProducts", async (request, response) => {
 //UPDATE DELIVERY STATUS FOR SELLERS
 router.put("/orderProduct", async (request, response) => {
     try {
+        if (process.env.NODE_ENV == "dev") {
+            if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
+                return response.status(400).json({
+                    "response": "Bad json format"
+                });
+            }
+        }
         if (!request.body.productName || !request.body.ownerId || !request.body.addressName || !request.body.shipped || !request.body.shippingDate) {
-            if (request.body.shipped !== "preparation" && request.body.shipped !== "shipped" && request.body.shipped !== "delivred") {
+            if (request.body.shipped !== "shipped" && request.body.shipped !== "delivred") {
                 return response.status(400).json({
                     "response": "Bad json format"
                 });
@@ -188,7 +211,16 @@ router.put("/orderProduct", async (request, response) => {
                 ownerId: userId,
                 productId: sellerProduct.data.response.id,
                 addressId: address.data.response.id
-            })
+            });
+            //TODO MAILER
+            if (orderProductToUpdate.status == 200) {
+                await axios.post(roads.MAILER_URL, {
+                    mailRecipient: request.body.mailRecipient,
+                    mailSubject: request.body.mailSubject,
+                    mailContent: request.body.mailContent
+                });
+
+            }
             return response.status(orderProductToUpdate.status).json({
                 "response": orderProductToUpdate.data.response
             });

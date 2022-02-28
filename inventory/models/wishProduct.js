@@ -9,7 +9,10 @@ const wishProduct = db.define('wishProduct', {
         autoIncrement: true
     },
     productId: {
-        type: DataTypes.INTEGER, allowNull: false
+        type: DataTypes.INTEGER, allowNull: false, unique: 'compositePk'
+    },
+    ownerId: {
+        type: DataTypes.INTEGER, allowNull: false, unique: 'compositePk'
     },
     quantity: {
         type: DataTypes.INTEGER, allowNull: false

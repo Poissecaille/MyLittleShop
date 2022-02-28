@@ -2,7 +2,6 @@ const router = require("express").Router();
 const cartProduct = require("../models/cartProduct");
 const Sequelize = require('sequelize');
 const Product = require("../models/product");
-const Cart = require("../models/cart");
 const Op = Sequelize.Op
 
 router.get("/cartProducts", async (request, response) => {
@@ -182,7 +181,7 @@ router.delete("/cartProducts", async (request, response) => {
         });
     } catch (error) {
         console.log(error)
-        response.status(error.response.status).json({
+        return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }

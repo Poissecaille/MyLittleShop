@@ -2,24 +2,26 @@ var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
 process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
 
-const cartProduct = db.define('cartProduct', {
+const QuotationProduct = db.define("quotationProduct", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    productId: {
-        type: DataTypes.INTEGER, allowNull: false, unique: 'compositePk'
-    },
     ownerId: {
-        type: DataTypes.INTEGER, allowNull: false, unique: 'compositePk'
-    },
-    quantity: {
         type: DataTypes.INTEGER, allowNull: false
-    }
-}, {
+    },
+    productId: {
+        type: DataTypes.INTEGER, allowNull: false
+    },
+    value: {
+        type: DataTypes.SMALLINT, allowNull: false
+    },
+    comment: {
+        type: DataTypes.TEXT, allowNull: true
+    },
     freezeTableName: true,
-    tableName: "cartProduct"
+    tableName: "quotationProduct"
 });
 
-module.exports = cartProduct;
+module.exports = QuotationProduct;

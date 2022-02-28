@@ -22,6 +22,29 @@ const Op = Sequelize.Op
 //     });
 // })
 
+// DEDICATED ROAD FOR ORDERS RATING
+router.get("/buyer/product", async (request, response) => {
+    try {
+        const productToRate = Product.findOne({
+            where: {
+                sellerId: request.query.sellerId,
+                name: request.query.productName
+            }
+        });
+        if (!productToRate) {
+            return response.status(404).json({
+                "response": "Product not found"
+            });
+        } else {
+            return response.status(200).json({
+                "response": productToRate.data.response,
+            });
+        }
+    } catch (error) {
+        console.log(error)
+    }
+});
+
 // CONSULT PRODUCTS FOR BUYERS
 router.get("/buyer/products", async (request, response) => {
     try {
@@ -265,7 +288,7 @@ router.put("/seller/product", async (request, response) => {
                 });
             request.body.onSale = false
         }
-        productToUpdate.update({
+        await productToUpdate.update({
             name: request.body.newName !== undefined ? request.body.newName : productToUpdate.name,
             label: request.body.label !== undefined ? request.body.label : productToUpdate.label,
             condition: request.body.condition !== undefined ? request.body.condition : productToUpdate.condition,
