@@ -3,6 +3,8 @@ const env = require("dotenv").config();
 const userAddress = require("./models/userAddress");
 const user = require("./models/user");
 const { sequelizeDev, sequelizeTest } = require("./settings/database")
+const cors = require('cors');
+
 
 // ENVIRONNEMENT SELECTION
 var db;
@@ -45,6 +47,7 @@ const userRoute = require("./routes/user");
 const userAddressRoute = require("./routes/userAddress");
 
 app.use(express.json());
+app.use(cors());
 app.use("/api/", authRoute);
 app.use("/api/", userRoute);
 app.use("/api/", userAddressRoute);

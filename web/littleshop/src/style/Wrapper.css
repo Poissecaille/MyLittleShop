@@ -1,0 +1,25 @@
+.wrapper{
+    width: auto;
+    background-color: #000;
+}
+
+.wrapper-title{
+   float: left;
+   padding: 20px;
+   padding-left: 50%;
+   font-weight: bold;
+   cursor: pointer;
+   text-decoration: none;
+}
+
+.wrapper-register{
+    float: right;
+    padding: 20px;
+    cursor: pointer;
+}
+
+.wrapper-login{
+    float: right;
+    padding: 20px;
+    cursor: pointer;
+}
