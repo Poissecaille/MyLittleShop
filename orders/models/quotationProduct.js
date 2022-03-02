@@ -19,9 +19,11 @@ const QuotationProduct = db.define("quotationProduct", {
     },
     comment: {
         type: DataTypes.TEXT, allowNull: true
-    },
+    }
+},
+    {
     freezeTableName: true,
     tableName: "quotationProduct"
-});
+    });
 
 module.exports = QuotationProduct;

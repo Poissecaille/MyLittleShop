@@ -44,16 +44,6 @@ router.get("/products", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
-            // if(!request.query.productName || !request.query.sellerUsername){
-            //     return response.status(400).json({
-            //         "response": "Bad json format",
-            //     });
-            // }
-            // if (request.query.sellerUsername.length == 0 && request.query.productName.length == 0) {
-            //     return response.status(400).json({
-            //         "response": "Bad json format",
-            //     });
-            // }
             var filter;
             var sellerData = undefined;
             if (request.query.condition) {
@@ -219,7 +209,7 @@ router.put("/product", async (request, response) => {
         });
 
     }
-})
+});
 
 //SEARCH_USERS_URL: "http://localhost:5002/api/sellers"
 // router.get("/products", async (request, response) => {

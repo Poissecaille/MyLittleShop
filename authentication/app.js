@@ -4,7 +4,7 @@ const userAddress = require("./models/userAddress");
 const user = require("./models/user");
 const { sequelizeDev, sequelizeTest } = require("./settings/database")
 const cors = require('cors');
-
+const execSync = require('child_process').execSync;
 
 // ENVIRONNEMENT SELECTION
 var db;
@@ -30,17 +30,32 @@ db.authenticate().
 // DB ASSOCIATIONS
 user.hasMany(userAddress);
 
+
 // DB SYNC
 db.sync({ force: force }).
 //db.sync({ force: false }).
     then(
-        () => console.log(`database ${dbName} synced!`)
+        () => 
+        {
+        console.log(`database ${dbName} synced!`)
+        try {
+            execSync('npx sequelize-cli db:seed:all', { encoding: 'utf-8' });
+        }
+        catch(error){
+
+        }
+        }
     )
     .catch((error) => console.log(error));
+    
+
+
+
+
+
 
 
 const app = express();
-
 //ROUTES
 const authRoute = require("./routes/auth");
 const userRoute = require("./routes/user");

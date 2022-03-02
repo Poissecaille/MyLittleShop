@@ -14,6 +14,9 @@ var buyerName3 = "alexxxxx";
 var productNames = ["product1", "product2"];
 var availableQuantity = 5;
 var newProductName = "greatProductName";
+
+
+
 describe('POST /register', () => {
   it('register with correct json and create buyer account', (done) => {
     request(app)
@@ -1363,6 +1366,7 @@ describe('GET /cartProduct', () => {
       .catch(err => done(err));
   });
 });
+
 describe('PUT /cartProduct', () => {
   it('modify a product quantity from cart successfuly done', (done) => {
     request(app)

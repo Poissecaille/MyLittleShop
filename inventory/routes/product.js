@@ -5,23 +5,6 @@ const ProductTag = require("../models/productTag");
 const Product = require("../models/product");
 const Op = Sequelize.Op
 
-// DEDICATED ROAD FOR ORDERS
-// router.get("/order/products", async (request, response) => {
-//     console.log("######")
-//     console.log("######")
-//     console.log(request.query.productId)
-//     var productsIds = request.query.productId.map((string) => Number(string));
-//     console.log(productsIds)
-//     const products = await Product.findAll({
-//         where: {
-//             id: productsIds
-//         }
-//     });
-//     return response.status(200).json({
-//         "response": products,
-//     });
-// })
-
 // DEDICATED ROAD FOR ORDERS RATING
 router.get("/buyer/product", async (request, response) => {
     try {
@@ -246,6 +229,7 @@ router.post("/seller/product", async (request, response) => {
         }
     }
 });
+
 router.put("/seller/product", async (request, response) => {
     try {
         const productToUpdate = await Product.findOne({

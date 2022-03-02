@@ -7,6 +7,7 @@ const roads = {
     LOGIN_ACCOUNT_URL: "http://localhost:5002/api/login",
     DISABLE_ACCOUNT_URL: "http://localhost:5002/api/disable",
     DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate",
+    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
     // PRODUCT MICROSERVICE
     WITHDRAW_SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products"
 }
@@ -40,7 +41,7 @@ router.post("/login", async (request, response) => {
         // }
     }
 });
-// BUYER/SELLER ACCOUNT CREATION
+// BUYER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
     try {
         if (!request.body.email || !request.body.password || !request.body.firstName || !request.body.lastName || !request.body.birthDate || !request.body.username) {
@@ -55,7 +56,7 @@ router.post("/register", async (request, response) => {
             lastName: request.body.lastName,
             username: request.body.username,
             birthDate: request.body.birthDate,
-            role: request.body.role
+            role: "buyer"
         })
 
         if (userToRegister.status === 201) {
@@ -70,6 +71,52 @@ router.post("/register", async (request, response) => {
         });
     }
 });
+
+
+// SELLER ACCOUNT CREATION BY ADMIN
+router.post("/seller/register", async (request, response) => {
+
+    try {
+        if (!request.body.email || !request.body.password || !request.body.firstName || !request.body.lastName || !request.body.birthDate || !request.body.username) {
+            return response.status(400).json({
+                "response": "Bad json format"
+            });
+        }
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userRole = user.data.response.role
+
+        if (userRole === "admin"){
+            const userToRegister = await axios.post(roads.CREATE_ACCOUNT_URL, {
+                email: request.body.email,
+                password: request.body.password,
+                firstName: request.body.firstName,
+                lastName: request.body.lastName,
+                username: request.body.username,
+                birthDate: request.body.birthDate,
+                role: "seller"
+            })
+    
+            if (userToRegister.status === 201) {
+                return response.status(201).json({
+                    "response": userToRegister.data.response
+                });
+            }
+        }
+        else {
+            return response.status(401).json({ "response": "Unauthorized" });
+        }
+    } catch (error) {
+        //console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 
 // ADMIN ROAD FOR ACCOUNT DISABLING //TODO DISABLE SELLERS PRODUCTS
 router.put("/disable", async (request, response) => {

@@ -12,6 +12,7 @@ const checkToken = (request, response, next) => {
         }
         if (header) {
             const token = header.split(" ")[1];
+            console.log(token);
             jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
                 if (error) {
                     if (error instanceof jwt.TokenExpiredError) {
@@ -29,7 +30,7 @@ const checkToken = (request, response, next) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
-        console.log(error)
+        //console.log(error)
         return response.status(401).json({ "response": "Unauthorized" });
     }
 }
@@ -67,7 +68,7 @@ const checkPasswordWithId = async (request, response, next) => {
 }
 
 const checkIsAdmin = (request, response, next) => {
-    console.log(request)
+    //console.log(request)
     checkToken(request, response, async () => {
         if (request.user.role === "admin") {
             next();
@@ -98,7 +99,7 @@ const checkIsAdmin = (request, response, next) => {
 const checkIsAdminWithCorrectPassword = (request, response, next) => {
     checkToken(request, response, () => {
         console.log("#####################")
-        console.log(request.user)
+        //console.log(request.user)
         if (request.user.role === "admin") {
             checkPasswordWithId(request, response, async () => {
                 next()
