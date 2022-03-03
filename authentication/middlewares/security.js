@@ -30,8 +30,30 @@ const checkToken = (request, response, next) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
-        //console.log(error)
-        return response.status(401).json({ "response": "Unauthorized" });
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+        //return response.status(401).json({ "response": "Unauthorized" });
+    }
+}
+
+const checkPasswordWithId = async (request, response, next) => {
+    try {
+        const saltUser = await User.findByPk(request.user.id);
+        if (!saltUser) {
+            return response.status(404).json({ "response": "No user found" });
+        }
+        const decryptedPassword = CryptoJS.AES.decrypt(saltUser.password, process.env.PASSWORD_SECRET);
+        const originalPassword = decryptedPassword.toString(CryptoJS.enc.Utf8);
+        if (originalPassword === request.body.password) {
+            next();
+        } else {
+            return response.status(401).json({ "response": "Bad credentials" });
+        }
+    } catch (error) {
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 }
 
@@ -51,65 +73,16 @@ const checkPasswordWithEmail = async (request, response, next) => {
     }
 }
 
-const checkPasswordWithId = async (request, response, next) => {
-    const saltUser = await User.findByPk(request.user.id);
 
-    if (!saltUser) {
-        return response.status(404).json({ "response": "No user found" });
+// const checkIsAdminWithCorrectPassword = async (request, response, next) => {
+//     console.log("blublublu", request.headers.authorization)
+// checkToken(request, response, () => {});
+//     if (request.user.role === "admin") {
+//         checkPasswordWithId(request, response, () => {});
+//     } else {
+//         return response.status(403).json({ "response": "Forbidden" });
+//     }
 
-    }
-    const decryptedPassword = CryptoJS.AES.decrypt(saltUser.password, process.env.PASSWORD_SECRET);
-    const originalPassword = decryptedPassword.toString(CryptoJS.enc.Utf8);
-    if (originalPassword === request.body.password) {
-        next();
-    } else {
-        return response.status(401).json({ "response": "Bad credentials" });
-    }
-}
+//}
 
-const checkIsAdmin = (request, response, next) => {
-    //console.log(request)
-    checkToken(request, response, async () => {
-        if (request.user.role === "admin") {
-            next();
-        } else {
-            return response.status(403).json({ "response": "Forbidden" });
-        }
-    })
-}
-// const checkIsBuyerOrAdmin = (request, response, next) => {
-//     checkToken(request, response, async () => {
-//         if (request.user.role === "buyer" || request.user.role === "admin") {
-//             next();
-//         } else {
-//             return response.status(403).json({ "response": "Forbidden" });
-//         }
-//     })
-// }
-// const checkIsSellerOrAdmin = (request, response, next) => {
-//     checkToken(request, response, async () => {
-//         if (request.user.role === "seller" || request.user.role === "admin") {
-//             next();
-//         } else {
-//             return response.status(403).json({ "response": "Forbidden" });
-//         }
-//     })
-// }
-
-const checkIsAdminWithCorrectPassword = (request, response, next) => {
-    checkToken(request, response, () => {
-        console.log("#####################")
-        //console.log(request.user)
-        if (request.user.role === "admin") {
-            checkPasswordWithId(request, response, async () => {
-                next()
-            }
-            )
-            next()
-        } else {
-            return response.status(403).json({ "response": "Forbidden" });
-        }
-    })
-}
-
-module.exports = { checkIsAdmin, checkToken, checkIsAdminWithCorrectPassword, checkToken, checkPasswordWithEmail, checkPasswordWithId };
+module.exports = { checkToken, checkPasswordWithEmail, checkPasswordWithId };

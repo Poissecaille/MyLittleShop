@@ -30,8 +30,8 @@ db.authenticate().
 //order.hasMany(orderProduct)
 
 // DB SYNC
-db.sync({ force: force }).
-    //db.sync({ force: false }).
+//db.sync({ force: force }).
+db.sync({ force: false }).
     then(
         () => console.log(`database ${dbName} synced!`)
     )

@@ -89,7 +89,7 @@ router.post("/seller/register", async (request, response) => {
         });
         const userRole = user.data.response.role
 
-        if (userRole === "admin"){
+        if (userRole === "admin") {
             const userToRegister = await axios.post(roads.CREATE_ACCOUNT_URL, {
                 email: request.body.email,
                 password: request.body.password,
@@ -99,7 +99,7 @@ router.post("/seller/register", async (request, response) => {
                 birthDate: request.body.birthDate,
                 role: "seller"
             })
-    
+
             if (userToRegister.status === 201) {
                 return response.status(201).json({
                     "response": userToRegister.data.response
@@ -110,7 +110,6 @@ router.post("/seller/register", async (request, response) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
-        //console.log(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -132,11 +131,8 @@ router.put("/disable", async (request, response) => {
             });
         }
         const userEmailToDisable = request.query.email;
-        const userPassword = request.body.password;
-
         const userDisabled = await axios.put(roads.DISABLE_ACCOUNT_URL + "?email=" + userEmailToDisable, {
-            password: userPassword,
-        }, {
+            password: request.body.password,
             headers: {
                 'Authorization': request.headers.authorization
             }
@@ -145,7 +141,6 @@ router.put("/disable", async (request, response) => {
             "response": userDisabled.data.response
         });
     } catch (error) {
-        console.log(error)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -160,14 +155,20 @@ router.put("/deactivate", async (request, response) => {
                 "response": "Unauthorized"
             });
         }
-        const deactivatedAccount = await axios.put(roads.DEACTIVATE_ACCOUNT_URL, null, {
+        if (!request.body.password) {
+            return response.status(400).json({
+                "response": "Bad request format"
+            });
+        }
+        const deactivatedAccount = await axios.put(roads.DEACTIVATE_ACCOUNT_URL, {
+            password: request.body.password
+        }, {
             headers: {
                 'Authorization': request.headers.authorization
             }
         });
         const sellerId = deactivatedAccount.data.userId
         if (deactivatedAccount.data.userRole == "seller") {
-            console.log(roads.WITHDRAW_SELLER_PRODUCTS_URL + "?sellerId=" + sellerId)
             const sellerProducts = await axios.put(roads.WITHDRAW_SELLER_PRODUCTS_URL + "?sellerId=" + sellerId)
             return response.status(200).json({
                 "response": sellerProducts.data.response

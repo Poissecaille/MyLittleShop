@@ -163,13 +163,13 @@ router.post("/product", async (request, response) => {
 
 router.put("/product", async (request, response) => {
     try {
-        if (process.env.NODE_ENV == "dev") {
-            if (!request.body.mailRecipient || !request.body.mailSubject || !request.body.mailContent) {
-                return response.status(400).json({
-                    "response": "Bad json format",
-                });
-            }
-        }
+        // if (process.env.NODE_ENV == "dev") {
+        //     if (!request.body.mailRecipient || !request.body.mailSubject || !request.body.mailContent) {
+        //         return response.status(400).json({
+        //             "response": "Bad json format",
+        //         });
+        //     }
+        // }
         if (!request.body.name) {
             return response.status(400).json({
                 "response": "Bad json format",
@@ -185,14 +185,13 @@ router.put("/product", async (request, response) => {
         request.body.userId = userId;
         if (userRole == "seller") {
             const productToUpdate = await axios.put(roads.PRODUCT_SELLER_URL, request.body)
-            //TODO MAILER
-            if (productToUpdate.status == 200) {
-                await axios.post(roads.MAILER_URL, {
-                    mailRecipient: request.body.mailRecipient,
-                    mailSubject: request.body.mailSubject,
-                    mailContent: request.body.mailContent
-                });
-            }
+            // if (productToUpdate.status == 200) {
+            //     await axios.post(roads.MAILER_URL, {
+            //         mailRecipient: request.body.mailRecipient,
+            //         mailSubject: request.body.mailSubject,
+            //         mailContent: request.body.mailContent
+            //     });
+            // }
             return response.status(productToUpdate.status).json({
                 "response": productToUpdate.data.response
             });
@@ -207,40 +206,47 @@ router.put("/product", async (request, response) => {
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
-
     }
 });
 
-//SEARCH_USERS_URL: "http://localhost:5002/api/sellers"
-// router.get("/products", async (request, response) => {
-//     if (!request.query.userEmail) {
-//         return response.status(400).json({
-//             "response": "Bad request format",
-//         });
-//     }
-//     var sellersIds = []
-//     const sellers = await axios.get(roads.SEARCH_USERS_URL, {
-//         params: {
-//             userEmail: request.query.userEmail
-//         },
-//         headers: {
-//             'Authorization': request.headers.authorization
-//         }
-//     })
-//     sellers.data.response.forEach((seller) => {
-//         sellersIds.push(seller.id)
-//     });
-//     console.log("######")
-//     console.log(sellersIds)
-//     const products = await axios.get(roads.SEARCH_PRODUCTS_URL, {
-//         params: {
-//             sellersIds
-//         }
-//     });
-//     return response.status(200).json({
-//         "response": products.data.response,
-//         "numberOfProducts": products.data.rows
-//     });
-// });
+
+router.delete("/product", async (request, response) => {
+    try {
+        if (!request.body.name) {
+            return response.status(400).json({
+                "response": "Bad json format",
+            });
+        }
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id;
+        const userRole = user.data.response.role;
+        request.body.userId = userId;
+        if (userRole == "seller") {
+            const productToDelete = await axios.delete(roads.PRODUCT_SELLER_URL, {
+                data: {
+                    productName: request.body.name,
+                    sellerId: userId
+                }
+            });
+            return response.status(productToDelete.status).json({
+                "response": productToDelete.data.response
+            });
+
+        } else {
+            return response.status(401).json({
+                "response": "Unauthorized"
+            });
+        }
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 module.exports = router;

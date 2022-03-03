@@ -10,7 +10,7 @@ const Product = db.define('product', {
         autoIncrement: true
     },
     name: {
-        type: DataTypes.STRING(50), allowNull: false, unique: "compositePK"
+        type: DataTypes.STRING(100), allowNull: false, unique: "compositePK"
     },
     label: {
         type: DataTypes.STRING(50), allowNull: false

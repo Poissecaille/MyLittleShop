@@ -230,6 +230,7 @@ router.post("/seller/product", async (request, response) => {
     }
 });
 
+// MODIFY A PRODUCT FOR SELLERS 
 router.put("/seller/product", async (request, response) => {
     try {
         const productToUpdate = await Product.findOne({
@@ -293,5 +294,26 @@ router.put("/seller/product", async (request, response) => {
         });
     }
 });
+
+// DELETE A PRODUCT FOR SELLERS 
+router.put("/seller/product", async (request, response) => {
+    try {
+        const productToDelete = await Product.findOne({
+            where: {
+                name: request.data.name,
+                sellerId: request.data.sellerId
+            }
+        });
+        await productToDelete.destroy();
+        return response.status(200).json({
+            "response": "Product deleted"
+        });
+    } catch (error) {
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 
 module.exports = router;

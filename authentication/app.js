@@ -32,8 +32,8 @@ user.hasMany(userAddress);
 
 
 // DB SYNC
-db.sync({ force: force }).
-//db.sync({ force: false }).
+//db.sync({ force: force }).
+db.sync({ force: false }).
     then(
         () => 
         {

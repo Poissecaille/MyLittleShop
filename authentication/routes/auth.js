@@ -2,17 +2,10 @@ const router = require("express").Router();
 const User = require("../models/user");
 const CryptoJS = require("crypto-js")
 const jwt = require('jsonwebtoken');
-const { checkPasswordWithEmail, checkToken } = require("../middlewares/security");
+const { checkToken, checkPasswordWithEmail } = require("../middlewares/security");
 
 // GIVE ACCESS TO BUYER REQUESTS
 router.get("/checkToken", checkToken, async (request, response) => {
-    // if (response == 403) {
-    //     return response.status(403).json({ "response": "Token has expired" });
-    // } else {
-    //     return response.status(200).json({
-    //         "response": request.user
-    //     });
-    // }
     try {
         return response.status(200).json({
             "response": request.user

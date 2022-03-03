@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/user");
-const { checkIsAdminWithCorrectPassword, checkToken } = require("../middlewares/security")
+const { checkIsAdminWithCorrectPassword, checkToken, checkPasswordWithId } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
@@ -57,24 +57,33 @@ router.get("/userData", async (request, response) => {
 });
 
 // DISABLE ACCOUNT
-router.put("/disable", checkIsAdminWithCorrectPassword, async (request, response) => {
-    const userToDisable = await User.findOne(
-        {
-            where: { email: request.query.email }
+router.put("/disable", [checkToken, checkPasswordWithId], async (request, response) => {
+    try {
+        const userToDisable = await User.findOne(
+            {
+                where: { email: request.query.email }
+            }
+        );
+        if (!userToDisable) {
+            return response.status(404).json({
+                "response": "User not found"
+            });
         }
-    );
-
-    userToDisable.update(
-        { activated: false }
-    )
-
-    return response.status(200).json({
-        "response": "User deactivated"
-    });
+        userToDisable.update(
+            { activated: false }
+        )
+        return response.status(200).json({
+            "response": "User deactivated"
+        });
+    } catch (error) {
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
 })
 
 // DEACTIVATE ACCOUNT
-router.put("/deactivate", checkToken, async (request, response) => {
+router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, response) => {
     try {
         const userId = request.user.id
         const userRole = request.user.role
@@ -102,7 +111,7 @@ router.put("/deactivate", checkToken, async (request, response) => {
         });
     } catch (error) {
         console.log(error)
-        response.status(error.response.status).json({
+        return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }
