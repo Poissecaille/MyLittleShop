@@ -296,12 +296,12 @@ router.put("/seller/product", async (request, response) => {
 });
 
 // DELETE A PRODUCT FOR SELLERS 
-router.put("/seller/product", async (request, response) => {
+router.delete("/seller/product", async (request, response) => {
     try {
         const productToDelete = await Product.findOne({
             where: {
-                name: request.data.name,
-                sellerId: request.data.sellerId
+                name: request.body.productName,
+                sellerId: request.body.sellerId
             }
         });
         await productToDelete.destroy();
@@ -309,6 +309,7 @@ router.put("/seller/product", async (request, response) => {
             "response": "Product deleted"
         });
     } catch (error) {
+        console.log(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
