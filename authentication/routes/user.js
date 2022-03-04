@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/user");
-const { checkIsAdminWithCorrectPassword, checkToken, checkPasswordWithId } = require("../middlewares/security")
+const { checkIsAdminWithCorrectPassword, checkToken, checkPasswordWithId, checkAdminPasswordWithId } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
@@ -12,8 +12,6 @@ router.get("/userData", async (request, response) => {
         if (Array.isArray(request.query.sellerUsername)) {
             userData = []
             request.query.sellerUsername.forEach(async (username) => {
-                console.log("***************************")
-                console.log(username.data)
                 var user = await User.findOne({
                     where: {
                         username: username.data.response
@@ -21,19 +19,8 @@ router.get("/userData", async (request, response) => {
                 });
                 userData.push(user)
             });
-            // userData = await User.findAll({
-            //     where: {
-            //         [Op.like]: {
-            //             [Op.any]: request.query.sellerUsername
-            //         }
-            //     }
-            // });
-            console.log("777777", "777777")
-            console.log(userData)
         }
         else {
-            console.log("***************************")
-            console.log(request.query.sellerUsername)
             userData = await User.findOne({
                 where: {
                     username: request.query.sellerUsername
@@ -57,7 +44,7 @@ router.get("/userData", async (request, response) => {
 });
 
 // DISABLE ACCOUNT
-router.put("/disable", [checkToken, checkPasswordWithId], async (request, response) => {
+router.put("/disable", [checkToken, checkAdminPasswordWithId], async (request, response) => {
     try {
         const userToDisable = await User.findOne(
             {

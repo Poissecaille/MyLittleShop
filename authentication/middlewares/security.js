@@ -56,6 +56,30 @@ const checkPasswordWithId = async (request, response, next) => {
         });
     }
 }
+const checkAdminPasswordWithId = async (request, response, next) => {
+    try {
+        const saltUser = await User.findByPk(request.user.id);
+        if (!saltUser) {
+            return response.status(404).json({ "response": "No user found" });
+        }
+        if (saltUser.role === "admin") {
+            const decryptedPassword = CryptoJS.AES.decrypt(saltUser.password, process.env.PASSWORD_SECRET);
+            const originalPassword = decryptedPassword.toString(CryptoJS.enc.Utf8);
+            if (originalPassword === request.body.password) {
+                next();
+            } else {
+                return response.status(401).json({ "response": "Bad credentials" });
+            }
+        } else {
+            return response.status(401).json({ "response": "Unauthorized" });
+        }
+    } catch (error) {
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+}
+
 
 const checkPasswordWithEmail = async (request, response, next) => {
     const saltUser = await User.findOne({
@@ -85,4 +109,4 @@ const checkPasswordWithEmail = async (request, response, next) => {
 
 //}
 
-module.exports = { checkToken, checkPasswordWithEmail, checkPasswordWithId };
+module.exports = { checkToken, checkPasswordWithEmail, checkPasswordWithId , checkAdminPasswordWithId};
