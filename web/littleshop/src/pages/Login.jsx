@@ -3,13 +3,12 @@ import axios from 'axios';
 import Navbar from '../components/Navbar'
 import { useNavigate } from "react-router-dom";
 
-const BACKEND_LOGIN_URL = "http://localhost:5002/api/login"
+const BACKEND_LOGIN_URL = "http://localhost:5000/login"
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loginStatus, setLoginStatus] = useState('');
 
   const loginBackEnd = async () => {
     try {
@@ -17,10 +16,9 @@ const Login = () => {
         email: email,
         password: password
       });
-      console.log(request)
+      console.log(request.status)
       if (request.status === 200) {
-        setLoginStatus(request.data.response);
-        console.log(loginStatus)
+        localStorage.setItem("token", request.data.token);
         navigate("/");
       }
     } catch (error) {

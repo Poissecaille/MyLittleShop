@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import axios from 'axios';
 import Navbar from '../components/Navbar'
 import { useNavigate } from "react-router-dom";
+import DatePicker from 'react-date-picker';
 
-const BACKEND_REGISTER_URL = "http://localhost:5002/api/register"
+const BACKEND_REGISTER_URL = "http://localhost:5000/register"
 
 const Register = () => {
     const navigate = useNavigate();
@@ -72,11 +73,12 @@ const Register = () => {
                     }}>
                 </input>
                 <label>birthdate</label>
-                <input type="text"
+                <DatePicker
                     onChange={(e) => {
-                        setBirthdate(e.target.value)
-                    }}>
-                </input>
+                        console.log(e)
+                        //setBirthdate(e.target.value)
+                        setBirthdate(e)
+                    }} />
                 <label>role</label>
                 <input type="text"
                     onChange={(e) => {
