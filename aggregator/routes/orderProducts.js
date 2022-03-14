@@ -75,7 +75,7 @@ router.get("/orderProducts", async (request, response) => {
 // MAKE AN ORDER
 router.post("/orderProducts", async (request, response) => {
     try {
-        if (process.env.NODE_ENV == "dev") {
+        if (process.env.NODE_ENV === "development") {
             if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
                 return response.status(400).json({
                     "response": "Bad json format"
@@ -161,7 +161,7 @@ router.post("/orderProducts", async (request, response) => {
 //UPDATE DELIVERY STATUS FOR SELLERS
 router.put("/orderProduct", async (request, response) => {
     try {
-        if (process.env.NODE_ENV == "dev") {
+        if (process.env.NODE_ENV === "development") {
             if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
                 return response.status(400).json({
                     "response": "Bad json format"

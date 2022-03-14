@@ -10,7 +10,7 @@ var db;
 var dbName;
 var force;
 
-if (process.env.NODE_ENV === "dev") {
+if (process.env.NODE_ENV === "development") {
     db = sequelizeDev
     dbName = process.env.DB_NAME
     force = false
@@ -30,8 +30,7 @@ db.authenticate().
 //order.hasMany(orderProduct)
 
 // DB SYNC
-//db.sync({ force: force }).
-db.sync({ force: false }).
+db.sync({ force: force }).
     then(
         () => console.log(`database ${dbName} synced!`)
     )

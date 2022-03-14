@@ -1,6 +1,6 @@
 var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
-process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
+process.env.NODE_ENV === "development" ? db = db.sequelizeDev : db = db.sequelizeTest
 
 const QuotationProduct = db.define("quotationProduct", {
     id: {

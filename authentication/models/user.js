@@ -1,7 +1,7 @@
 var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
 const roles = ["buyer", "seller", "admin"];
-process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
+process.env.NODE_ENV === "development" ? db = db.sequelizeDev : db = db.sequelizeTest
 
 const User = db.define('user', {
     id: {

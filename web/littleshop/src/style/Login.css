@@ -1,0 +1,27 @@
+.Login {
+    margin: 250px;
+  }
+  
+  input[type="text"] {
+    width: 70%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid black;
+    border-color: none;
+  }
+  
+  
+  input[type="text"]:focus {
+      border: 2px solid red;
+  }
+  
+  .login-button {
+    margin-left: 10%;
+      font-size: 16px;
+  }
+  
+  .title-form {
+      justify-content: center;
+      text-align: center;
+  }
