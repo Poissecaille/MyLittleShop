@@ -1,8 +1,67 @@
-.div.container {
-  flex: 1;
-  margin: 5px;
-  min-width: 280px;
-  height: 350px;
+.container {
+  margin-left: 20%;
+  width: 80%;
+  height: 100%;
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  vertical-align: middle;
+  margin-top: -25%;
+}
+.product-card {
+  text-align: left;
+  width: 33%;
+  overflow: scroll;
+  margin-bottom: 2.5%;
+  margin-top: 2.5%;
+  padding-bottom: 1%;
+}
+input,
+label {
+  float: none;
+  display: inline-block;
+  vertical-align: middle;
+  width: 30%;
+  margin: 1%;
+}
+
+.product-img {
+  text-align: center;
+}
+
+.card-header {
+  text-align: left;
+  min-height: 100px;
+}
+
+.card-content {
+  text-align: left;
+}
+.card-content label{
+width: 1%;
+}
+
+.cart-button {
+  margin-right: 1%;
+}
+
+.card-content-description {
+  width: 200%;
+  min-height: 120px;
+}
+
+.filters {
+  max-width: 20%;
+}
+
+.gaug-price label {
+  padding-left: 0px;
+}
+
+.dropdown label {
+  padding-left: 0px;
+}
+
+
+.product-name input[type="text"] {
+  height: 10px;
 }

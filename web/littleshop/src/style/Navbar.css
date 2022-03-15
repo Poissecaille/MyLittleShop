@@ -1,6 +1,7 @@
 .navBar{
     height:60px;
     background-color: lightcoral;
+    width: 100%;
 }
 .wrapper{
     width: auto;
