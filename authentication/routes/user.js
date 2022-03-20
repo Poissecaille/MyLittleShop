@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/user");
-const { checkIsAdminWithCorrectPassword, checkToken, checkPasswordWithId, checkAdminPasswordWithId } = require("../middlewares/security")
+const { checkToken, checkPasswordWithId, checkAdminPasswordWithId } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
@@ -9,16 +9,33 @@ const Op = Sequelize.Op
 router.get("/userData", async (request, response) => {
     try {
         var userData;
-        if (Array.isArray(request.query.sellerUsername)) {
+        if (!request.query.sellerUsername) {
+            const users = await User.findAll({
+                where: {
+                    role: "seller"
+                }
+            })
+            if (!users) {
+                return response.status(404).json({
+                    "response": "No user found"
+                });
+            }
+            return response.status(200).json({
+                "response": users
+            });
+        }
+        else if (Array.isArray(request.query.sellerUsername)) {
             userData = []
-            request.query.sellerUsername.forEach(async (username) => {
-                var user = await User.findOne({
+            for (let i = 0; i < request.query.sellerUsername.length; i++) {
+                const user = await User.findOne({
                     where: {
-                        username: username.data.response
+                        username: request.query.sellerUsername[i]
                     }
                 });
-                userData.push(user)
-            });
+                if (user) {
+                    userData.push(user.dataValues)
+                }
+            }
         }
         else {
             userData = await User.findOne({

@@ -34,7 +34,7 @@ user.hasMany(userAddress);
 db.sync({ force: force }).
     then(
         () => {
-            execSync('sequelize db:seed:all', { encoding: 'utf-8' });
+            execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
             console.log(`database ${dbName} synced!`)
         }
               

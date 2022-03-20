@@ -25,6 +25,9 @@ router.get("/buyer/product", async (request, response) => {
         }
     } catch (error) {
         console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 });
 
@@ -36,7 +39,8 @@ router.get("/buyer/products", async (request, response) => {
         // var tagsIds = [];
         var productsIds = [];
         if (Array.isArray(request.query.sellerId)) {
-            request.query.userId.forEach(
+            console.log(request.query.sellerId)
+            request.query.sellerId.forEach(
                 (id) => {
                     sellersIds.push(parseInt(id))
                 }
@@ -72,7 +76,7 @@ router.get("/buyer/products", async (request, response) => {
                 }
             }
         );
-        console.log("ASSERTION_TEST", productsIds)
+        console.log("ASSERTION_TEST", request.query)
         const products = await Product.findAndCountAll({
             where: {
                 [Op.and]: [
@@ -96,6 +100,11 @@ router.get("/buyer/products", async (request, response) => {
         if (error.name == "SequelizeDatabaseError") {
             return response.status(400).json({
                 "response": "Bad json format",
+            });
+        }
+        else {
+            response.status(error.response.status).json({
+                "response": error.response.data.response
             });
         }
     }
@@ -123,6 +132,9 @@ router.get("/seller/products", async (request, response) => {
         }
     } catch (error) {
         console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 });
 
@@ -149,6 +161,9 @@ router.get("/seller/product", async (request, response) => {
         }
     } catch (error) {
         console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 });
 

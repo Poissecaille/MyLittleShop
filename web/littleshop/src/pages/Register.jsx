@@ -16,7 +16,7 @@ const Register = () => {
   const [lastname, setLastname] = useState("");
   const [password, setPassword] = useState("");
   const [birthdate, setBirthdate] = useState(new Date());
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("buyer");
   //const [registerStatus, setRegisterStatus] = useState("");
   // let [error, setError] = React.useState(null);
   const registerBackEnd = async () => {

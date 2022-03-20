@@ -12,9 +12,9 @@ const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(1000);
   const [productName, setProductName] = useState("");
-  const [productCondition, setProductCondition] = useState("");
+  const [productCondition, setProductCondition] = useState("new");
   const [cartQuantity, setCartQuantity] = useState(null);
   //const [cartAdded, setCartAdded] = useState(false);
   //const [wishAdded, setWishAdded] = useState(false);
@@ -25,13 +25,24 @@ const Products = () => {
     setProductCondition(e.target.value);
   };
   const handleMinPrice = (e) => {
-    setMinPrice(e.target.value);
+    setTimeout(() => {
+      setMinPrice(e.target.value)
+    }, 500)
   };
   const handleMaxPrice = (e) => {
-    setMaxPrice(e.target.value);
+    setTimeout(() => {
+      setMaxPrice(e.target.value)
+    }, 500)
   };
   const handleProductName = (e) => {
-    setProductName(capitalize(e.target.value));
+    setTimeout(() => {
+      console.log(e.target.value)
+      if (e.target.value === "") {
+        setProductName(e.target.value)
+      } else {
+        setProductName(capitalize(e.target.value))
+      }
+    }, 500)
   };
 
   useEffect(() => {
@@ -48,7 +59,7 @@ const Products = () => {
         },
       })
       .then((response) => {
-        //console.log(response);
+        console.log(response);
         setProducts(response.data.response);
       })
       .catch((error) => {
@@ -151,6 +162,10 @@ const Products = () => {
               <h2>{product.name}</h2>
             </div>
             <div className="card-content">
+              <p>
+                <b>Seller: </b>
+                {product.sellerUsername}
+              </p>
               <p>
                 <b>Label: </b>
                 {product.label}

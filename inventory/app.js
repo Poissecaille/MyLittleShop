@@ -47,10 +47,9 @@ db.sync({ force: force }).
         () => {
             console.log(`database ${dbName} synced!`)
             try {
-                execSync('sequelize db:seed:all', { encoding: 'utf-8' });
+                execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
             }
             catch (error) {
-                console.log(error)
              }
         }
     )
