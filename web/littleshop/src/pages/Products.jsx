@@ -5,47 +5,67 @@ import { useEffect } from "react";
 import { BsSuitHeart, BsCart4 } from "react-icons/bs";
 import "../style/Product.css";
 import { capitalize } from "../utils/functions";
+import Popup from "../components/popup";
 
 const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
 
 const Products = () => {
+  //localStorage.clear()
+  console.log(JSON.parse(localStorage.getItem("cartProduct", null)));
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000);
   const [productName, setProductName] = useState("");
   const [productCondition, setProductCondition] = useState("new");
-  const [cartQuantity, setCartQuantity] = useState(null);
-  //const [cartAdded, setCartAdded] = useState(false);
-  //const [wishAdded, setWishAdded] = useState(false);
+  const [cartQuantity, setCartQuantity] = useState(0);
+  const [popup, setShowPopUp] = useState(false);
+  const [popupContent, setPopupContent] = useState("");
+  const [popupTitle, setPopupTitle] = useState("");
+
+  const popupContentHandler = (e) => {
+    setPopupContent(e);
+  };
+  const popupTitleHandler = (e) => {
+    setPopupTitle(e);
+  };
+
+  const popupHandler = (e) => {
+    setShowPopUp(!e);
+    setTimeout(() => {
+      setShowPopUp(false);
+    }, 2000);
+  };
+
   const handleCartQuantity = (e) => {
-    setCartQuantity(e.target.value);
+    setCartQuantity(parseInt(e.target.value, 10));
   };
   const handleCondition = (e) => {
     setProductCondition(e.target.value);
   };
   const handleMinPrice = (e) => {
     setTimeout(() => {
-      setMinPrice(e.target.value)
-    }, 500)
+      setMinPrice(e.target.value);
+    }, 500);
   };
   const handleMaxPrice = (e) => {
     setTimeout(() => {
-      setMaxPrice(e.target.value)
-    }, 500)
+      setMaxPrice(e.target.value);
+    }, 500);
   };
   const handleProductName = (e) => {
     setTimeout(() => {
-      console.log(e.target.value)
       if (e.target.value === "") {
-        setProductName(e.target.value)
+        setProductName(e.target.value);
       } else {
-        setProductName(capitalize(e.target.value))
+        setProductName(capitalize(e.target.value));
       }
-    }, 500)
+    }, 500);
   };
 
   useEffect(() => {
+    console.log(localStorage);
+
     axios
       .get(BACKEND_PRODUCTS_URL, {
         headers: {
@@ -59,7 +79,6 @@ const Products = () => {
         },
       })
       .then((response) => {
-        console.log(response);
         setProducts(response.data.response);
       })
       .catch((error) => {
@@ -67,25 +86,49 @@ const Products = () => {
       });
   }, [maxPrice, minPrice, productName, productCondition]);
 
-  const addProductToCart = (data) => {
-    console.log(data);
-    axios
-      .post(BACKEND_CART_PRODUCTS_URL, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: {
-          productName: data.name,
+  const addProductToCart = async (data) => {
+    try {
+      const request = await axios.post(
+        BACKEND_CART_PRODUCTS_URL,
+        {
+          productName: data.productName,
           quantity: data.quantity,
-          sellerUsername: data.seller,
+          sellerUsername: data.sellerUsername,
         },
-      })
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      console.log(request.status);
+      if (request.status === 201) {
+        popupHandler(popup);
+        popupTitleHandler("Product added to cart!");
+        popupContentHandler(
+          `${data.quantity} "${data.productName}" have been successfully added to cart !!`
+        );
+        if (localStorage.getItem("cartProduct") === null) {
+          console.log("WTF!!");
+          localStorage.setItem("cartProduct", "[]");
+        }
+        var old = JSON.parse(localStorage.getItem("cartProduct"));
+        for (let key in old) {
+          console.log("value:", old[key].productName);
+          if (
+            old[key].productName !== data.productName &&
+            old[key].sellerUsername !== data.sellerUsername
+          ) {
+            old.push({
+              productName: data.productName,
+              quantity: data.quantity,
+              sellerUsername: data.sellerUsername,
+            });
+            localStorage.setItem("cartProduct", JSON.stringify(old));
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -148,6 +191,7 @@ const Products = () => {
       </div>
 
       <div className="container">
+        <Popup trigger={popup} title={popupTitle} value={popupContent} />
         {products.map((product) => (
           <div className="product-card" key={product.id}>
             <div className="product-img">
@@ -201,7 +245,8 @@ const Products = () => {
                 onClick={() =>
                   addProductToCart({
                     productName: product.name,
-                    quantity: cartQuantity
+                    quantity: cartQuantity,
+                    sellerUsername: product.sellerUsername,
                   })
                 }
               >

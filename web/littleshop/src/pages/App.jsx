@@ -5,6 +5,7 @@ import Home from "./Home";
 import Login from "./Login";
 import Products from "./Products";
 import Register from "./Register";
+import Cart from "./Cart";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route exact path="/login" element={<Login />} />
         <Route exact path="/register" element={<Register />} />
         <Route exact path="/products" element={<Products />} />
+        <Route exact path="/cart" element={<Cart />} />
       </Routes>
     </Router>
   );

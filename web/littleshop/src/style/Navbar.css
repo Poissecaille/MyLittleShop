@@ -1,35 +1,36 @@
-.navBar{
-    height:60px;
-    background-color: lightcoral;
-    width: 100%;
+.navBar {
+  height: 60px;
+  background-color: lightcoral;
+  width: 100%;
 }
-.wrapper{
-    width: auto;
-    background-color: #000;
-}
-
-.wrapper-menu{
-    float: left;
-    padding: 20px;
+.wrapper {
+  width: auto;
+  background-color: #000;
 }
 
-.wrapper-title{
-   float: left;
-   padding: 20px;
-   padding-left: 50%;
-   font-weight: bold;
-   text-decoration: none;
+.wrapper-menu {
+  float: left;
+  padding: 20px;
 }
 
-.wrapper-register{
-    float: right;
-    padding: 20px;
-    cursor: pointer;
+.wrapper-title {
+  float: left;
+  padding: 20px;
+  padding-left: 50%;
+  font-weight: bold;
+  text-decoration: none;
 }
 
-.wrapper-login{
-    float: right;
-    padding: 20px;
-    cursor: pointer;
+.wrapper-register {
+  float: right;
+  padding: 20px;
+  cursor: pointer;
 }
 
+.wrapper-login,
+.wrapper-logout,
+.wrapper-register {
+  float: right;
+  padding: 20px;
+  cursor: pointer;
+}

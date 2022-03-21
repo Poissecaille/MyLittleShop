@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../style/Registration.css"
+import "../style/Registration.css";
 
 const BACKEND_REGISTER_URL = "http://localhost:5000/register";
 
@@ -48,7 +48,7 @@ const Register = () => {
         <input
           type="text"
           onChange={(e) => {
-            setEmail(e.target.value);
+            setEmail(e.target.value.toLowerCase());
           }}
         ></input>
         <label>username</label>
@@ -80,12 +80,18 @@ const Register = () => {
           }}
         ></input>
         <label>role</label>
-        <input
+        <select id="roles" name="roles">
+          onChange={(e) => setRole(e.target.value)}
+          value={role}
+          <option value="buyer">buyer</option>
+          <option value="seller">seller</option>
+        </select>
+        {/* <input
           type="text"
           onChange={(e) => {
             setRole(e.target.value);
           }}
-        ></input>
+        ></input> */}
         <label className="birthdate">birthdate</label>
         <DatePicker
           selected={birthdate}
@@ -93,8 +99,12 @@ const Register = () => {
             console.log(date);
             setBirthdate(date);
           }}
-        /><br/>
-        <button className="register-button" onClick={registerBackEnd}> REGISTER </button>
+        />
+        <br />
+        <button className="register-button" onClick={registerBackEnd}>
+          {" "}
+          REGISTER{" "}
+        </button>
       </div>
     </div>
   );

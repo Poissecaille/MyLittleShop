@@ -35,7 +35,7 @@ const Login = () => {
         <input
           type="text"
           onChange={(e) => {
-            setEmail(e.target.value);
+            setEmail(e.target.value.toLowerCase());
           }}
         ></input>
         <label>password</label>
