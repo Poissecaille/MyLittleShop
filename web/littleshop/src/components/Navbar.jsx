@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Sidemenu from "./Sidemenu";
 
 const Navbar = () => {
+  const token = localStorage.getItem("token");
   return (
     <div className="navBar">
       <div className="wrapper">
@@ -31,6 +32,11 @@ const Navbar = () => {
         <div className="wrapper-login">
           <Link to="/login" style={{ textDecoration: "none", color: "black" }}>
             Login
+          </Link>
+        </div>
+        <div className="wrapper-account">
+          <Link to="/account" style={{ textDecoration: "none", color: "black" }}>
+            Account
           </Link>
         </div>
       </div>

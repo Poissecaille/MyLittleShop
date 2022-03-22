@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { BsSuitHeart, BsCart4 } from "react-icons/bs";
 import "../style/Product.css";
 import { capitalize } from "../utils/functions";
-import Popup from "../components/popup";
+import Popup from "../components/Popup";
 
 const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
@@ -107,22 +107,21 @@ const Products = () => {
           `${data.quantity} "${data.productName}" have been successfully added to cart !!`
         );
         if (localStorage.getItem("cartProduct") === null) {
-          console.log("WTF!!");
           localStorage.setItem("cartProduct", "[]");
         }
-        var old = JSON.parse(localStorage.getItem("cartProduct"));
-        for (let key in old) {
-          console.log("value:", old[key].productName);
+        var oldCart = JSON.parse(localStorage.getItem("cartProduct"));
+        for (let key in oldCart) {
+          console.log("value:", oldCart[key].productName);
           if (
-            old[key].productName !== data.productName &&
-            old[key].sellerUsername !== data.sellerUsername
+            oldCart[key].productName !== data.productName &&
+            oldCart[key].sellerUsername !== data.sellerUsername
           ) {
-            old.push({
+            oldCart.push({
               productName: data.productName,
               quantity: data.quantity,
               sellerUsername: data.sellerUsername,
             });
-            localStorage.setItem("cartProduct", JSON.stringify(old));
+            localStorage.setItem("cartProduct", JSON.stringify(oldCart));
           }
         }
       }

@@ -1,0 +1,16 @@
+.account-img{
+    margin-top: 2%;
+    margin-left:45%;
+    margin-right:65%;
+;}
+
+h2,.account-details{
+    width: 50px;
+    margin-left: 52%;
+    margin-right: 48%;
+}
+
+.delete-account{
+    background-color: lightcoral;
+    font-weight : bold ;
+}

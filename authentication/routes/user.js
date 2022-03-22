@@ -91,6 +91,9 @@ router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, res
     try {
         const userId = request.user.id
         const userRole = request.user.role
+        console.log(request.user.role)
+        console.log(request.user.id)
+
         const userActivated = await User.findByPk(userId)
         if (!userActivated.activated) {
             return response.status(403).json({

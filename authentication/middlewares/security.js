@@ -12,7 +12,6 @@ const checkToken = (request, response, next) => {
         }
         if (header) {
             const token = header.split(" ")[1];
-            console.log(token);
             jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
                 if (error) {
                     if (error instanceof jwt.TokenExpiredError) {
