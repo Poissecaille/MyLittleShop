@@ -23,18 +23,14 @@ const Products = () => {
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
 
-  const popupContentHandler = (e) => {
-    setPopupContent(e);
-  };
-  const popupTitleHandler = (e) => {
-    setPopupTitle(e);
-  };
-
   const popupHandler = (e) => {
-    setShowPopUp(!e);
-    setTimeout(() => {
-      setShowPopUp(false);
-    }, 2000);
+    return new Promise((resolve, reject) => {
+      setShowPopUp(!e);
+      setTimeout(() => {
+        setShowPopUp(false);
+        resolve()
+      }, 2000);
+    })
   };
 
   const handleCartQuantity = (e) => {
@@ -101,9 +97,8 @@ const Products = () => {
       );
       console.log(request.status);
       if (request.status === 201) {
-        popupHandler(popup);
-        popupTitleHandler("Product added to cart!");
-        popupContentHandler(
+        setPopupTitle("LittleShop product management information");
+        setPopupContent(
           `${data.quantity} "${data.productName}" have been successfully added to cart !!`
         );
         if (localStorage.getItem("cartProduct") === null) {
@@ -124,6 +119,7 @@ const Products = () => {
             localStorage.setItem("cartProduct", JSON.stringify(oldCart));
           }
         }
+        await popupHandler();
       }
     } catch (error) {
       console.log(error);
