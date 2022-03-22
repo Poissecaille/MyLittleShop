@@ -29,8 +29,7 @@
 
 .wrapper-login,
 .wrapper-logout,
-.wrapper-register,
-.wrapper-account {
+.wrapper-register{
   float: right;
   padding: 20px;
   cursor: pointer;

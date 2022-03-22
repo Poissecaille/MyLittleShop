@@ -34,11 +34,6 @@ const Navbar = () => {
             Login
           </Link>
         </div>
-        <div className="wrapper-account">
-          <Link to="/account" style={{ textDecoration: "none", color: "black" }}>
-            Account
-          </Link>
-        </div>
       </div>
     </div>
   );
