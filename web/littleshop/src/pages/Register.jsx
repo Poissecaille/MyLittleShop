@@ -17,7 +17,7 @@ const Register = () => {
   const [lastname, setLastname] = useState("");
   const [password, setPassword] = useState("");
   const [birthdate, setBirthdate] = useState(new Date());
-  const [role, setRole] = useState("buyer");
+  //const [role, setRole] = useState("buyer");
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
@@ -41,7 +41,7 @@ const Register = () => {
       lastName: lastname,
       password: password,
       birthDate: birthdate,
-      role: role,
+      role: "buyer",
     }).then(async (response) => {
       console.log(response)
       if (response.status === 201) {
@@ -54,7 +54,7 @@ const Register = () => {
           lastName: lastname,
           password: password,
           birthDate: birthdate,
-          role: role,
+          role: "buyer",
         }));
         await popupHandler();
         navigate("/login");
@@ -67,7 +67,7 @@ const Register = () => {
           await popupHandler();
         } else {
           setPopupTitle("LittleShop account management information");
-          setPopupContent("Account creation failed!");
+          setPopupContent("Account creation failed !");
           await popupHandler();
         }
       });
@@ -113,13 +113,13 @@ const Register = () => {
             setPassword(e.target.value);
           }}
         ></input>
-        <label>role</label>
+        {/* <label>role</label>
         <select id="roles" name="roles">
           onChange={(e) => setRole(e.target.value)}
           value={role}
           <option value="buyer">buyer</option>
           <option value="seller">seller</option>
-        </select>
+        </select> */}
         {/* <input
           type="text"
           onChange={(e) => {

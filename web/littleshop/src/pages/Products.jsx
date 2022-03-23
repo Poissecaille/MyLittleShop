@@ -11,8 +11,13 @@ const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
 
 const Products = () => {
-  //localStorage.clear()
-  console.log(JSON.parse(localStorage.getItem("cartProduct", null)));
+  // const cart = axios.get(BACKEND_CART_PRODUCTS_URL, {
+  //   headers: {
+  //     Authorization: `Bearer ${localStorage.getItem("token")}`
+  //   },
+  // }).then((response) => {
+  //   console.log(response.data.response)
+  // })
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000);
@@ -60,8 +65,6 @@ const Products = () => {
   };
 
   useEffect(() => {
-    console.log(localStorage);
-
     axios
       .get(BACKEND_PRODUCTS_URL, {
         headers: {
@@ -82,50 +85,54 @@ const Products = () => {
       });
   }, [maxPrice, minPrice, productName, productCondition]);
 
-  const addProductToCart = async (data) => {
-    try {
-      const request = await axios.post(
-        BACKEND_CART_PRODUCTS_URL,
-        {
-          productName: data.productName,
-          quantity: data.quantity,
-          sellerUsername: data.sellerUsername,
-        },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      console.log(request.status);
-      if (request.status === 201) {
-        setPopupTitle("LittleShop product management information");
-        setPopupContent(
-          `${data.quantity} "${data.productName}" have been successfully added to cart !!`
-        );
-        if (localStorage.getItem("cartProduct") === null) {
-          localStorage.setItem("cartProduct", "[]");
-        }
-        var oldCart = JSON.parse(localStorage.getItem("cartProduct"));
-        for (let key in oldCart) {
-          console.log("value:", oldCart[key].productName);
-          if (
-            oldCart[key].productName !== data.productName &&
-            oldCart[key].sellerUsername !== data.sellerUsername
-          ) {
-            oldCart.push({
-              productName: data.productName,
-              quantity: data.quantity,
-              sellerUsername: data.sellerUsername,
-            });
-            localStorage.setItem("cartProduct", JSON.stringify(oldCart));
-          }
-        }
-        await popupHandler();
+  const addProductToCart = (data) => {
+    axios.post(
+      BACKEND_CART_PRODUCTS_URL,
+      {
+        productName: data.productName,
+        quantity: data.quantity,
+        sellerUsername: data.sellerUsername,
+      },
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    )
+      .then(async (response) => {
+        if (response.status === 201) {
+          setPopupTitle("LittleShop product management information");
+          setPopupContent(
+            `${data.quantity} "${data.productName}" have been successfully added to cart !`
+          );
+          if (localStorage.getItem("cartProduct") === null) {
+            localStorage.setItem("cartProduct", "[]");
+          }
+          var oldCart = JSON.parse(localStorage.getItem("cartProduct"));
+          console.log(oldCart)
 
+          oldCart.push({
+            id: data.id,
+            productName: data.productName,
+            label: data.label,
+            quantity: data.quantity,
+            sellerUsername: data.sellerUsername,
+            unitPrice: data.unitPrice,
+            condition: data.condition,
+            availableQuantity: data.availableQuantity
+          });
+          localStorage.setItem("cartProduct", JSON.stringify(oldCart));
+          await popupHandler(popup);
+        }
+      })
+      .catch(async (error) => {
+        if (error.response.status === 409) {
+          setPopupTitle("LittleShop product management information");
+          setPopupContent(
+            ` "${data.productName}" is already inside cart !`
+          );
+          await popupHandler(popup);
+        }
+      });
+  }
   return (
     <div>
       <Navbar />
@@ -239,9 +246,14 @@ const Products = () => {
                 className="cart-button"
                 onClick={() =>
                   addProductToCart({
+                    id: product.id,
                     productName: product.name,
-                    quantity: cartQuantity,
+                    label: product.label,
                     sellerUsername: product.sellerUsername,
+                    quantity: cartQuantity,
+                    unitPrice: product.unitPrice,
+                    condition: product.condition,
+                    availableQuantity: product.availableQuantity
                   })
                 }
               >
