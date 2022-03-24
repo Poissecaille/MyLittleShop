@@ -11,13 +11,6 @@ const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
 
 const Products = () => {
-  // const cart = axios.get(BACKEND_CART_PRODUCTS_URL, {
-  //   headers: {
-  //     Authorization: `Bearer ${localStorage.getItem("token")}`
-  //   },
-  // }).then((response) => {
-  //   console.log(response.data.response)
-  // })
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000);

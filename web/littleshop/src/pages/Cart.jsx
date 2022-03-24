@@ -5,25 +5,69 @@ import { BsFillBagCheckFill } from "react-icons/bs";
 import { MdCancel } from "react-icons/md";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
+//localStorage.removeItem("cartProduct")
+const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
+const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
 
-const REMOVE_CART_PRODUCT_URL = "http://localhost:5000/cartProduct";
 var initialCartPrice = 0
 
 const Cart = () => {
     const navigate = useNavigate();
-    const cart = JSON.parse(localStorage.getItem("cartProduct"));
     var [cartPrice, setCartPrice] = useState(initialCartPrice);
     const [popup, setShowPopUp] = useState(false);
     const [popupContent, setPopupContent] = useState("");
     const [popupTitle, setPopupTitle] = useState("");
     const [quantity, setQuantity] = useState("");
+    var cart = localStorage.getItem("cartProduct") ? JSON.parse(localStorage.getItem("cartProduct")) : cart = [];
+    
+    // if (!JSON.parse(localStorage.getItem("cartProduct"))) {
+    // axios.get(BACKEND_CART_PRODUCTS_URL, {
+    //     headers: {
+    //         Authorization: `Bearer ${localStorage.getItem("token")}`
+    //     },
+    // }).then((response) => {
+    //     var productsIds = []
+    //     console.log(JSON.parse(response.data.response))
+    //     for (let i = 0; i < response.data.response.length;i++){
+    //         productsIds.push(response.data.response[i].productsId)
+    //     }
+    // axios
+    //     .get(BACKEND_PRODUCTS_URL, {
+    //         headers: {
+    //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //         },
+    //         params: {
+    //             productName: productName,
+    //         },
+    //     })
+    //     .then((response) => {
+
+    //     })
+    //     .catch((error) => {
+    //         console.log(error);
+    //     });
+
+    // localStorage.setItem("cartProduct", JSON.stringify(response.data.response))
+    // cart = JSON.parse(localStorage.getItem("cartProduct"))
+    // console.log(cart)
+
+    //     }).catch((error) => {
+    //             console.log(error)
+    //         })
+    // } else {
+    //     cart = JSON.parse(localStorage.getItem("cartProduct"))
+    // }
 
     useEffect(() => {
-        try {
-            for (let i = 0; i < cart.length; i++) {
-                initialCartPrice += cart[i].unitPrice * cart[i].quantity
+        new Promise(() => {
+            if (!localStorage.getItem("cartProduct")) {
+                setPopupTitle("LittleShop Cart management information");
+                setPopupContent(`No product is currently in your cart ${JSON.parse(localStorage["account"]).username}`)
+                popupHandler().then(() => {
+                    navigate("/products");
+                })
             }
-            setCartPrice(initialCartPrice)
+        }).then(() => {
             if (cart.length === 0) {
                 setPopupTitle("LittleShop Cart management information");
                 setPopupContent(`No product is currently in your cart ${JSON.parse(localStorage["account"]).username}`)
@@ -31,10 +75,13 @@ const Cart = () => {
                     navigate("/products");
                 })
             }
-        } catch (error) {
-            console.log(error)
-        }
-    }, [])
+            for (let i = 0; i < cart.length; i++) {
+                initialCartPrice += cart[i].unitPrice * cart[i].quantity
+            }
+            setCartPrice(initialCartPrice)
+        })
+    }
+        , [])
 
     const popupHandler = (e) => {
         return new Promise((resolve, reject) => {
@@ -49,32 +96,34 @@ const Cart = () => {
     const handleCartQuantity = (cartProduct) => (e) => {
         for (let i = 0; i < cart.length; i++) {
             if (cartProduct.id === cart[i].id) {
-                cartPrice = cart[i].unitPrice * Number(e.target.value)
-                // if (Number(e.target.value) > quantity) {
-                //     cartPrice += cart[i].unitPrice
-                // } else {
-                //     cartPrice -= cart[i].unitPrice
-                // }
-                // if (Number(cart[i].quantity) < Number(e.target.value)) {
-                //     cart[i].quantity = Number(e.target.value)
-                //     cartPrice += cart[i].unitPrice
-                // } else {
-                //     cart[i].quantity = Number(e.target.value)
-                //     cartPrice -= cart[i].unitPrice
-                // }
+                if (!cart[i].unitPrice) {
+                    console.log(cartProduct)
+                    cart[i].unitPrice = cartProduct.unitPrice
+                    //console.log(cart[i])
+                }
+                console.log(cart[i].quantity, Number(e.target.value))
+                if (Number(cart[i].quantity) < Number(e.target.value)) {
+                    cart[i].quantity = Number(e.target.value)
+                    cartPrice += cart[i].unitPrice
+                } else {
+                    cart[i].quantity = Number(e.target.value)
+                    cartPrice -= cart[i].unitPrice
+                }
+                localStorage["cartProduct"] = JSON.stringify(cart)
             }
         }
         if (cartPrice < 0) {
             cartPrice = 0
         }
         initialCartPrice = 0
+        console.log(cartPrice)
         setQuantity(Number(e.target.value))
         setCartPrice(Number(cartPrice.toFixed(2)));
     };
 
     const removeProductFromCart = (data) => {
         axios.delete(
-            REMOVE_CART_PRODUCT_URL, {
+            BACKEND_CART_PRODUCTS_URL, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
@@ -101,6 +150,9 @@ const Cart = () => {
             .catch((error) => {
                 console.log(error)
             })
+    }
+    const validateCart = () => {
+        console.log(cart)
     }
 
     return (
@@ -178,7 +230,8 @@ const Cart = () => {
                 {cartPrice != 0 ? cartPrice : initialCartPrice}
             </p>
 
-            <button className="validate-cart-button">
+            <button className="validate-cart-button"
+                onClick={validateCart}>
                 Validate cart <BsFillBagCheckFill />
             </button>
         </div>
