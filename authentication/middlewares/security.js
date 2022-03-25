@@ -15,6 +15,7 @@ const checkToken = (request, response, next) => {
             jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
                 if (error) {
                     if (error instanceof jwt.TokenExpiredError) {
+                        console.log(error)
                         return response.status(403).json({ "response": "Token has expired" });
                     } else {
                         return response.status(403).json({ "response": "Invalid token" });

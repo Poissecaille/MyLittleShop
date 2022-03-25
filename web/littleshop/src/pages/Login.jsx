@@ -6,7 +6,7 @@ import "../style/Login.css";
 import Popup from "../components/Popup";
 
 const BACKEND_LOGIN_URL = "http://localhost:5000/login";
-
+const test = ()=>{console.log("ok")}
 const Login = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const Login = () => {
     try {
       console.log(token)
 
-      if (!token) {
+      // if (!token) {
         const request = await axios.post(BACKEND_LOGIN_URL, {
           email: email,
           password: password,
@@ -42,12 +42,12 @@ const Login = () => {
           await popupHandler();
           navigate("/");
         }
-      } else {
-        setPopupTitle("LittleShop account management information");
-        setPopupContent("You are already logged in !");
-        await popupHandler();
-        navigate("/");
-      }
+      // } else {
+      //   setPopupTitle("LittleShop account management information");
+      //   setPopupContent("You are already logged in !");
+      //   await popupHandler();
+      //   navigate("/");
+      // }
     }
     catch (error) {
       console.log(error);

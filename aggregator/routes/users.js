@@ -8,6 +8,7 @@ const roads = {
     DISABLE_ACCOUNT_URL: "http://localhost:5002/api/disable",
     DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate",
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
+    SYNC_ACCOUNT_URL: "http://localhost:5002/api/syncAccount",
     // PRODUCT MICROSERVICE
     WITHDRAW_SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products"
 }
@@ -24,10 +25,12 @@ router.post("/login", async (request, response) => {
             email: request.body.email,
             password: request.body.password,
         });
+
         if (userToLogin.status === 200) {
             return response.status(200).json({
                 "response": userToLogin.data.response,
-                "token": userToLogin.data.token
+                "token": userToLogin.data.token,
+                "expire": userToLogin.data.expire
             });
         }
     } catch (error) {
@@ -178,6 +181,25 @@ router.put("/deactivate", async (request, response) => {
                 "response": deactivatedAccount.data.response
             });
         }
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
+//SYNC ACCOUNT WITH FRONT STORAGE
+router.get("/syncAccount", async (request, response) => {
+    try {
+        const userData = await axios.get(roads.SYNC_ACCOUNT_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        })
+        return response.status(200).json({
+            "response": userData.data.response
+        });
     } catch (error) {
         console.log(error)
         response.status(error.response.status).json({

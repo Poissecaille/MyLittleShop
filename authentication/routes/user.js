@@ -124,4 +124,24 @@ router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, res
     }
 });
 
+// SYNC USER ACCOUNT FOR AGGREGATOR
+router.get("/syncAccount", checkToken, async (request, response) => {
+    try {
+        var result = {};
+        const userId = request.user.id
+        const userData = await User.findByPk(userId)
+        result.email = userData.email
+        result.username = userData.username
+        result.firstName = userData.firstName
+        result.lastName = userData.lastName
+        result.birthDate = userData.birthDate
+        return response.status(200).json({
+            "response": result
+        });
+    } catch (error) {
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+})
 module.exports = router;

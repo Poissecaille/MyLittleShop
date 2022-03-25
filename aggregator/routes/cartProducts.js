@@ -5,7 +5,7 @@ const roads = {
     // INVENTORY MICROSERVICE
     GET_CART_ITEMS_URL: "http://localhost:5003/api/cartProducts",
     CART_MANAGEMENT_URL: "http://localhost:5003/api/cartProduct",
-
+    SYNC_CART_ITEMS_URL: "http://localhost:5003/api/productsPerId",
     // USER MICROSERVICE
     CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
     USER_DATA_URL: "http://localhost:5002/api/userData"
@@ -161,6 +161,53 @@ router.delete("/cartProduct", async (request, response) => {
     } catch (error) {
         console.log(error)
         response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
+//CART REFRESH
+router.get("/syncCart", async (request, response) => {
+    try {
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
+        if (userRole !== "buyer") {
+            return response.status(401).json({ "response": "Unauthorized" });
+        }
+        else {
+            const cart = await axios.get(roads.GET_CART_ITEMS_URL, {
+                params: {
+                    userId: userId
+                }
+            });
+            var productIds = [];
+            for (let i = 0; i < cart.data.response.length; i++) {
+                productIds.push(cart.data.response[i].productId)
+            }
+
+            const cartProductsData = await axios.get(roads.SYNC_CART_ITEMS_URL, {
+                params: {
+                    productIds
+                }
+            })
+            for (let i = 0; i < cart.data.response.length; i++) {
+                for (let j = 0; j < cartProductsData.data.response.length; j++) {
+                    if (cart.data.response[i].productId === cartProductsData.data.response[j].id) {
+                        cartProductsData.data.response[i].quantity = cart.data.response[i].quantity
+                    }
+                }
+            }
+            return response.status(200).json({
+                "response": cartProductsData.data.response
+            });
+        }
+    } catch (error) {
+        return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }

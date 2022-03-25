@@ -9,7 +9,6 @@ import Popup from "../components/Popup";
 
 const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
-
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
