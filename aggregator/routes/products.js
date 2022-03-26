@@ -47,10 +47,13 @@ router.get("/products", async (request, response) => {
             var filter;
             var sellerData;
             if (request.query.condition) {
-                if (request.query.condition != "new" && request.query.condition != "occasion" && request.query.condition != "renovated") {
+                if (request.query.condition != "new" && request.query.condition != "occasion" && request.query.condition != "renovated" && request.query.condition != "all") {
                     return response.status(400).json({
                         "response": "Bad json format"
                     });
+                }
+                if (request.query.condition === "all") {
+                    request.query.condition = null
                 }
             }
             if (!request.query.filter) {

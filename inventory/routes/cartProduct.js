@@ -6,6 +6,7 @@ const Op = Sequelize.Op
 
 router.get("/cartProducts", async (request, response) => {
     try {
+        //var productIds = [];
         if (!request.query.userId) {
             return response.status(400).json({
                 "response": "Bad json format",
@@ -16,8 +17,21 @@ router.get("/cartProducts", async (request, response) => {
                 ownerId: request.query.userId
             }
         });
-        console.log("cartProducts", cartProducts)
 
+        // cartProducts.forEach((cartProduct) => {
+        //     productIds.push(cartProduct.productId)
+        // });
+
+        // const products = await Product.findAll({
+        //     where: {
+        //         id: { [Op.in]: productIds }
+        //     }
+        // })
+        // for (let i = 0; i < products.length; i++) {
+        //     if (products[i].dataValues.id === cartProducts[i].dataValues.productId) {
+        //         cartProducts[i].dataValues.productName = products[i].dataValues.name
+        //     }
+        // }
         return response.status(200).json({
             "response": cartProducts
         });
@@ -26,12 +40,12 @@ router.get("/cartProducts", async (request, response) => {
             "response": error.response.data.response
         });
     }
-
 });
+
+
 
 router.post("/cartProduct", async (request, response) => {
     try {
-        console.log("TEST!!!!!!!!!!!!!!!!", request.body)
         const availableProduct = await Product.findOne(
             {
                 where: {
@@ -47,7 +61,6 @@ router.post("/cartProduct", async (request, response) => {
                 "response": "Product not found or not in stock"
             });
         }
-        console.log("TEST2!!!!!", availableProduct.id)
         const productAlreadyInCart = await cartProduct.findOne({
             where: {
                 [Op.and]: [
@@ -63,7 +76,6 @@ router.post("/cartProduct", async (request, response) => {
                 ]
             }
         });
-        console.log("PRODUCT IN CART EXISTS", productAlreadyInCart)
         if (!productAlreadyInCart) {
             const newCartProduct = new cartProduct({
                 productId: availableProduct.id,
@@ -71,6 +83,9 @@ router.post("/cartProduct", async (request, response) => {
                 ownerId: request.body.userId
             });
             await newCartProduct.save();
+            await availableProduct.update({
+                availableQuantity: availableProduct.availableQuantity - newCartProduct.quantity
+            })
             return response.status(201).json({
                 "response": "Product added to cart"
             });
@@ -81,7 +96,6 @@ router.post("/cartProduct", async (request, response) => {
         }
     } catch (error) {
         console.log(error)
-
         if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
                 "response": "Product already in cart"
@@ -126,7 +140,9 @@ router.put("/cartProduct", async (request, response) => {
         await productInCart.update({
             quantity: request.body.quantity
         })
-        console.log("#####")
+        await availableProduct.update({
+            availableQuantity: availableProduct.availableQuantity += request.body.quantityVariation
+        })
         return response.status(200).json({
             "response": productInCart
         })

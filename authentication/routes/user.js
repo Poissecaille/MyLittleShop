@@ -144,4 +144,24 @@ router.get("/syncAccount", checkToken, async (request, response) => {
         });
     }
 })
+
+//SYNC CART WITH FRONT STORAGE FOR SELLERS
+router.get("/syncSellersPerProduct", async (request, response) => {
+    try {
+        const sellerData = await User.findAll({
+            where: {
+                id: { [Op.in]: request.query.sellerIds }
+            }
+        });
+        return response.status(200).json({
+            "response": sellerData
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 module.exports = router;

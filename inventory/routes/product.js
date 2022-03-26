@@ -343,6 +343,7 @@ router.get("/productsPerId", async (request, response) => {
             "response": products
         });
     } catch (error) {
+        console.log(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

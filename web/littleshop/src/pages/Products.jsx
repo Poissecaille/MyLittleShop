@@ -14,7 +14,8 @@ const Products = () => {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000);
   const [productName, setProductName] = useState("");
-  const [productCondition, setProductCondition] = useState("new");
+  const [productCondition, setProductCondition] = useState(null);
+  const [productSort, setProductSort] = useState("unitPrice");
   const [cartQuantity, setCartQuantity] = useState(0);
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
@@ -30,21 +31,26 @@ const Products = () => {
     })
   };
 
+
   const handleCartQuantity = (e) => {
     setCartQuantity(parseInt(e.target.value, 10));
   };
   const handleCondition = (e) => {
     setProductCondition(e.target.value);
   };
+  const handleSort = (e) => {
+    setProductSort(e.target.value);
+    window.location.reload()
+  };
   const handleMinPrice = (e) => {
     setTimeout(() => {
       setMinPrice(e.target.value);
-    }, 500);
+    }, 300);
   };
   const handleMaxPrice = (e) => {
     setTimeout(() => {
       setMaxPrice(e.target.value);
-    }, 500);
+    }, 300);
   };
   const handleProductName = (e) => {
     setTimeout(() => {
@@ -53,7 +59,7 @@ const Products = () => {
       } else {
         setProductName(capitalize(e.target.value));
       }
-    }, 500);
+    }, 300);
   };
 
   useEffect(() => {
@@ -91,10 +97,6 @@ const Products = () => {
     )
       .then(async (response) => {
         if (response.status === 201) {
-          setPopupTitle("LittleShop product management information");
-          setPopupContent(
-            `${data.quantity} "${data.productName}" have been successfully added to cart !`
-          );
           if (localStorage.getItem("cartProduct") === null) {
             localStorage.setItem("cartProduct", "[]");
           }
@@ -112,7 +114,12 @@ const Products = () => {
             availableQuantity: data.availableQuantity
           });
           localStorage.setItem("cartProduct", JSON.stringify(oldCart));
+          setPopupTitle("LittleShop product management information");
+          setPopupContent(
+            `${data.quantity} "${data.productName}" have been successfully added to cart !`
+          );
           await popupHandler(popup);
+          window.location.reload()
         }
       })
       .catch(async (error) => {
@@ -167,9 +174,9 @@ const Products = () => {
             name="productName"
           ></input>
         </div>
-        <div className="dropdown">
+        <div className="dropdown-condition">
           <label>
-            <b>condition</b>
+            <b>condition:</b>
           </label>
           <select
             name="conditions"
@@ -177,9 +184,24 @@ const Products = () => {
             onChange={handleCondition}
             value={productCondition}
           >
+            <option value="all">all</option>
             <option value="new">new</option>
             <option value="occasion">occasion</option>
             <option value="renovated">renovated</option>
+          </select>
+        </div>
+        <div className="dropdown-sort">
+          <label>
+            <b>Sort by:</b>
+          </label>
+          <select
+            name="sort"
+            id="sort"
+            onChange={handleSort}
+            value={productSort}
+          >
+            <option value="unitPrice">unitPrice</option>
+            <option value="condition">condition</option>
           </select>
         </div>
       </div>

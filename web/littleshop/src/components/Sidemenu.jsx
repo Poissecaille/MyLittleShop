@@ -41,7 +41,7 @@ const sidebarData = [
         className: 'nav-text'
     },
     {
-        title: "Order",
+        title: "Orders",
         path: "/orders",
         icon: <RiBillLine />,
         className: 'nav-text'
