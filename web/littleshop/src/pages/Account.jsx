@@ -5,7 +5,6 @@ import "../style/Account.css";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
 import { isEmpty } from "../utils/functions";
-
 const BACKEND_DELETE_ACCOUNT_URL = "http://localhost:5000/deactivate";
 const SYNC_ACCOUNT_BACKEND_URL = "http://localhost:5000/syncAccount";
 const Account = () => {

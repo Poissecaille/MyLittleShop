@@ -8,6 +8,7 @@ import Register from "./Register";
 import Cart from "./Cart";
 import Logout from "./Logout";
 import Account from "./Account";
+import Addresses from "./Addresses";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
         <Route exact path="/logout" element={<Logout />} />
         <Route exact path="/register" element={<Register />} />
         <Route exact path="/account" element={<Account />} />
+        <Route exact path="/addresses" element={<Addresses />} />
         <Route exact path="/products" element={<Products />} />
         <Route exact path="/cart" element={<Cart />} />
       </Routes>

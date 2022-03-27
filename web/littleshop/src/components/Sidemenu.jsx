@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { BsListUl } from "react-icons/bs";
 import { AiOutlineClose, AiOutlineHome } from "react-icons/ai";
 import { GrCatalogOption } from "react-icons/gr"
-import { BsSuitHeart, BsCart4 } from "react-icons/bs"
+import { BsSuitHeart, BsCart4, BsSignpost } from "react-icons/bs"
 import { RiBillLine } from "react-icons/ri"
 import { MdOutlineAccountCircle } from "react-icons/md"
 import '../style/Sidemenu.css'
@@ -20,6 +20,12 @@ const sidebarData = [
         title: "Account",
         path: "/account",
         icon: <MdOutlineAccountCircle />,
+        className: 'nav-text'
+    },
+    {
+        title: "Addresses",
+        path: "/addresses",
+        icon: <BsSignpost />,
         className: 'nav-text'
     },
     {

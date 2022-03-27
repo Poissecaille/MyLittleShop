@@ -6,6 +6,7 @@ import { MdCancel } from "react-icons/md";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
+const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
 const SYNC_CART_BACKEND_URL = "http://localhost:5000/syncCart";
 var initialCartPrice = 0;
 
@@ -170,6 +171,13 @@ const Cart = () => {
         //             }
         //         })
         // }
+        await axios.post(BACKEND_ORDER_URL, {},
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            }
+        )
         for (let i = 0; i < cart.length; i++) {
             await axios.delete(BACKEND_CART_PRODUCTS_URL, {
                 headers: {
@@ -238,7 +246,7 @@ const Cart = () => {
                             ></input>
                             <br />
                             <button
-                                className="remove-cart-button"
+                                className="remove-cart-btn"
                                 onClick={() =>
                                     removeProductFromCart({
                                         id: cartProduct.id,
@@ -260,7 +268,7 @@ const Cart = () => {
                 {cartPrice != 0 ? cartPrice : initialCartPrice}
             </p>
 
-            <button className="validate-cart-button" onClick={validateCart}>
+            <button className="validate-cart-btn" onClick={validateCart}>
                 Validate cart <BsFillBagCheckFill />
             </button>
         </div>
