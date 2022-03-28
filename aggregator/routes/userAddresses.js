@@ -79,7 +79,7 @@ router.post("/userAddress", async (request, response) => {
 //MODIFY A USER ADDRESS
 router.put("/userAddress", async (request, response) => {
     try {
-        if (!request.body.address1 || request.body.postalCode.toString().length != 5) {
+        if (!request.body.address1 || !request.body.address2 || request.body.postalCode.toString().length != 5) {
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -103,7 +103,7 @@ router.put("/userAddress", async (request, response) => {
 //DELETE A USER ADDRESS
 router.delete("/userAddress", async (request, response) => {
     try {
-        if (!request.body.address1) {
+        if (!request.body.address1 || !request.body.address2) {
             return response.status(400).json({
                 "response": "Bad json format",
             });

@@ -9,10 +9,10 @@ const userAddress = db.define('userAddress', {
         autoIncrement: true
     },
     address1: {
-        type: DataTypes.STRING, unique: false, allowNull: false,
+        type: DataTypes.STRING, unique: 'compositePk', allowNull: false,
     },
     address2: {
-        type: DataTypes.STRING, unique: false, allowNull: false,
+        type: DataTypes.STRING, unique: 'compositePk', allowNull: false,
     },
     address3: {
         type: DataTypes.STRING, unique: false, allowNull: true,

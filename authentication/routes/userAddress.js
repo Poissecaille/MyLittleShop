@@ -40,14 +40,16 @@ router.get("/userAddresses", checkToken, async (request, response) => {
 // GET A USER ADDRESS FOR ORDERS
 router.get("/userAddress", checkToken, async (request, response) => {
     try {
-        console.log("ERRORDETECTION",request.query.address1)
+        console.log("ERRORDETECTION", request.query.address1)
         const userId = request.user.id
         const userRole = request.user.role
         if (userRole == "buyer") {
             const address = await UserAddress.findOne({
                 where: {
                     userId: userId,
-                    address1: request.query.address1
+                    address1: request.query.address1,
+                    address2: request.query.address2
+
                 }
             });
             if (!address) {
@@ -128,7 +130,8 @@ router.put("/userAddress", checkToken, async (request, response) => {
             const userAddressToUpdate = await UserAddress.findOne({
                 where: {
                     userId: userId,
-                    address1: request.body.address1
+                    address1: request.body.address1,
+                    address2: request.body.address2
                 }
             });
             if (!userAddressToUpdate) {
@@ -170,7 +173,8 @@ router.delete("/userAddress", checkToken, async (request, response) => {
             const userAddressToDelete = await UserAddress.findOne({
                 where: {
                     userId: userId,
-                    address1: request.body.address1
+                    address1: request.body.address1,
+                    address2: request.body.address2
                 }
             });
             if (!userAddressToDelete) {
