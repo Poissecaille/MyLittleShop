@@ -8,6 +8,7 @@ import {
   MdOutlineEditLocation,
 } from "react-icons/md";
 import Form from "../components/Form";
+import "../style/Address.css";
 
 const BACKEND_ADDRESSES_URL = "http://localhost:5000/userAddresses";
 const BACKEND_ADDRESS_URL = "http://localhost:5000/userAddress";
@@ -19,6 +20,7 @@ const Addresses = () => {
   const [popupTitle, setPopupTitle] = useState("");
   const [modify, setModify] = useState(false);
   const [addressToUpdate, setaddressToUpdate] = useState("");
+  const [mainAddressId, setMainAddressId] = useState(0);
   var addresses = localStorage.getItem("addresses")
     ? JSON.parse(localStorage.getItem("addresses"))
     : [];
@@ -70,6 +72,19 @@ const Addresses = () => {
       });
   };
 
+  const chooseMainAddress = (id) => {
+    for (let i = 0; i < addresses.length; i++) {
+      if (addresses[i].id === id) {
+        addresses[i].mainAddress = true;
+      } else {
+        addresses[i].mainAddress = false;
+      }
+    }
+    localStorage.setItem("addresses", JSON.stringify(addresses));
+    console.log(JSON.parse(localStorage.getItem("addresses")));
+    setMainAddressId(id);
+  };
+
   useEffect(() => {
     new Promise((resolve) => {
       if (addresses.length === 0) {
@@ -108,7 +123,17 @@ const Addresses = () => {
         <Popup trigger={popup} title={popupTitle} value={popupContent} />
         <h1>Your addresses</h1>
         {addresses.map((address) => (
-          <div className="address-card" key={address.id}>
+          <div
+            className={
+              mainAddressId === address.id
+                ? "main-address-card"
+                : "address-card"
+            }
+            key={address.id}
+            onClick={() => {
+              chooseMainAddress(address.id);
+            }}
+          >
             <div className="address-img">
               <img
                 src={require("../images/location.png")}
