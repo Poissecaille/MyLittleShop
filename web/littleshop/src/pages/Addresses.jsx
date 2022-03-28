@@ -17,10 +17,16 @@ const Addresses = () => {
   const [form, setShowForm] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
-
+  const [modify, setModify] = useState(false);
+  const [addressToUpdate, setaddressToUpdate] = useState("");
   var addresses = localStorage.getItem("addresses")
     ? JSON.parse(localStorage.getItem("addresses"))
     : [];
+  if (addresses.length === 0) {
+    setPopupTitle("LittleShop Account management information");
+    setPopupContent("No do not have any address yet please add one.");
+    popupHandler().then(() => {});
+  }
 
   const popupHandler = (e) => {
     return new Promise((resolve, reject) => {
@@ -66,7 +72,7 @@ const Addresses = () => {
 
   useEffect(() => {
     new Promise((resolve) => {
-      if (!localStorage.getItem("addresses")) {
+      if (addresses.length === 0) {
         axios
           .get(BACKEND_ADDRESSES_URL, {
             headers: {
@@ -75,11 +81,9 @@ const Addresses = () => {
           })
           .then((response) => {
             addresses = response.data.response;
-            if (addresses.length === 0) {
-              setPopupTitle("LittleShop Account management information");
-              setPopupContent("No do not have any address yet please add one.");
-              popupHandler().then(() => {});
-            }
+            localStorage.setItem("addresses", JSON.stringify(addresses));
+            window.location.reload();
+
             resolve();
           })
           .catch((error) => {
@@ -95,7 +99,12 @@ const Addresses = () => {
     <div>
       <Navbar />
       <div className="address-page">
-        <Form trigger={form} updateDisplay={() => setShowForm(false)} />
+        <Form
+          trigger={form}
+          updateDisplay={() => setShowForm(false)}
+          modify={modify}
+          addressToUpdate={addressToUpdate}
+        />
         <Popup trigger={popup} title={popupTitle} value={popupContent} />
         <h1>Your addresses</h1>
         {addresses.map((address) => (
@@ -126,7 +135,14 @@ const Addresses = () => {
               >
                 Remove address <MdOutlineWrongLocation />
               </button>
-              <button className="address-edit-btn">
+              <button
+                className="address-edit-btn"
+                onClick={() => {
+                  setaddressToUpdate(address);
+                  setModify(true);
+                  displayForm();
+                }}
+              >
                 Modify address <MdOutlineEditLocation />
               </button>
             </div>
