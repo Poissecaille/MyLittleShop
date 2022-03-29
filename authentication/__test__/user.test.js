@@ -112,7 +112,7 @@ describe("POST /api/register", () => {
     request(app)
       .post('/api/register')
       .send({
-        "email": fakePerson.email(),
+        "email": fakePerson.email,
         "username": faker.internet.userName(),
         "firstName": faker.name.firstName(),
         "lastName": faker.name.lastName(),

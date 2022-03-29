@@ -7,7 +7,6 @@ const parseDate = require('../utils/utils');
 const { UniqueConstraintError } = require("sequelize")
 var difflib = require('difflib');
 
-
 const db = sequelizeTest
 
 describe("Crypto unit tests", () => {

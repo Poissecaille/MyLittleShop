@@ -1,3 +1,4 @@
+
 {
   "name": "MyLittleShopping",
   "version": "1.0.0",
@@ -6,7 +7,7 @@
   "scripts": {
     "start": "nodemon server.js",
     "test": "jest --detectOpenHandles --forceExit",
-    "launch": "concurrently \"nodemon server.js\" \"nodemon ../authentication/app.js\" \"nodemon ../inventory/app.js\" \"nodemon ../orders/app.js\" \"nodemon ../mailer/app.js\""
+    "launch": "concurrently \"nodemon server.js\" \"nodemon ../authentication/server.js\" \"nodemon ../inventory/app.js\" \"nodemon ../orders/app.js\" \"nodemon ../mailer/app.js\""
   },
   "repository": {
     "type": "git",
