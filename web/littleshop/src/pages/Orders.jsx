@@ -7,14 +7,14 @@ import { useNavigate } from "react-router-dom";
 const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
 
 const Order = () => {
-    var orders = localStorage.getItem("orders")
-        ? JSON.parse(localStorage.getItem("orders"))
+    //localStorage.removeItem("orderProduct")
+    var orders = localStorage.getItem("orderProduct")
+        ? JSON.parse(localStorage.getItem("orderProduct"))
         : [];
     const [popup, setShowPopUp] = useState(false);
     const [popupContent, setPopupContent] = useState("");
     const [popupTitle, setPopupTitle] = useState("");
     const navigate = useNavigate();
-
     const popupHandler = (e) => {
         return new Promise((resolve, reject) => {
             setShowPopUp(!e);
@@ -26,6 +26,7 @@ const Order = () => {
     };
 
     useEffect(() => {
+        console.log(orders)
         if (!orders || orders.length === 0) {
             axios
                 .get(BACKEND_ORDER_URL, {
@@ -49,6 +50,14 @@ const Order = () => {
                 })
                 .catch((error) => {
                     console.log(error)
+                    if (error.response.status === 403) {
+                        localStorage.removeItem("token")
+                        setPopupTitle("LittleShop account management information");
+                        setPopupContent("You are currently not logged in !");
+                        popupHandler().then(() => {
+                            navigate("/login");
+                        });
+                    }
                 })
         }
     }, []);
@@ -65,6 +74,7 @@ const Order = () => {
                                 <th>Delivery Address</th>
                                 <th>ProductName</th>
                                 <th>Quantity</th>
+                                <th>Value</th>
                                 <th>Expedition status</th>
                                 <th>Expedition date</th>
                             </tr>
@@ -73,20 +83,23 @@ const Order = () => {
                             {orders.map((order) => (
                                 <tr className="order-raw" key={order.id}>
                                     <td>
-                                        {order.Address}
+                                        {`${order.address.address1} ${order.address.address2} ${order.address.address3} ${order.address.city} ${order.address.country} ${order.address.region} ${order.address.postalCode}`}
                                     </td>
                                     <td>
-                                        {order.ProductName}
+                                        {order.cart.productName}
                                     </td>
                                     <td>
-                                        {order.quantity}
+                                        {order.cart.quantity}
                                     </td>
                                     <td>
-                                        {order.shipped}
+                                        {order.cart.unitPrice * order.cart.quantity}
+                                    </td>
+                                    {/* <td>
+                                        {shipped}
                                     </td>
                                     <td>
-                                        {order.shippingDate}
-                                    </td>
+                                        {shippingDate}
+                                    </td> */}
                                 </tr>
                             ))}
                         </tbody>

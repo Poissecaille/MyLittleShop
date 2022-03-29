@@ -18,24 +18,32 @@ const Account = () => {
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
   useEffect(() => {
-      if (isEmpty(localStorage.getItem("account"))) {
-        axios
-          .get(SYNC_ACCOUNT_BACKEND_URL, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          })
-          .then((response) => {
-            localStorage.setItem(
-              "account",
-              JSON.stringify(response.data.response)
-            );
-            setAccount(response.data.response);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
+    if (isEmpty(localStorage.getItem("account"))) {
+      axios
+        .get(SYNC_ACCOUNT_BACKEND_URL, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          localStorage.setItem(
+            "account",
+            JSON.stringify(response.data.response)
+          );
+          setAccount(response.data.response);
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status === 403) {
+            localStorage.removeItem("token")
+            setPopupTitle("LittleShop account management information");
+            setPopupContent("You are currently not logged in !");
+            popupHandler().then(() => {
+              navigate("/login");
+            });
+          }
+        });
+    }
   }, []);
 
   const popupHandler = (e) => {
@@ -72,6 +80,14 @@ const Account = () => {
       }
     } catch (error) {
       console.log(error);
+      if (error.response.status === 403) {
+        localStorage.removeItem("token")
+        setPopupTitle("LittleShop account management information");
+        setPopupContent("You are currently not logged in !");
+        popupHandler().then(() => {
+          navigate("/login");
+        });
+      }
     }
   };
 

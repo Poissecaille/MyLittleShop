@@ -99,7 +99,7 @@ const Form = (props) => {
                 console.log(error);
             });
     };
-    if (props.modify) {
+    if (props.modify && props.trigger) {
         return (
             <div className="form-container">
                 <div className="form-inner">

@@ -6,10 +6,12 @@ import { BsSuitHeart, BsCart4 } from "react-icons/bs";
 import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
+import { useNavigate } from "react-router-dom";
 
 const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
 const Products = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000);
@@ -79,7 +81,15 @@ const Products = () => {
         setProducts(response.data.response);
       })
       .catch((error) => {
-        console.log(error);
+        console.log(error)
+        if (error.response.status === 403) {
+          localStorage.removeItem("token")
+          setPopupTitle("LittleShop account management information");
+          setPopupContent("You are currently not logged in !");
+          popupHandler().then(() => {
+            navigate("/login");
+          });
+        }
       });
   }, [maxPrice, minPrice, productName, productCondition]);
 
@@ -119,7 +129,7 @@ const Products = () => {
             `${data.quantity} "${data.productName}" have been successfully added to cart !`
           );
           await popupHandler(popup);
-          window.location.reload()
+          //window.location.reload()
         }
       })
       .catch(async (error) => {
@@ -129,6 +139,14 @@ const Products = () => {
             ` "${data.productName}" is already inside cart !`
           );
           await popupHandler(popup);
+        }
+        else if (error.response.status === 403) {
+          localStorage.removeItem("token")
+          setPopupTitle("LittleShop account management information");
+          setPopupContent("You are currently not logged in !");
+          popupHandler().then(() => {
+            navigate("/login");
+          });
         }
       });
   }

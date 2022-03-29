@@ -5,11 +5,13 @@ import Popup from "../components/Popup";
 import { MdOutlineAddLocationAlt, MdOutlineWrongLocation, MdOutlineEditLocation } from "react-icons/md";
 import Form from "../components/Form";
 import "../style/Address.css";
+import { useNavigate } from "react-router-dom";
 
 const BACKEND_ADDRESSES_URL = "http://localhost:5000/userAddresses";
 const BACKEND_ADDRESS_URL = "http://localhost:5000/userAddress";
 
 const Addresses = () => {
+    const navigate = useNavigate();
     const [popup, setShowPopUp] = useState(false);
     const [form, setShowForm] = useState(false);
     const [popupContent, setPopupContent] = useState("");
@@ -58,7 +60,17 @@ const Addresses = () => {
                     }
                     window.location.reload();
                 }
-            });
+            })
+            .catch((error) => {
+                if (error.response.status === 403) {
+                    localStorage.removeItem("token")
+                    setPopupTitle("LittleShop account management information");
+                    setPopupContent("You are currently not logged in !");
+                    popupHandler().then(() => {
+                        navigate("/login");
+                    });
+                }
+            })
     };
 
 
@@ -94,6 +106,14 @@ const Addresses = () => {
                     })
                     .catch((error) => {
                         console.log(error)
+                        if (error.response.status === 403) {
+                            localStorage.removeItem("token")
+                            setPopupTitle("LittleShop account management information");
+                            setPopupContent("You are currently not logged in !");
+                            popupHandler().then(() => {
+                                navigate("/login");
+                            });
+                        }
                     })
             } else {
                 resolve()

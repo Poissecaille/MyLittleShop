@@ -9,16 +9,15 @@ import { useNavigate } from "react-router-dom";
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
 const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
 const SYNC_CART_BACKEND_URL = "http://localhost:5000/syncCart";
-var initialCartPrice = 0;
 
 const Cart = () => {
+    //localStorage.removeItem("cartProduct");
+    var initialCartPrice = 0;
     const navigate = useNavigate();
     var [cartPrice, setCartPrice] = useState(initialCartPrice);
-    //localStorage.removeItem("cartProduct")
     var cart = localStorage.getItem("cartProduct")
         ? JSON.parse(localStorage.getItem("cartProduct"))
         : [];
-    console.log("test")
     const [popup, setShowPopUp] = useState(false);
     const [popupContent, setPopupContent] = useState("");
     const [popupTitle, setPopupTitle] = useState("");
@@ -26,7 +25,6 @@ const Cart = () => {
 
     useEffect(() => {
         new Promise((resolve) => {
-            console.log(cart)
             if (!cart || cart.length === 0) {
                 axios
                     .get(SYNC_CART_BACKEND_URL, {
@@ -42,10 +40,10 @@ const Cart = () => {
                     .catch((error) => {
                         console.log(error)
                         if (error.response.status === 403) {
+                            localStorage.removeItem("token")
                             setPopupTitle("LittleShop account management information");
                             setPopupContent("You are currently not logged in !");
                             popupHandler().then(() => {
-                                localStorage.removeItem("login");
                                 navigate("/login");
                             });
                         }
@@ -154,44 +152,69 @@ const Cart = () => {
                 console.log(error);
             });
     };
-    const validateCart = async () => {
+    const validateCart = (data) => {
         var addresses = JSON.parse(localStorage.getItem("addresses"))
         if (!addresses || addresses.length === 0) {
             setPopupTitle("LittleShop Account management information");
             setPopupContent(
                 "No do not have any address yet please add one."
             );
-            await popupHandler()
-            navigate("/addresses")
-
+            popupHandler().then(() => {
+                navigate("/addresses")
+            });
         }
-        var oldOrders = JSON.parse(localStorage.getItem("orders"));
-        const order = await axios.post(BACKEND_ORDER_URL, {},
-            {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                }
+        for (let i = 0; i < addresses.length; i++) {
+            if (addresses[i].mainAddress) {
+                console.log(addresses[i])
+                axios.post(BACKEND_ORDER_URL, {
+                    address1: addresses[i].address1,
+                    address2: addresses[i].address2
+                },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        }
+                    }
+                ).then((response) => {
+                    if (response.status === 201) {
+                        if (!localStorage.getItem("orderProduct")) {
+                            localStorage.setItem("orderProduct", "[]");
+                        }
+                        var oldOrders = JSON.parse(localStorage.getItem("orderProduct"));
+                        console.log("oldOrders", oldOrders)
+                    }
+                    for (let j = 0; j < data.length; j++) {
+                        oldOrders.push({
+                            address: addresses[i],
+                            cart: data[j],
+                        })
+                        console.log(data[j])
+                    }
+                    console.log("Orders", oldOrders)
+                    localStorage.setItem("orderProduct", JSON.stringify(oldOrders));
+                    localStorage.removeItem("cartProduct");
+                    setPopupTitle("LittleShop Cart management information");
+                    setPopupContent(
+                        `Cart is validated for ${cartPrice}€!`
+                    );
+                    popupHandler(popup).then(() => {
+                        navigate("/orders")
+                    });
+                }).catch((error) => {
+                    console.log(error)
+                    if (error.response.status === 403) {
+                        localStorage.removeItem("token")
+                        setPopupTitle("LittleShop account management information");
+                        setPopupContent("You are currently not logged in !");
+                        popupHandler().then(() => {
+                            navigate("/login");
+                        });
+                    }
+                })
+                break
             }
-        )
-        oldOrders.push(order.data.response);
-        localStorage.setItem(JSON.stringify(oldOrders));
-
-        for (let i = 0; i < cart.length; i++) {
-            await axios.delete(BACKEND_CART_PRODUCTS_URL, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                }, data: {
-                    productName: cart[i].productName,
-                    sellerUsername: cart[i].sellerUsername
-                }
-            })
         }
-        localStorage.removeItem("cartProduct");
-        setPopupTitle("LittleShop Cart management information");
-        setPopupContent(
-            `Cart is validated for ${cartPrice}€!`
-        );
-        await popupHandler(popup);
+
     };
 
     return (
@@ -266,7 +289,7 @@ const Cart = () => {
                 {cartPrice != 0 ? cartPrice : initialCartPrice}
             </p>
 
-            <button className="validate-cart-btn" onClick={validateCart}>
+            <button className="validate-cart-btn" onClick={() => validateCart(JSON.parse(localStorage.getItem("cartProduct")))}>
                 Validate cart <BsFillBagCheckFill />
             </button>
         </div>
