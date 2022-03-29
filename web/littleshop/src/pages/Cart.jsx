@@ -5,6 +5,7 @@ import { BsFillBagCheckFill } from "react-icons/bs";
 import { MdCancel } from "react-icons/md";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
+
 const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
 const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
 const SYNC_CART_BACKEND_URL = "http://localhost:5000/syncCart";
@@ -17,14 +18,16 @@ const Cart = () => {
     var cart = localStorage.getItem("cartProduct")
         ? JSON.parse(localStorage.getItem("cartProduct"))
         : [];
-
+    console.log("test")
     const [popup, setShowPopUp] = useState(false);
     const [popupContent, setPopupContent] = useState("");
     const [popupTitle, setPopupTitle] = useState("");
     const [quantity, setQuantity] = useState("");
+
     useEffect(() => {
         new Promise((resolve) => {
-            if (!localStorage.getItem("cartProduct")) {
+            console.log(cart)
+            if (!cart || cart.length === 0) {
                 axios
                     .get(SYNC_CART_BACKEND_URL, {
                         headers: {
@@ -96,16 +99,10 @@ const Cart = () => {
                     cart[i].quantity = Number(e.target.value);
                     cartPrice += cart[i].unitPrice;
                     cartProduct.availableQuantity += quantityVariation
-                    console.log("TEST1")
-                    console.log(cart[i].quantity)
-                    console.log(cart[i].availableQuantity)
                 } else if (Number(cart[i].quantity) > Number(e.target.value)) {
                     cart[i].quantity = Number(e.target.value);
                     cartPrice -= cart[i].unitPrice;
                     cartProduct.availableQuantity -= quantityVariation
-                    console.log("TEST2")
-                    console.log(cart[i].quantity)
-                    console.log(cart[i].availableQuantity)
                 }
                 localStorage["cartProduct"] = JSON.stringify(cart);
                 await axios.put(BACKEND_CART_PRODUCTS_URL, {
@@ -158,26 +155,27 @@ const Cart = () => {
             });
     };
     const validateCart = async () => {
-        console.log(cart);
-        // for (let i = 0; i < cart.length; i++) {
-        //     await axios.put(BACKEND_CART_PRODUCTS_URL, {
-        //         productName: cart[i].name,
-        //         sellerUsername: cart[i].sellerUsername,
-        //         quantity: cart[i].quantity
-        //     },
-        //         {
-        //             headers: {
-        //                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-        //             }
-        //         })
-        // }
-        await axios.post(BACKEND_ORDER_URL, {},
+        var addresses = JSON.parse(localStorage.getItem("addresses"))
+        if (!addresses || addresses.length === 0) {
+            setPopupTitle("LittleShop Account management information");
+            setPopupContent(
+                "No do not have any address yet please add one."
+            );
+            await popupHandler()
+            navigate("/addresses")
+
+        }
+        var oldOrders = JSON.parse(localStorage.getItem("orders"));
+        const order = await axios.post(BACKEND_ORDER_URL, {},
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 }
             }
         )
+        oldOrders.push(order.data.response);
+        localStorage.setItem(JSON.stringify(oldOrders));
+
         for (let i = 0; i < cart.length; i++) {
             await axios.delete(BACKEND_CART_PRODUCTS_URL, {
                 headers: {
