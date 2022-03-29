@@ -48,7 +48,7 @@ router.post("/register", async (request, response) => {
             });
         } else if (error.name === "SequelizeUniqueConstraintError") {
             return response.status(409).json({
-                "response": "User already existant"
+                "response": "Username or email already used"
             });
         }
     }

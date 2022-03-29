@@ -15,6 +15,12 @@ if (process.env.NODE_ENV === "dev") {
     db = sequelizeDev
     dbName = process.env.DB_NAME
     force = false
+    // DB CONNECTION
+    db.authenticate().
+    then(() => console.log(`Connected to data base ${dbName}...`))
+    .catch((error) => console.log(error));
+
+
 } else if (process.env.NODE_ENV === "test") {
     db = sequelizeTest
     dbName = process.env.DBTEST_NAME
@@ -22,39 +28,30 @@ if (process.env.NODE_ENV === "dev") {
 }
 
 
-// DB CONNECTION
-db.authenticate().
-    then(() => console.log(`Connected to data base ${dbName}...`))
-    .catch((error) => console.log(error));
 
 // DB ASSOCIATIONS
 user.hasMany(userAddress);
 
 
 // DB SYNC
-//db.sync({ force: force }).
-db.sync({ force: false }).
+if(process.env.NODE_ENV === "dev"){
+    db.sync({ force: force }).
     then(
         () => 
         {
-        console.log(`database ${dbName} synced!`)
-        try {
-            execSync('npx sequelize-cli db:seed:all', { encoding: 'utf-8' });
-        }
-        catch(error){
+            console.log(`database ${dbName} synced!`)
+            try {
+                execSync(`npx sequelize-cli db:seed:all --env \'${process.env.NODE_ENV}\'`, { encoding: 'utf-8' });
+            }
+            catch(error){
 
-        }
+            }
         }
     )
     .catch((error) => console.log(error));
+}
+
     
-
-
-
-
-
-
-
 const app = express();
 //ROUTES
 const authRoute = require("./routes/auth");
@@ -67,7 +64,4 @@ app.use("/api/", authRoute);
 app.use("/api/", userRoute);
 app.use("/api/", userAddressRoute);
 
-//NETWORK SETTINGS
-app.listen(process.env.APP_AUTHENTICATION_PORT, () => {
-    console.log(`Backend is running on port ${process.env.APP_AUTHENTICATION_PORT}`);
-});
+module.exports = app;

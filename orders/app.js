@@ -31,7 +31,7 @@ db.authenticate().
 
 // DB SYNC
 //db.sync({ force: force }).
-db.sync({ force: false }).
+db.sync({ force: force }).
     then(
         () => console.log(`database ${dbName} synced!`)
     )

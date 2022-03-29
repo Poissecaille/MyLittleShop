@@ -39,9 +39,18 @@ product.hasMany(productTag);
 
 // DB SYNC
 //db.sync({ force: force }).
-db.sync({ force: false }).
+db.sync({ force: force }).
     then(
-        () => console.log(`database ${dbName} synced!`)
+        () => 
+        {
+            console.log(`database ${dbName} synced!`)
+            try {
+                execSync(`npx sequelize-cli db:seed:all --env \'${process.env.NODE_ENV}\'`, { encoding: 'utf-8' });
+            }
+            catch(error){
+
+            }
+        }
     )
     .catch((error) => console.log(error));
 
