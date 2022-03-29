@@ -10,8 +10,7 @@ const execSync = require('child_process').execSync;
 var db;
 var dbName;
 var force;
-
-if (process.env.NODE_ENV === "dev") {
+if (process.env.NODE_ENV === "development") {
     db = sequelizeDev
     dbName = process.env.DB_NAME
     force = false
@@ -34,22 +33,17 @@ user.hasMany(userAddress);
 
 
 // DB SYNC
-if(process.env.NODE_ENV === "dev"){
-    db.sync({ force: force }).
+db.sync({ force: force }).
     then(
-        () => 
-        {
+        () => {
+            execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
             console.log(`database ${dbName} synced!`)
-            try {
-                execSync(`npx sequelize-cli db:seed:all --env \'${process.env.NODE_ENV}\'`, { encoding: 'utf-8' });
-            }
-            catch(error){
-
-            }
         }
+              
+        
     )
     .catch((error) => console.log(error));
-}
+
 
     
 const app = express();

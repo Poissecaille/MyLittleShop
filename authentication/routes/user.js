@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/user");
-const { checkIsAdminWithCorrectPassword, checkToken, checkPasswordWithId, checkAdminPasswordWithId } = require("../middlewares/security")
+const { checkToken, checkPasswordWithId, checkAdminPasswordWithId } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
@@ -9,16 +9,33 @@ const Op = Sequelize.Op
 router.get("/userData", async (request, response) => {
     try {
         var userData;
-        if (Array.isArray(request.query.sellerUsername)) {
+        if (!request.query.sellerUsername) {
+            const users = await User.findAll({
+                where: {
+                    role: "seller"
+                }
+            })
+            if (!users) {
+                return response.status(404).json({
+                    "response": "No user found"
+                });
+            }
+            return response.status(200).json({
+                "response": users
+            });
+        }
+        else if (Array.isArray(request.query.sellerUsername)) {
             userData = []
-            request.query.sellerUsername.forEach(async (username) => {
-                var user = await User.findOne({
+            for (let i = 0; i < request.query.sellerUsername.length; i++) {
+                const user = await User.findOne({
                     where: {
-                        username: username.data.response
+                        username: request.query.sellerUsername[i]
                     }
                 });
-                userData.push(user)
-            });
+                if (user) {
+                    userData.push(user.dataValues)
+                }
+            }
         }
         else {
             userData = await User.findOne({
@@ -74,6 +91,9 @@ router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, res
     try {
         const userId = request.user.id
         const userRole = request.user.role
+        console.log(request.user.role)
+        console.log(request.user.id)
+
         const userActivated = await User.findByPk(userId)
         if (!userActivated.activated) {
             return response.status(403).json({
@@ -95,6 +115,46 @@ router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, res
             "response": "Account deleted",
             "userId": userId,
             "userRole": userRole
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
+// SYNC USER ACCOUNT FOR AGGREGATOR
+router.get("/syncAccount", checkToken, async (request, response) => {
+    try {
+        var result = {};
+        const userId = request.user.id
+        const userData = await User.findByPk(userId)
+        result.email = userData.email
+        result.username = userData.username
+        result.firstName = userData.firstName
+        result.lastName = userData.lastName
+        result.birthDate = userData.birthDate
+        return response.status(200).json({
+            "response": result
+        });
+    } catch (error) {
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+})
+
+//SYNC CART WITH FRONT STORAGE FOR SELLERS
+router.get("/syncSellersPerProduct", async (request, response) => {
+    try {
+        const sellerData = await User.findAll({
+            where: {
+                id: { [Op.in]: request.query.sellerIds }
+            }
+        });
+        return response.status(200).json({
+            "response": sellerData
         });
     } catch (error) {
         console.log(error)

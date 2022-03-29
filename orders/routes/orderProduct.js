@@ -33,7 +33,7 @@ router.get("/buyer/orderProducts", async (request, response) => {
             where: {
                 ownerId: request.query.ownerId,
                 productId: request.query.productId !== undefined ? request.query.productId : { [Op.ne]: null },
-                sellerId: request.query.sellerId !== undefined ? request.query.sellerId : { [Op.ne]: null },
+                //sellerId: request.query.sellerId !== undefined ? request.query.sellerId : { [Op.ne]: null },
                 shipped: request.query.orderStatus !== undefined ? request.query.orderStatus : { [Op.ne]: null }
             }
         });

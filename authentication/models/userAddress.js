@@ -1,6 +1,6 @@
 var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
-process.env.NODE_ENV == "dev" ? db = db.sequelizeDev : db = db.sequelizeTest
+process.env.NODE_ENV === "development" ? db = db.sequelizeDev : db = db.sequelizeTest
 
 const userAddress = db.define('userAddress', {
     id: {
@@ -9,10 +9,10 @@ const userAddress = db.define('userAddress', {
         autoIncrement: true
     },
     address1: {
-        type: DataTypes.STRING, unique: false, allowNull: false,
+        type: DataTypes.STRING, unique: 'compositePk', allowNull: false,
     },
     address2: {
-        type: DataTypes.STRING, unique: false, allowNull: false,
+        type: DataTypes.STRING, unique: 'compositePk', allowNull: false,
     },
     address3: {
         type: DataTypes.STRING, unique: false, allowNull: true,

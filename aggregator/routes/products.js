@@ -45,12 +45,15 @@ router.get("/products", async (request, response) => {
         const userRole = user.data.response.role
         if (userRole == "buyer") {
             var filter;
-            var sellerData = undefined;
+            var sellerData;
             if (request.query.condition) {
-                if (request.query.condition != "new" && request.query.condition != "occasion" && request.query.condition != "renovated") {
+                if (request.query.condition != "new" && request.query.condition != "occasion" && request.query.condition != "renovated" && request.query.condition != "all") {
                     return response.status(400).json({
                         "response": "Bad json format"
                     });
+                }
+                if (request.query.condition === "all") {
+                    request.query.condition = null
                 }
             }
             if (!request.query.filter) {
@@ -62,22 +65,32 @@ router.get("/products", async (request, response) => {
             } else {
                 filter = request.query.filter;
             }
-            if (request.query.sellerUsername) {
-                if (request.query.sellerUsername.length > 0) {
-                    sellerData = await axios.get(roads.USER_DATA_URL, {
-                        params: {
-                            sellerUsername: request.query.sellerUsername
-                        }
-                    })
-                    console.log("#####################")
-                    console.log(sellerData.data.response)
-                    console.log("#####################")
+            sellerData = await axios.get(roads.USER_DATA_URL, {
+                params: {
+                    sellerUsername: request.query.sellerUsername
                 }
+            });
+            var sellerIds = [];
+            var sellerNames = [];
+            if (request.query.sellerUsername) {
+                if (Array.isArray(sellerData.data.response)) {
+                    for (let i = 0; i < sellerData.data.response.length; i++) {
+                        sellerIds.push(sellerData.data.response[i].id)
+                        sellerNames.push(sellerData.data.response[i].username)
+                        console.log(sellerData.data.response[i])
+                    }
+                } else {
+                    console.log(sellerData.data.response)
+                    sellerIds.push(sellerData.data.response.id)
+                    sellerNames.push(sellerData.data.response.username)
+                }
+                console.log("IDS:", sellerIds)
+                console.log("NAMES:", sellerNames)
             }
 
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
-                    sellerId: sellerData ? sellerData.data.response.id : null,
+                    sellerId: sellerIds ? sellerIds : null,
                     productName: request.query.productName ? request.query.productName : null,
                     category: request.query.category ? request.query.category : null,
                     tag: request.query.tag ? request.query.tag : null,
@@ -87,8 +100,27 @@ router.get("/products", async (request, response) => {
                     filter: filter
                 }
             });
+            if (sellerIds && sellerIds.length > 0) {
+                for (let i = 0; i < products.data.response.length; i++) {
+                    for (let j = 0; j < sellerIds.length; j++) {
+                        if (products.data.response[i].sellerId === sellerIds[j]) {
+                            products.data.response[i].sellerUsername = sellerNames[j]
+                        }
+                    }
+                }
+            }
+            else {
+                for (let i = 0; i < products.data.response.length; i++) {
+                    for (let j = 0; j < sellerData.data.response.length; j++) {
+                        if (sellerData.data.response[j].id == products.data.response[i].sellerId) {
+                            products.data.response[i].sellerUsername = sellerData.data.response[j].username
+                        }
+                    }
+                }
+            }
             return response.status(products.status).json({
-                "response": products.data.response
+                "response": products.data.response,
+                "rows": products.data.rows
             });
         } else if (userRole == "seller") {
             const products = await axios.get(roads.SEARCH_PRODUCTS_SELLER_URL, {
@@ -163,7 +195,7 @@ router.post("/product", async (request, response) => {
 
 router.put("/product", async (request, response) => {
     try {
-        // if (process.env.NODE_ENV == "dev") {
+        // if (process.env.NODE_ENV === "development") {
         //     if (!request.body.mailRecipient || !request.body.mailSubject || !request.body.mailContent) {
         //         return response.status(400).json({
         //             "response": "Bad json format",

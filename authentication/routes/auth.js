@@ -58,10 +58,11 @@ router.post("/register", async (request, response) => {
 router.post("/login", checkPasswordWithEmail, async (request, response) => {
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
-            "response": "Malformed request"
+            "response": "Bad json format"
         });
     }
     try {
+        var tokenExpiration;
         const user = await User.findOne({
             where: {
                 email: request.body.email,
@@ -77,10 +78,13 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
         }, process.env.JWT_SECRET, {
             expiresIn: "3d"
         });
-
+        jwt.verify(accessToken, process.env.JWT_SECRET, (error, user) => {
+            tokenExpiration = user.exp
+        })
         return response.status(200).json({
             "response": "Logged in",
-            "token": accessToken
+            "token": accessToken,
+            "expire": tokenExpiration
         });
     } catch (error) {
         response.status(error.response.status).json({

@@ -18,6 +18,18 @@ module.exports = {
       createdAt: now,
       updatedAt: now
     },
+    {
+      email: "seller@hotmail.fr",
+      firstName: "seller",
+      lastName: "seller",
+      username: "seller",
+      password: pass,
+      birthDate: "01/01/1970",
+      role: "seller",
+      activated: true,
+      createdAt: now,
+      updatedAt: now
+    },
     ])
   }, async down(queryInterface, Sequelize) {
     return queryInterface.bulkDelete('user', null, {});
