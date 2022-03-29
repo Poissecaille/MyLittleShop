@@ -4,14 +4,19 @@ import Navbar from "../components/Navbar";
 import Popup from "../components/Popup";
 import { MdOutlineAddLocationAlt, MdOutlineWrongLocation, MdOutlineEditLocation } from "react-icons/md";
 import Form from "../components/Form";
+import "../style/Address.css";
 
 const BACKEND_ADDRESSES_URL = "http://localhost:5000/userAddresses";
+const BACKEND_ADDRESS_URL = "http://localhost:5000/userAddress";
 
 const Addresses = () => {
     const [popup, setShowPopUp] = useState(false);
     const [form, setShowForm] = useState(false);
     const [popupContent, setPopupContent] = useState("");
     const [popupTitle, setPopupTitle] = useState("");
+    const [modify, setModify] = useState(false);
+    const [addressToUpdate, setaddressToUpdate] = useState("");
+    const [mainAddressId, setMainAddressId] = useState(0);
     var addresses = localStorage.getItem("addresses") ? JSON.parse(localStorage.getItem("addresses")) : [];
     //localStorage.removeItem("addresses")
     const popupHandler = (e) => {
@@ -28,9 +33,53 @@ const Addresses = () => {
         setShowForm(!e);
     }
 
+    const removeAddress = (data) => {
+        axios
+            .delete(BACKEND_ADDRESS_URL, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                data: {
+                    address1: data.address1,
+                    address2: data.address2,
+                },
+            })
+            .then((response) => {
+                if (response.status == 200) {
+                    for (let i = 0; i < addresses.length; i++) {
+                        if (
+                            addresses[i].address1 === data.address1 &&
+                            addresses[i].address2 === data.address2
+                        ) {
+                            addresses.splice(i, 1);
+                            localStorage.setItem("addresses", JSON.stringify(addresses));
+                            break;
+                        }
+                    }
+                    window.location.reload();
+                }
+            });
+    };
+
+
+    const chooseMainAddress = (id) => {
+        for (let i = 0; i < addresses.length; i++) {
+            if (addresses[i].id === id) {
+                addresses[i].mainAddress = true;
+            } else {
+                addresses[i].mainAddress = false;
+            }
+        }
+        localStorage.setItem("addresses", JSON.stringify(addresses));
+        console.log(JSON.parse(localStorage.getItem("addresses")));
+        setMainAddressId(id);
+    };
+
+
+
     useEffect(() => {
         new Promise((resolve) => {
-            if (!localStorage.getItem("addresses")) {
+            if (!addresses || addresses.length === 0) {
                 axios
                     .get(BACKEND_ADDRESSES_URL, {
                         headers: {
@@ -38,7 +87,9 @@ const Addresses = () => {
                         }
                     })
                     .then((response) => {
-                        addresses = response.data.response
+                        addresses = response.data.response;
+                        localStorage.setItem("addresses", JSON.stringify(addresses));
+                        window.location.reload();
                         resolve()
                     })
                     .catch((error) => {
@@ -55,13 +106,26 @@ const Addresses = () => {
         <div>
             <Navbar />
             <div className="address-page">
-                <Form trigger={form} updateDisplay={() => setShowForm(false)} />
+                <Form
+                    trigger={form}
+                    updateDisplay={() => setShowForm(false)}
+                    modify={modify}
+                    addressToUpdate={addressToUpdate}
+                />
                 <Popup trigger={popup} title={popupTitle} value={popupContent} />
-                <h1>
-                    Your addresses
-                </h1>
+                <h1>Your addresses</h1>
                 {addresses.map((address) => (
-                    <div className="address-card" key={address.id}>
+                    <div
+                        className={
+                            mainAddressId === address.id
+                                ? "main-address-card"
+                                : "address-card"
+                        }
+                        key={address.id}
+                        onClick={() => {
+                            chooseMainAddress(address.id);
+                        }}
+                    >
                         <div className="address-img">
                             <img
                                 src={require("../images/location.png")}
@@ -74,38 +138,46 @@ const Addresses = () => {
                             <p>
                                 {address.address1} {address.address2} {address.address3}
                             </p>
+                            <p>{address.city}</p>
+                            <p>{address.region}</p>
                             <p>
-                                {address.city}
+                                <b>{address.country}</b>
                             </p>
-                            <p>
-                                {address.region}
-                            </p>
-                            <p>
-                                <b>
-                                    {address.country}
-                                </b>
-                            </p>
-                            <p>
-                                {address.postalCode}
-                            </p>
-                            <button className="address-remove-btn">
+                            <p>{address.postalCode}</p>
+                            <button
+                                className="address-remove-btn"
+                                onClick={() => {
+                                    removeAddress(address);
+                                }}
+                            >
                                 Remove address <MdOutlineWrongLocation />
                             </button>
-                            <button className="address-edit-btn">
+                            <button
+                                className="address-edit-btn"
+                                onClick={() => {
+                                    displayForm();
+
+                                    setaddressToUpdate(address);
+                                    setModify(true);
+                                }}
+                            >
                                 Modify address <MdOutlineEditLocation />
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
-            <button className="address-add-btn"
+            <button
+                className="address-add-btn"
                 onClick={() => {
-                    displayForm()
-                }}>
+                    displayForm();
+                }}
+            >
                 Add an address <MdOutlineAddLocationAlt />
             </button>
         </div>
-    )
+    );
 };
+
 
 export default Addresses;
