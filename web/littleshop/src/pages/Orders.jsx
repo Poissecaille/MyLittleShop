@@ -26,6 +26,7 @@ const Order = () => {
     };
 
     useEffect(() => {
+        console.log(orders)
         if (!orders || orders.length === 0) {
             axios
                 .get(BACKEND_ORDER_URL, {
@@ -49,6 +50,14 @@ const Order = () => {
                 })
                 .catch((error) => {
                     console.log(error)
+                    if (error.response.status === 403) {
+                        localStorage.removeItem("token")
+                        setPopupTitle("LittleShop account management information");
+                        setPopupContent("You are currently not logged in !");
+                        popupHandler().then(() => {
+                            navigate("/login");
+                        });
+                    }
                 })
         }
     }, []);
@@ -73,7 +82,7 @@ const Order = () => {
                             {orders.map((order) => (
                                 <tr className="order-raw" key={order.id}>
                                     <td>
-                                        {order.Address}
+                                        {order.deliveryAddress}
                                     </td>
                                     <td>
                                         {order.ProductName}
