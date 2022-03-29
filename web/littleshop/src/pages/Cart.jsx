@@ -11,10 +11,10 @@ const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
 const SYNC_CART_BACKEND_URL = "http://localhost:5000/syncCart";
 
 const Cart = () => {
+    //localStorage.removeItem("cartProduct");
     var initialCartPrice = 0;
     const navigate = useNavigate();
     var [cartPrice, setCartPrice] = useState(initialCartPrice);
-    //localStorage.removeItem("cartProduct");
     var cart = localStorage.getItem("cartProduct")
         ? JSON.parse(localStorage.getItem("cartProduct"))
         : [];
@@ -183,10 +183,13 @@ const Cart = () => {
                         var oldOrders = JSON.parse(localStorage.getItem("orderProduct"));
                         console.log("oldOrders", oldOrders)
                     }
-                    oldOrders.push({
-                        address: addresses[i],
-                        cart: cart,
-                    })
+                    for (let j = 0; j < data.length; j++) {
+                        oldOrders.push({
+                            address: addresses[i],
+                            cart: data[j],
+                        })
+                        console.log(data[j])
+                    }
                     console.log("Orders", oldOrders)
                     localStorage.setItem("orderProduct", JSON.stringify(oldOrders));
                     localStorage.removeItem("cartProduct");
