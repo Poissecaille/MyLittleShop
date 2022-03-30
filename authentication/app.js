@@ -31,16 +31,16 @@ user.hasMany(userAddress);
 
 
 // DB SYNC
-db.sync({ force: force }).
-    then(
-        () => {
-            execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
-            console.log(`database ${dbName} synced!`)
-        }
+db.sync({ force: force })
+    // then(
+    //     () => {
+    //         execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
+    //         console.log(`database ${dbName} synced!`)
+    //     }
               
         
-    )
-    .catch((error) => console.log(error));
+    // )
+    // .catch((error) => console.log(error));
     
 
 

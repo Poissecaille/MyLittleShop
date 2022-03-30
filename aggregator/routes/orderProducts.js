@@ -75,14 +75,14 @@ router.get("/orderProducts", async (request, response) => {
 // MAKE AN ORDER
 router.post("/orderProducts", async (request, response) => {
     try {
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV === "test") {
             if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
                 return response.status(400).json({
                     "response": "Bad json format"
                 });
             }
         }
-        if (!request.body.address1) {
+        if (!request.body.address1 || !request.body.address2) {
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -90,14 +90,14 @@ router.post("/orderProducts", async (request, response) => {
         const userAddressToUse = await axios.get(roads.GET_ONE_USER_ADDRESS_URL,
             {
                 params: {
-                    address1: request.body.address1
+                    address1: request.body.address1,
+                    address2: request.body.address2
                 },
                 headers: {
                     'Authorization': request.headers.authorization
                 }
             }
         );
-        console.log("#########PRODUCT############")
         const userId = userAddressToUse.data.userId;
         const userRole = userAddressToUse.data.userRole;
         if (userRole == "buyer") {
@@ -106,13 +106,13 @@ router.post("/orderProducts", async (request, response) => {
                     userId: userId
                 }
             });
-            console.log("#########PRODUCT############")
-            console.log(productsInCart.data.response)
             if (productsInCart.data.response.length == 0) {
                 return response.status(404).json({
                     "response": "No product found in user cart"
                 });
             }
+            console.log("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLOLOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
