@@ -12,7 +12,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./db-data/:/var/lib/postgresql/data/
-    restart: always
+    restart: on-failure
 
   aggregator:
     build: ./aggregator/
@@ -38,7 +38,7 @@ services:
       - inventory
       - mailer
       - orders
-    restart: always
+    restart: on-failure
 
   authentication:
     build: ./authentication/
@@ -57,10 +57,12 @@ services:
       - DBTEST_USERNAME=${DBTEST_USERNAME}
       - DBTEST_PASSWORD=${DBTEST_PASSWORD}
       - DBTEST_PORT=${DBTEST_PORT}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - PASSWORD_SECRET=${PASSWORD_SECRET}
     container_name: shop_authentication
     depends_on:
       - db
-    restart: always
+    restart: on-failure
     
   inventory:
     build: ./inventory/
@@ -82,7 +84,7 @@ services:
     container_name: shop_inventory
     depends_on:
       - db
-    restart: always
+    restart: on-failure
     
   mailer:
     build: ./mailer/
@@ -104,7 +106,7 @@ services:
     container_name: shop_mailer
     depends_on:
           - db
-    restart: always        
+    restart: on-failure        
 
   orders:
     build: ./orders/
@@ -126,7 +128,7 @@ services:
     container_name: shop_order
     depends_on:
       - db
-    restart: always    
+    restart: on-failure    
 
   web:
     build: ./web/littleshop/
@@ -135,5 +137,4 @@ services:
     container_name: shop_web
     depends_on:
       - aggregator
-    
-    restart: always
+    restart: on-failure
