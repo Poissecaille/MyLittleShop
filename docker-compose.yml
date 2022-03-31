@@ -143,10 +143,10 @@ services:
   web:
     build: ./web/littleshop/
     ports:
-      - "${WEB_FRONT_PORT}:${WEB_FRONT_PORT}"
+      - "${WEB_FRONT_PORT}:${PORT}"
     container_name: shop_web
     depends_on:
       - aggregator
     restart: on-failure
-    # volumes:
-    #   - ./web/:/web/
+    volumes:
+      - ./web/:/web/
