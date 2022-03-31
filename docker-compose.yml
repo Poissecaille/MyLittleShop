@@ -39,6 +39,8 @@ services:
       - mailer
       - orders
     restart: on-failure
+    volumes:
+      - ./aggregator:/aggregator
 
   authentication:
     build: ./authentication/
@@ -63,7 +65,9 @@ services:
     depends_on:
       - db
     restart: on-failure
-    
+    volumes:
+      - ./authentication:/authentication
+
   inventory:
     build: ./inventory/
     ports:
@@ -85,7 +89,9 @@ services:
     depends_on:
       - db
     restart: on-failure
-    
+    volumes:
+      - ./inventory:/inventory
+
   mailer:
     build: ./mailer/
     ports:
@@ -105,8 +111,10 @@ services:
       - DBTEST_PORT=${DBTEST_PORT}
     container_name: shop_mailer
     depends_on:
-          - db
-    restart: on-failure        
+      - db
+    restart: on-failure
+    volumes:
+      - ./mailer:/mailer
 
   orders:
     build: ./orders/
@@ -128,7 +136,9 @@ services:
     container_name: shop_order
     depends_on:
       - db
-    restart: on-failure    
+    restart: on-failure
+    volumes:
+      - ./orders:/orders
 
   web:
     build: ./web/littleshop/
@@ -138,3 +148,5 @@ services:
     depends_on:
       - aggregator
     restart: on-failure
+    # volumes:
+    #   - ./web/:/web/
