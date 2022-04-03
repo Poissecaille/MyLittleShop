@@ -3,11 +3,11 @@ const axios = require('axios');
 
 const roads = {
     // INVENTORY MICROSERVICE
-    CRUD_WISHLIST_URL: "http://localhost:5003/api/wishProduct",
-    GET_WISHLIST_URL: "http://localhost:5003/api/wishProducts",
+    CRUD_WISHLIST_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/wishProduct`,
+    GET_WISHLIST_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/wishProducts`,
     // USER MICROSERVICE
-    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
-    USER_DATA_URL: "http://localhost:5002/api/userData"
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
+    USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`
 }
 
 // ADD A PRODUCT IN WISHLIST

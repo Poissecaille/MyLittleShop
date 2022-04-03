@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "../style/Login.css";
 import Popup from "../components/Popup";
 
-const BACKEND_LOGIN_URL = "http://localhost:5000/login";
+const BACKEND_LOGIN_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/login`;
 const test = ()=>{console.log("ok")}
 const Login = () => {
   const token = localStorage.getItem("token");

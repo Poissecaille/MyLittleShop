@@ -5,9 +5,9 @@ import { BsFillBagCheckFill } from "react-icons/bs";
 import { MdCancel } from "react-icons/md";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
-const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
-const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
-const SYNC_CART_BACKEND_URL = "http://localhost:5000/syncCart";
+const BACKEND_CART_PRODUCTS_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/cartProduct`;
+const BACKEND_ORDER_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/orderProducts`;
+const SYNC_CART_BACKEND_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/syncCart`;
 var initialCartPrice = 0;
 
 const Cart = () => {
@@ -55,8 +55,7 @@ const Cart = () => {
       if (cart.length === 0) {
         setPopupTitle("LittleShop Cart management information");
         setPopupContent(
-          `No product is currently in your cart ${
-            JSON.parse(localStorage["account"]).username
+          `No product is currently in your cart ${JSON.parse(localStorage["account"]).username
           } !`
         );
         popupHandler().then(() => {
@@ -174,7 +173,7 @@ const Cart = () => {
       setPopupContent(
         "You do not have any address selected yet please add one to proceed the transaction."
       );
-      popupHandler().then(() => {});
+      popupHandler().then(() => { });
     }
     console.log("###############");
     console.log(addressToUse.address1, addressToUse.address2);

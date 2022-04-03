@@ -132,9 +132,9 @@ router.get("/syncAccount", checkToken, async (request, response) => {
         const userData = await User.findByPk(userId)
         result.email = userData.email
         result.username = userData.username
-        result.firstName = userData.firstName
-        result.lastName = userData.lastName
-        result.birthDate = userData.birthDate
+        result.firstname = userData.firstname
+        result.lastname = userData.lastname
+        result.birthdate = userData.birthdate
         return response.status(200).json({
             "response": result
         });

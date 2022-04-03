@@ -3,19 +3,19 @@ const axios = require('axios');
 
 const roads = {
     // USER MICROSERVICE
-    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
-    GET_ONE_USER_ADDRESS_URL: "http://localhost:5002/api/userAddress",
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
+    GET_ONE_USER_ADDRESS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddress`,
     //INVENTORY MICROSERVICE
-    CART_URL: "http://localhost:5003/api/cartProducts",
-    BUYER_PRODUCT_URL: "http://localhost:5003/api/buyer/products",
-    SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products",
-    UPDATE_PRODUCTS_STOCKS: "http://localhost:5003/api/products",
+    CART_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProducts`,
+    BUYER_PRODUCT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/buyer/products`,
+    SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
+    UPDATE_PRODUCTS_STOCKS: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/products`,
     //ORDER MICROSERVICE
-    CREATE_ORDER_URL: "http://localhost:5001/api/orderProducts",
-    GET_SELLER_ORDERS_URL: "http://localhost:5001/api/seller/orderProducts",
-    GET_BUYER_ORDERS_URL: "http://localhost:5001/api/buyer/orderProducts",
+    CREATE_ORDER_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/orderProducts`,
+    GET_SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`,
+    GET_BUYER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/buyer/orderProducts`,
     //MAILER SERVICE
-    MAILER_URL: "http://localhost:5004/api/mail"
+    MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/mail`
 }
 
 // GET ORDERS FOR SELLERS

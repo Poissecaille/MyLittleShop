@@ -10,8 +10,8 @@ import {
 import Form from "../components/Form";
 import "../style/Address.css";
 
-const BACKEND_ADDRESSES_URL = "http://localhost:5000/userAddresses";
-const BACKEND_ADDRESS_URL = "http://localhost:5000/userAddress";
+const BACKEND_ADDRESSES_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/userAddresses`;
+const BACKEND_ADDRESS_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/userAddress`;
 
 const Addresses = () => {
   const [popup, setShowPopUp] = useState(false);
@@ -27,7 +27,7 @@ const Addresses = () => {
   if (addresses.length === 0) {
     setPopupTitle("LittleShop Account management information");
     setPopupContent("No do not have any address yet please add one.");
-    popupHandler().then(() => {});
+    popupHandler().then(() => { });
   }
 
   const popupHandler = (e) => {
@@ -78,13 +78,11 @@ const Addresses = () => {
         addresses[i].mainAddress = true;
         setPopupTitle("LittleShop Account management information");
         setPopupContent(
-          `Your products will be delivered to ${addresses[i].address1} ${
-            addresses[i].address2
-          } ${addresses[i].address3 ? addresses[i].address3 : null} in ${
-            addresses[i].city
+          `Your products will be delivered to ${addresses[i].address1} ${addresses[i].address2
+          } ${addresses[i].address3 ? addresses[i].address3 : null} in ${addresses[i].city
           } ${addresses[i].region} ${addresses[i].country}`
         );
-        popupHandler().then(() => {});
+        popupHandler().then(() => { });
       } else {
         addresses[i].mainAddress = false;
       }

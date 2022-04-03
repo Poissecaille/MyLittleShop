@@ -3,14 +3,14 @@ const axios = require('axios');
 
 const roads = {
     // PRODUCT MICROSERVICE
-    SEARCH_PRODUCTS_BUYER_URL: "http://localhost:5003/api/buyer/products",
-    SEARCH_PRODUCTS_SELLER_URL: "http://localhost:5003/api/seller/products",
-    PRODUCT_SELLER_URL: "http://localhost:5003/api/seller/product",
+    SEARCH_PRODUCTS_BUYER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/buyer/products`,
+    SEARCH_PRODUCTS_SELLER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
+    PRODUCT_SELLER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/product`,
     // USER MICROSERVICE
-    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
-    USER_DATA_URL: "http://localhost:5002/api/userData",
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
+    USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
     // MAILER SERVICE
-    MAILER_URL: "http://localhost:5004/api/mailer"
+    MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/mailer`
 }
 
 //EVALUATE A BOUGHT PRODUCT

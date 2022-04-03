@@ -15,16 +15,16 @@ const User = db.define('user', {
     username: {
         type: DataTypes.STRING(50), unique: true, allowNull: false
     },
-    firstName: {
+    firstname: {
         type: DataTypes.STRING(50), allowNull: false
     },
-    lastName: {
+    lastname: {
         type: DataTypes.STRING(50), allowNull: false
     },
     password: {
         type: DataTypes.STRING, allowNull: false
     },
-    birthDate: {
+    birthdate: {
         type: DataTypes.DATEONLY, allowNull: false
     },
     role: {
@@ -32,13 +32,7 @@ const User = db.define('user', {
     },
     activated: {
         type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true
-    },
-    createdAt: {
-        type: DataTypes.DATE, allowNull: false
-    },
-    updatedAt: {
-        type: DataTypes.DATE, allowNull: false
-    },
+    }
 }, {
     freezeTableName: true,
     tableName: "user"

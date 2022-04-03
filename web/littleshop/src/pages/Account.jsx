@@ -5,8 +5,8 @@ import "../style/Account.css";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
 import { isEmpty } from "../utils/functions";
-const BACKEND_DELETE_ACCOUNT_URL = "http://localhost:5000/deactivate";
-const SYNC_ACCOUNT_BACKEND_URL = "http://localhost:5000/syncAccount";
+const BACKEND_DELETE_ACCOUNT_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/deactivate`;
+const SYNC_ACCOUNT_BACKEND_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/syncAccount`;
 const Account = () => {
   const navigate = useNavigate();
   const [account, setAccount] = useState(
@@ -18,24 +18,24 @@ const Account = () => {
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
   useEffect(() => {
-      if (isEmpty(localStorage.getItem("account"))) {
-        axios
-          .get(SYNC_ACCOUNT_BACKEND_URL, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          })
-          .then((response) => {
-            localStorage.setItem(
-              "account",
-              JSON.stringify(response.data.response)
-            );
-            setAccount(response.data.response);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
+    if (isEmpty(localStorage.getItem("account"))) {
+      axios
+        .get(SYNC_ACCOUNT_BACKEND_URL, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          localStorage.setItem(
+            "account",
+            JSON.stringify(response.data.response)
+          );
+          setAccount(response.data.response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }, []);
 
   const popupHandler = (e) => {
@@ -96,19 +96,19 @@ const Account = () => {
           <b>Username:</b> {account.username}
         </p>
         <p>
-          <b>Firstname:</b> {account.firstName}
+          <b>Firstname:</b> {account.firstname}
         </p>
         <p>
-          <b>Lastname:</b> {account.lastName}
+          <b>Lastname:</b> {account.lastname}
         </p>
         <p>
           <b>Password:</b> {account.password}
         </p>
         <p>
           <b>Birthdate:</b>{" "}
-          {account.birthDate
-            ? account.birthDate.split("T")[0]
-            : account.birthDate}
+          {account.birthdate
+            ? account.birthdate.split("T")[0]
+            : account.birthdate}
         </p>
         <button className="delete-account" onClick={deleteAccount}>
           Delete Account

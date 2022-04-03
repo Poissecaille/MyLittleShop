@@ -7,7 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../style/Registration.css";
 import Popup from "../components/Popup";
 
-const BACKEND_REGISTER_URL = "http://localhost:5000/register";
+const BACKEND_REGISTER_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/register`;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -37,10 +37,10 @@ const Register = () => {
     await axios.post(BACKEND_REGISTER_URL, {
       email: email,
       username: username,
-      firstName: firstname,
-      lastName: lastname,
+      firstname: firstname,
+      lastname: lastname,
       password: password,
-      birthDate: birthdate,
+      birthdate: birthdate,
       role: "buyer",
     }).then(async (response) => {
       console.log(response)
@@ -50,10 +50,10 @@ const Register = () => {
         localStorage.setItem("account", JSON.stringify({
           email: email,
           username: username,
-          firstName: firstname,
-          lastName: lastname,
+          firstname: firstname,
+          lastname: lastname,
           password: password,
-          birthDate: birthdate,
+          birthdate: birthdate,
           role: "buyer",
         }));
         await popupHandler();
