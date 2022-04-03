@@ -25,7 +25,6 @@ if (process.env.NODE_ENV === "development") {
     force = true
 }
 
-
 // DB CONNECTION
 db.authenticate().
     then(() => {

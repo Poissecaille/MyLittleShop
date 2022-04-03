@@ -20,7 +20,6 @@ if (process.env.NODE_ENV === "development") {
     force = true
 }
 
-
 // DB CONNECTION
 db.authenticate().
     then(() => console.log(`Connected to data base ${dbName}...`))
@@ -34,7 +33,7 @@ user.hasMany(userAddress);
 db.sync({ force: force })
     .then(
         () => {
-            execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
+            //execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
             console.log(`database ${dbName} synced!`)
         }
               
