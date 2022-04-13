@@ -30,7 +30,9 @@ const OrderProduct = db.define('orderProduct', {
     }
 }, {
     freezeTableName: true,
-    tableName: "orderProduct"
+    tableName: "orderProduct",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
 });
 
 module.exports = OrderProduct;

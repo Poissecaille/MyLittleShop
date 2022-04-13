@@ -3,7 +3,7 @@ import "../style/Form.css";
 import { MdOutlineAddLocationAlt, MdOutlineEditLocation } from "react-icons/md";
 import axios from "axios";
 
-const BACKEND_ADDRESS_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/userAddress`;
+const BACKEND_ADDRESS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userAddress`;
 
 const Form = (props) => {
   var [address1, setAddress1] = useState("");

@@ -23,7 +23,9 @@ const QuotationProduct = db.define("quotationProduct", {
 },
     {
     freezeTableName: true,
-    tableName: "quotationProduct"
+    tableName: "quotationProduct",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
     });
 
 module.exports = QuotationProduct;

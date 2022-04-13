@@ -5,6 +5,7 @@ import Sidemenu from "./Sidemenu";
 
 const Navbar = () => {
   const token = localStorage.getItem("token");
+  console.log(token)
   return (
     <div className="navBar">
       <div className="wrapper">
@@ -25,7 +26,7 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="wrapper-logout">
-          <Link to="/logout" style={{ textDecoration: "none", color: "black" }}>
+          <Link to="/logout" style={{ textDecoration: "none", color: "black", display: token ? "block" : "none" }}>
             Logout
           </Link>
         </div>

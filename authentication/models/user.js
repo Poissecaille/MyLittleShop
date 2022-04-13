@@ -35,7 +35,9 @@ const User = db.define('user', {
     }
 }, {
     freezeTableName: true,
-    tableName: "user"
+    tableName: "user",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
 });
 
 

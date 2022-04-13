@@ -7,12 +7,12 @@ import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
 
-const BACKEND_PRODUCTS_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/products`;
-const BACKEND_CART_PRODUCTS_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/cartProduct`;
+const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
+const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000);
+  const [maxPrice, setMaxPrice] = useState(100);
   const [productName, setProductName] = useState("");
   const [productCondition, setProductCondition] = useState(null);
   const [productSort, setProductSort] = useState("unitPrice");
@@ -119,7 +119,7 @@ const Products = () => {
             `${data.quantity} "${data.productName}" have been successfully added to cart !`
           );
           await popupHandler(popup);
-          window.location.reload()
+          //window.location.reload()
         }
       })
       .catch(async (error) => {

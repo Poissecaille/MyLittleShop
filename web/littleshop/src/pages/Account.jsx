@@ -5,8 +5,10 @@ import "../style/Account.css";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
 import { isEmpty } from "../utils/functions";
-const BACKEND_DELETE_ACCOUNT_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/deactivate`;
-const SYNC_ACCOUNT_BACKEND_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/syncAccount`;
+
+const BACKEND_DELETE_ACCOUNT_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/deactivate`;
+const SYNC_ACCOUNT_BACKEND_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncAccount`;
+
 const Account = () => {
   const navigate = useNavigate();
   const [account, setAccount] = useState(
@@ -17,7 +19,17 @@ const Account = () => {
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
+
+
   useEffect(() => {
+    // if (!localStorage.getItem("token")) {
+    //   setPopupTitle("LittleShop account management information");
+    //   setPopupContent("You are currently not logged in !");
+    //   popupHandler().then(() => {
+    //     navigate("/login");
+    //   });
+    // }
+
     if (isEmpty(localStorage.getItem("account"))) {
       axios
         .get(SYNC_ACCOUNT_BACKEND_URL, {

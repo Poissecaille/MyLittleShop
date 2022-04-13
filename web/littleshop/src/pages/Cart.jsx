@@ -5,15 +5,14 @@ import { BsFillBagCheckFill } from "react-icons/bs";
 import { MdCancel } from "react-icons/md";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
-const BACKEND_CART_PRODUCTS_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/cartProduct`;
-const BACKEND_ORDER_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/orderProducts`;
-const SYNC_CART_BACKEND_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/syncCart`;
+const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
+const BACKEND_ORDER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/orderProducts`;
+const SYNC_CART_BACKEND_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncCart`;
 var initialCartPrice = 0;
 
 const Cart = () => {
   const navigate = useNavigate();
   var [cartPrice, setCartPrice] = useState(initialCartPrice);
-  //localStorage.removeItem("cartProduct")
   var cart = localStorage.getItem("cartProduct")
     ? JSON.parse(localStorage.getItem("cartProduct"))
     : [];
@@ -23,6 +22,13 @@ const Cart = () => {
   const [popupTitle, setPopupTitle] = useState("");
   const [quantity, setQuantity] = useState("");
   useEffect(() => {
+    // if (!localStorage.getItem("token")) {
+    //   setPopupTitle("LittleShop account management information");
+    //   setPopupContent("You are currently not logged in !");
+    //   popupHandler().then(() => {
+    //     navigate("/login");
+    //   });
+    // }
     new Promise((resolve) => {
       if (!localStorage.getItem("cartProduct")) {
         axios
@@ -89,22 +95,16 @@ const Cart = () => {
         //var dif = Math.abs(Number(cart[i].quantity) - Number(e.target.value))
         var quantityVariation =
           Number(cart[i].quantity) - Number(e.target.value);
-        if (e.target.value == 0) {
+        if (e.target.value === 0) {
           e.target.value = 1;
         } else if (Number(cart[i].quantity) < Number(e.target.value)) {
           cart[i].quantity = Number(e.target.value);
           cartPrice += cart[i].unitPrice;
           cartProduct.availableQuantity += quantityVariation;
-          console.log("TEST1");
-          console.log(cart[i].quantity);
-          console.log(cart[i].availableQuantity);
         } else if (Number(cart[i].quantity) > Number(e.target.value)) {
           cart[i].quantity = Number(e.target.value);
           cartPrice -= cart[i].unitPrice;
           cartProduct.availableQuantity -= quantityVariation;
-          console.log("TEST2");
-          console.log(cart[i].quantity);
-          console.log(cart[i].availableQuantity);
         }
         localStorage["cartProduct"] = JSON.stringify(cart);
         await axios.put(
@@ -127,7 +127,6 @@ const Cart = () => {
       cartPrice = 0;
     }
     initialCartPrice = 0;
-    console.log(cartPrice);
     setQuantity(Number(e.target.value));
     setCartPrice(Number(cartPrice.toFixed(2)));
   };
@@ -285,7 +284,7 @@ const Cart = () => {
       <h3>Cart summary</h3>
       <p>
         <b>Total Price: </b>
-        {cartPrice != 0 ? cartPrice : initialCartPrice}
+        {cartPrice !== 0 ? cartPrice : initialCartPrice}
       </p>
 
       <button className="validate-cart-btn" onClick={() => validateCart()}>

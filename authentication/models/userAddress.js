@@ -31,7 +31,9 @@ const userAddress = db.define('userAddress', {
     }
 }, {
     freezeTableName: true,
-    tableName: "userAddress"
+    tableName: "userAddress",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
 })
 
 module.exports = userAddress;

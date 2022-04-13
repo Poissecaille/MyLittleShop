@@ -31,6 +31,16 @@
     list-style: none;
     height: 60px;
   }
+
+  .nav-text-hidden {
+    display: none;
+    justify-content: start;
+    align-items: center;
+    padding: 8px 0px 8px 16px;
+    list-style: none;
+    height: 60px;
+  }
+  
   
   .nav-text a {
     color: black;

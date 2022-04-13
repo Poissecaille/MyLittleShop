@@ -9,6 +9,7 @@ import Cart from "./Cart";
 import Logout from "./Logout";
 import Account from "./Account";
 import Addresses from "./Addresses";
+import Order from "./Orders";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route exact path="/addresses" element={<Addresses />} />
         <Route exact path="/products" element={<Products />} />
         <Route exact path="/cart" element={<Cart />} />
+        <Route exact path="/orders" element={<Order />} />
       </Routes>
     </Router>
   );

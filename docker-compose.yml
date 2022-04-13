@@ -13,7 +13,8 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./auth-db/db-data/:/var/lib/postgresql/data/
-      - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
+    #  - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
+    #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
   inventory_db:
@@ -29,7 +30,8 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./inventory-db/db-data/:/var/lib/postgresql/data/
-      - ./sql/inventory.sql:/docker-entrypoint-initdb.d/inventory.sql
+    #  - ./sql/inventory.sql:/docker-entrypoint-initdb.d/inventory.sql
+    #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
   order_db:
@@ -45,8 +47,8 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./order-db/db-data/:/var/lib/postgresql/data/
-      - ./sql/order.sql:/docker-entrypoint-initdb.d/order.sql
-
+    #  - ./sql/order.sql:/docker-entrypoint-initdb.d/order.sql
+    #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
   aggregator:
@@ -161,6 +163,9 @@ services:
 
   web:
     build: ./web/littleshop/
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_AGGREGATOR_PORT=${APP_AGGREGATOR_PORT}
     ports:
       - "${WEB_FRONT_PORT}:${PORT}"
     container_name: shop_web

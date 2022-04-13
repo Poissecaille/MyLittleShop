@@ -5,10 +5,9 @@ import { useNavigate } from "react-router-dom";
 import "../style/Login.css";
 import Popup from "../components/Popup";
 
-const BACKEND_LOGIN_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/login`;
-const test = ()=>{console.log("ok")}
+const BACKEND_LOGIN_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/login`;
 const Login = () => {
-  const token = localStorage.getItem("token");
+  //const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +26,7 @@ const Login = () => {
 
   const loginBackEnd = async () => {
     try {
-      console.log(token)
+      console.log(BACKEND_LOGIN_URL)
 
       // if (!token) {
         const request = await axios.post(BACKEND_LOGIN_URL, {
@@ -40,7 +39,7 @@ const Login = () => {
           setPopupTitle("LittleShop account management information");
           setPopupContent("You have successfully logged in  !");
           await popupHandler();
-          navigate("/");
+          window.location.reload();
         }
       // } else {
       //   setPopupTitle("LittleShop account management information");

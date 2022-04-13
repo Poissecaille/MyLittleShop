@@ -10,8 +10,8 @@ import {
 import Form from "../components/Form";
 import "../style/Address.css";
 
-const BACKEND_ADDRESSES_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/userAddresses`;
-const BACKEND_ADDRESS_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/userAddress`;
+const BACKEND_ADDRESSES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userAddresses`;
+const BACKEND_ADDRESS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userAddress`;
 
 const Addresses = () => {
   const [popup, setShowPopUp] = useState(false);
@@ -24,11 +24,6 @@ const Addresses = () => {
   var addresses = localStorage.getItem("addresses")
     ? JSON.parse(localStorage.getItem("addresses"))
     : [];
-  if (addresses.length === 0) {
-    setPopupTitle("LittleShop Account management information");
-    setPopupContent("No do not have any address yet please add one.");
-    popupHandler().then(() => { });
-  }
 
   const popupHandler = (e) => {
     return new Promise((resolve, reject) => {
@@ -56,7 +51,7 @@ const Addresses = () => {
         },
       })
       .then((response) => {
-        if (response.status == 200) {
+        if (response.status === 200) {
           for (let i = 0; i < addresses.length; i++) {
             if (
               addresses[i].address1 === data.address1 &&
@@ -94,6 +89,14 @@ const Addresses = () => {
 
   useEffect(() => {
     new Promise((resolve) => {
+      // if (!localStorage.getItem("token")) {
+      //   setPopupTitle("LittleShop account management information");
+      //   setPopupContent("You are currently not logged in !");
+      //   popupHandler().then(() => {
+      //     resolve()
+      //     navigate("/login");
+      //   });
+      // }
       if (addresses.length === 0) {
         axios
           .get(BACKEND_ADDRESSES_URL, {
@@ -104,9 +107,16 @@ const Addresses = () => {
           .then((response) => {
             addresses = response.data.response;
             localStorage.setItem("addresses", JSON.stringify(addresses));
-            window.location.reload();
-
-            resolve();
+            if (addresses.length === 0) {
+              setPopupTitle("LittleShop Account management information");
+              setPopupContent("You do not have any address yet please add one.");
+              popupHandler().then(() => {
+                resolve();
+              });
+            } else {
+              window.location.reload();
+              resolve();
+            }
           })
           .catch((error) => {
             console.log(error);

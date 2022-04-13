@@ -7,7 +7,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../style/Registration.css";
 import Popup from "../components/Popup";
 
-const BACKEND_REGISTER_URL = `http://aggregator:${process.env.APP_AGGREGATOR_PORT}/register`;
+console.log(process.env)
+const BACKEND_REGISTER_URL = `http://localhost:${process.env.REACT_REACT_APP_AGGREGATOR_PORT}/register`;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const Register = () => {
       password: password,
       birthdate: birthdate,
       role: "buyer",
-    }).then(async (response) => {
+    }).then((response) => {
       console.log(response)
       if (response.status === 201) {
         setPopupTitle("LittleShop account management information");
@@ -56,19 +57,24 @@ const Register = () => {
           birthdate: birthdate,
           role: "buyer",
         }));
-        await popupHandler();
-        navigate("/login");
+        popupHandler()
+          .then((response) => {
+            console.log(response)
+            navigate("/login");
+          });
       }
     })
-      .catch(async (error) => {
+      .catch((error) => {
+        console.log(BACKEND_REGISTER_URL)
+        console.log(error)
         if (error.response === 409) {
           setPopupTitle("LittleShop account management information");
           setPopupContent("Account creation failed, email or usermail alreay existant !");
-          await popupHandler();
+          popupHandler();
         } else {
           setPopupTitle("LittleShop account management information");
           setPopupContent("Account creation failed !");
-          await popupHandler();
+          popupHandler();
         }
       });
   }
@@ -128,6 +134,12 @@ const Register = () => {
         ></input> */}
         <label className="birthdate">birthdate</label>
         <DatePicker
+          isClearable
+          filterDate={(date) => {
+            return new Date() > date;
+          }}
+          placeholderText="Choose a date"
+          dateFormat="dd-MM-yyyy"
           selected={birthdate}
           onChange={(date) => {
             console.log(date);
