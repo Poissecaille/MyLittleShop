@@ -9,7 +9,6 @@ const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGR
 const BACKEND_ORDER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/orderProducts`;
 const SYNC_CART_BACKEND_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncCart`;
 var initialCartPrice = 0;
-
 const Cart = () => {
   const navigate = useNavigate();
   var [cartPrice, setCartPrice] = useState(initialCartPrice);
@@ -158,58 +157,68 @@ const Cart = () => {
         console.log(error);
       });
   };
-  const validateCart = () => {
-    console.log(cart);
-    var addressToUse;
-    var addresses = JSON.parse(localStorage.getItem("addresses"));
-    for (let i = 0; i < addresses.length; i++) {
-      if (addresses[i].mainAddress) {
-        addressToUse = addresses[i];
-      }
-    }
-    if (!addressToUse) {
+  const validateCart = (data) => {
+    var addresses = JSON.parse(localStorage.getItem("addresses"))
+    if (!addresses || addresses.length === 0) {
       setPopupTitle("LittleShop Account management information");
       setPopupContent(
-        "You do not have any address selected yet please add one to proceed the transaction."
+        "No do not have any address yet please add one."
       );
-      popupHandler().then(() => { });
-    }
-    console.log("###############");
-    console.log(addressToUse.address1, addressToUse.address2);
-    axios
-      .post(
-        BACKEND_ORDER_URL,
-        {
-          address1: addressToUse.address1,
-          address2: addressToUse.address2,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
-      .then((response) => {
-        console.log(response.data.response);
-        localStorage.removeItem("cartProduct");
-        setPopupTitle("LittleShop Cart management information");
-        setPopupContent(`Cart is validated for ${cartPrice}€!`);
-        popupHandler(popup);
-      })
-      .catch((error) => {
-        console.log(error);
+      popupHandler().then(() => {
+        navigate("/addresses")
       });
-    // for (let i = 0; i < cart.length; i++) {
-    //     await axios.delete(BACKEND_CART_PRODUCTS_URL, {
-    //         headers: {
-    //             Authorization: `Bearer ${localStorage.getItem("token")}`,
-    //         }, data: {
-    //             productName: cart[i].productName,
-    //             sellerUsername: cart[i].sellerUsername
-    //         }
-    //     })
-    // }
+    }
+    for (let i = 0; i < addresses.length; i++) {
+      if (addresses[i].mainAddress) {
+        console.log(addresses[i])
+        axios.post(BACKEND_ORDER_URL, {
+          address1: addresses[i].address1,
+          address2: addresses[i].address2
+        },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+          }
+        ).then((response) => {
+          if (response.status === 201) {
+            if (!localStorage.getItem("orderProduct")) {
+              localStorage.setItem("orderProduct", "[]");
+            }
+            var oldOrders = JSON.parse(localStorage.getItem("orderProduct"));
+            console.log("oldOrders", oldOrders)
+          }
+          oldOrders.push({
+            address: addresses[i],
+            cart: cart,
+          })
+          console.log("Orders", oldOrders)
+          localStorage.setItem("orderProduct", JSON.stringify(oldOrders));
+          localStorage.removeItem("cartProduct");
+          setPopupTitle("LittleShop Cart management information");
+          setPopupContent(
+            `Cart is validated for ${cartPrice}€!`
+          );
+          popupHandler(popup).then(() => {
+            navigate("/orders")
+          });
+        }).catch((error) => {
+          console.log(error)
+          if (error.response.status === 403) {
+            localStorage.removeItem("token")
+            setPopupTitle("LittleShop account management information");
+            setPopupContent("You are currently not logged in !");
+            popupHandler().then(() => {
+              navigate("/login");
+            });
+          }
+        })
+        break
+      }
+    }
+
   };
+
 
   return (
     <div>
@@ -287,7 +296,8 @@ const Cart = () => {
         {cartPrice !== 0 ? cartPrice : initialCartPrice}
       </p>
 
-      <button className="validate-cart-btn" onClick={() => validateCart()}>
+      <button className="validate-cart-btn" onClick={() => validateCart(JSON.parse(localStorage.getItem("cartProduct")))}>
+
         Validate cart <BsFillBagCheckFill />
       </button>
     </div>

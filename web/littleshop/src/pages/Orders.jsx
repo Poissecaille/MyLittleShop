@@ -5,7 +5,6 @@ import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
 
 const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
-
 const Order = () => {
     //localStorage.removeItem("orderProduct")
     var orders = localStorage.getItem("orderProduct")
