@@ -31,6 +31,7 @@ const Logout = () => {
             await popupHandler();
             localStorage.removeItem("token");
             navigate("/");
+            window.location.reload();
         }
     }, [])
     return (
