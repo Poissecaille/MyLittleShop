@@ -350,4 +350,27 @@ router.get("/productsPerId", async (request, response) => {
     }
 });
 
+//GET PRODUCTS FOR ORDERS
+router.get("/orderedProduct", async (request, response) => {
+    try {
+        const products = await Product.findAll({
+            where: {
+                id: { [Op.in]: request.query.productIds }
+            }
+        });
+        return response.status(200).json({
+            "response": products
+        });
+        // const product = await Product.findByPk(request.query.productId)
+        // return response.status(200).json({
+        //     "response": product
+        // });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 module.exports = router;

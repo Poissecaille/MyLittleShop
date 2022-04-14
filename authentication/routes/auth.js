@@ -84,7 +84,8 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
         return response.status(200).json({
             "response": "Logged in",
             "token": accessToken,
-            "expire": tokenExpiration
+           // "role": user.role
+            //"expire": tokenExpiration
         });
     } catch (error) {
         response.status(error.response.status).json({

@@ -8,7 +8,7 @@ import "../style/Registration.css";
 import Popup from "../components/Popup";
 
 console.log(process.env)
-const BACKEND_REGISTER_URL = `http://localhost:${process.env.REACT_REACT_APP_AGGREGATOR_PORT}/register`;
+const BACKEND_REGISTER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/register`;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -58,8 +58,8 @@ const Register = () => {
           role: "buyer",
         }));
         popupHandler()
-          .then((response) => {
-            console.log(response)
+          .then((res) => {
+            console.log(res)
             navigate("/login");
           });
       }
@@ -119,19 +119,7 @@ const Register = () => {
             setPassword(e.target.value);
           }}
         ></input>
-        {/* <label>role</label>
-        <select id="roles" name="roles">
-          onChange={(e) => setRole(e.target.value)}
-          value={role}
-          <option value="buyer">buyer</option>
-          <option value="seller">seller</option>
-        </select> */}
-        {/* <input
-          type="text"
-          onChange={(e) => {
-            setRole(e.target.value);
-          }}
-        ></input> */}
+
         <label className="birthdate">birthdate</label>
         <DatePicker
           isClearable

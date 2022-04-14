@@ -30,7 +30,8 @@ router.post("/login", async (request, response) => {
             return response.status(200).json({
                 "response": userToLogin.data.response,
                 "token": userToLogin.data.token,
-                "expire": userToLogin.data.expire
+                "role": userToLogin.data.role
+                //"expire": userToLogin.data.expire
             });
         }
     } catch (error) {

@@ -4,10 +4,8 @@ import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import "../style/Login.css";
 import Popup from "../components/Popup";
-
 const BACKEND_LOGIN_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/login`;
 const Login = () => {
-  //const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +13,7 @@ const Login = () => {
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
   const popupHandler = (e) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       setShowPopUp(!e);
       setTimeout(() => {
         setShowPopUp(false);
@@ -36,6 +34,7 @@ const Login = () => {
         console.log(request.status);
         if (request.status === 200) {
           localStorage.setItem("token", request.data.token);
+          //localStorage.setItem("role", request.data.role);
           setPopupTitle("LittleShop account management information");
           setPopupContent("You have successfully logged in  !");
           await popupHandler();

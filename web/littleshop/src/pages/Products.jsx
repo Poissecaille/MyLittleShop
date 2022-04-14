@@ -22,7 +22,7 @@ const Products = () => {
   const [popupTitle, setPopupTitle] = useState("");
 
   const popupHandler = (e) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       setShowPopUp(!e);
       setTimeout(() => {
         setShowPopUp(false);
@@ -77,6 +77,7 @@ const Products = () => {
       })
       .then((response) => {
         setProducts(response.data.response);
+        console.log(response.data.response)
       })
       .catch((error) => {
         console.log(error);
@@ -84,6 +85,7 @@ const Products = () => {
   }, [maxPrice, minPrice, productName, productCondition]);
 
   const addProductToCart = (data) => {
+    console.log(data)
     axios.post(
       BACKEND_CART_PRODUCTS_URL,
       {

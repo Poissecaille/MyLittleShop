@@ -5,11 +5,13 @@ const roads = {
     // USER MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     GET_ONE_USER_ADDRESS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddress`,
+    GET_DELIVERY_USER_ADDRESS: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/deliveryUserAddress`,
     //INVENTORY MICROSERVICE
     CART_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProducts`,
     BUYER_PRODUCT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/buyer/products`,
     SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
     UPDATE_PRODUCTS_STOCKS: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/products`,
+    SYNC_ORDERED_PRODUCT: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/orderedProduct`,
     //ORDER MICROSERVICE
     CREATE_ORDER_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/orderProducts`,
     GET_SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`,
@@ -236,5 +238,93 @@ router.put("/orderProduct", async (request, response) => {
         });
     }
 });
+
+//REFRESH ORDERS
+router.get("/syncOrder", async (request, response) => {
+    try {
+        var json = [];
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
+        if (userRole === "buyer") {
+            const orders = await axios.get(roads.GET_BUYER_ORDERS_URL, {
+                headers: {
+                    'Authorization': request.headers.authorization
+                },
+                params: {
+                    ownerId: userId
+                }
+            })
+            console.log(orders.data.response)
+            if (orders.data.response.length === 0) {
+                return response.status(200).json({
+                    "response": orders.data.response
+                });
+            }
+
+            // for (let i=0;i<orders.data.response.length;i++){
+            //     const userDeliveryAddress = await axios.get(roads.GET_DELIVERY_USER_ADDRESS, {
+            //             params: {
+            //                 addressId: orders.data.response[i].addressId
+            //             }
+            //         });
+            //         const productData = await axios.get(roads.SYNC_ORDERED_PRODUCT, {
+            //             params: {
+            //                 productId: orders.data.response[i].productId
+            //             }
+            //         }); 
+            // }
+
+            const deliveryAddressIds = [];
+            const orderedProductIds = [];
+            for (let i = 0; i < orders.data.response.length; i++) {
+                deliveryAddressIds.push(orders.data.response[i].addressId)
+                orderedProductIds.push(orders.data.response[i].productId)
+            }
+            const userDeliveryAddress = await axios.get(roads.GET_DELIVERY_USER_ADDRESS, {
+                params: {
+                    addressIds: deliveryAddressIds
+                }
+            });
+            const productData = await axios.get(roads.SYNC_ORDERED_PRODUCT, {
+                params: {
+                    productIds: orderedProductIds
+                }
+            });
+            for (let i = 0; i < orders.data.response.length; i++) {
+                var dict = {}
+                for (let j = 0; j < userDeliveryAddress.data.response.length; j++) {
+                    if (userDeliveryAddress.data.response[j].id == orders.data.response[i].addressId) {
+                        dict.address = userDeliveryAddress.data.response[j]
+                    }
+                    for (let k = 0; k < productData.data.response.length; k++) {
+                        if (productData.data.response[k].id === orders.data.response[i].productId) {
+                            productData.data.response[k].quantity=orders.data.response[i].quantity
+                            dict.cart = [productData.data.response[k]]
+                            dict.cart[0].productName=dict.cart[0].name
+                            delete dict.cart[0].name
+                            dict.cart[0].shipped=orders.data.response[i].shipped
+                            dict.cart[0].shippingDate=orders.data.response[i].shippingDate
+                        }
+                    }
+                }
+                json.push(dict)
+            }
+            return response.status(200).json({
+                "response": json
+            });
+        }
+    }
+    catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+})
 
 module.exports = router;
