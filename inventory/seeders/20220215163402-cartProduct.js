@@ -6,15 +6,15 @@ module.exports = {
       ownerId: 1,
       productId: 2,
       quantity: 2,
-      createdAt: "2022-02-05 17:00:00",
-      updatedAt: "2022-02-05 17:00:00",
+      created_at: "2022-02-05 17:00:00",
+      updated_at: "2022-02-05 17:00:00",
     },
     {
       ownerId: 2,
       productId: 1,
       quantity: 1,
-      createdAt: "2022-02-05 17:00:00",
-      updatedAt: "2022-02-05 17:00:00",
+      created_at: "2022-02-05 17:00:00",
+      updated_at: "2022-02-05 17:00:00",
     }
     ])
   },

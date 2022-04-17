@@ -75,6 +75,30 @@ router.get("/userAddress", checkToken, async (request, response) => {
     }
 });
 
+//GET USER ADDRESS FOR ORDERS
+router.get("/deliveryUserAddress", async (request, response) => {
+    try {
+        const deliveryAddresses = await UserAddress.findAll({
+            where: {
+                id: { [Op.in]: request.query.addressIds }
+            }
+        });
+        return response.status(200).json({
+            "response": deliveryAddresses
+        });
+        // const deliveryAddress = await UserAddress.findByPK(request.query.addressId)
+        // return response.status(200).json({
+        //     "response": deliveryAddress
+        // });
+    }
+    catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 // CREATE ADDRESS
 router.post("/userAddress", checkToken, async (request, response) => {
     try {

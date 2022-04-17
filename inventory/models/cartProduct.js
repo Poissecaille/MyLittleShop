@@ -19,7 +19,9 @@ const cartProduct = db.define('cartProduct', {
     }
 }, {
     freezeTableName: true,
-    tableName: "cartProduct"
+    tableName: "cartProduct",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
 });
 
 module.exports = cartProduct;

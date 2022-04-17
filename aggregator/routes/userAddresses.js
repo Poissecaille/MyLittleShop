@@ -3,8 +3,8 @@ const axios = require('axios');
 
 const roads = {
     //USER MICROSERVICE
-    USER_ADDRESSES_URL: "http://localhost:5002/api/userAddresses",
-    USER_ADDRESS_URL: "http://localhost:5002/api/userAddress"
+    USER_ADDRESSES_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddresses`,
+    USER_ADDRESS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddress`
 }
 
 // CONSULT ALL USER ADDRESSES

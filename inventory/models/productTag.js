@@ -16,7 +16,8 @@ const ProductTag = db.define('productTag', {
     {
         freezeTableName: true,
         tableName: "productTag",
-        timestamps: false
+        createdAt: "created_at",
+        updatedAt: "updated_at"    
     }
 );
 

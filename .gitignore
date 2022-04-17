@@ -4,3 +4,6 @@ node_modules
 nodemon.json
 config
 web/littleshop/node_modules
+inventory-db
+auth-db
+order-db

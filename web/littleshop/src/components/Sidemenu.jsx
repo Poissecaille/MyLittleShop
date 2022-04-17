@@ -9,6 +9,7 @@ import { MdOutlineAccountCircle } from "react-icons/md"
 import '../style/Sidemenu.css'
 import { IconContext } from 'react-icons/lib';
 
+const token = localStorage.getItem("token");
 const sidebarData = [
     {
         title: "Home",
@@ -20,37 +21,37 @@ const sidebarData = [
         title: "Account",
         path: "/account",
         icon: <MdOutlineAccountCircle />,
-        className: 'nav-text'
+        className: token ? 'nav-text' : 'nav-text-hidden'
     },
     {
         title: "Addresses",
         path: "/addresses",
         icon: <BsSignpost />,
-        className: 'nav-text'
+        className: token ? 'nav-text' : 'nav-text-hidden'
     },
     {
         title: "Products",
         path: "/products",
         icon: <GrCatalogOption />,
-        className: 'nav-text'
+        className: token ? 'nav-text' : 'nav-text-hidden'
     },
     {
         title: "Cart",
         path: "/cart",
         icon: <BsCart4 />,
-        className: 'nav-text'
+        className: token ? 'nav-text' : 'nav-text-hidden'
     },
     {
         title: "Wishlist",
         path: "/wishlist",
         icon: <BsSuitHeart />,
-        className: 'nav-text'
+        className: token ? 'nav-text' : 'nav-text-hidden'
     },
     {
         title: "Orders",
         path: "/orders",
         icon: <RiBillLine />,
-        className: 'nav-text'
+        className: token ? 'nav-text' : 'nav-text-hidden'
     },
 ]
 

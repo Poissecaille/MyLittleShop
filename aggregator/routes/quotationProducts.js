@@ -3,14 +3,14 @@ const axios = require('axios');
 
 const roads = {
     // USER MICROSERVICE
-    USER_DATA_URL: "http://localhost:5002/api/userData",
-    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
+    USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     // INVENTORY MICROSERVICE
-    BUYER_PRODUCT_URL: "http://localhost:5003/api/buyer/product",
+    BUYER_PRODUCT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/buyer/product`,
     // ORDER MICROSERVICE
-    GET_SELLER_ORDERS_URL: "http://localhost:5001/api/seller/orderProducts",
-    GET_BUYER_ORDERS_URL: "http://localhost:5001/api/buyer/orderProducts",
-    RATE_PRODUCT_URL: "http://localhost:5001/quotationProduct"
+    GET_SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`,
+    GET_BUYER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/buyer/orderProducts`,
+    RATE_PRODUCT_URL: `http://orders:${process.env.APP_ORDER_PORT}/quotationProduct`
 }
 
 //POST A QUOTATION ON AN ORDERED PRODUCT

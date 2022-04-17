@@ -4,10 +4,8 @@ import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import "../style/Login.css";
 import Popup from "../components/Popup";
-
-const BACKEND_LOGIN_URL = "http://localhost:5000/login";
+const BACKEND_LOGIN_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/login`;
 const Login = () => {
-  const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +13,7 @@ const Login = () => {
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
   const popupHandler = (e) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       setShowPopUp(!e);
       setTimeout(() => {
         setShowPopUp(false);
@@ -26,7 +24,9 @@ const Login = () => {
 
   const loginBackEnd = async () => {
     try {
-      if (!token) {
+      console.log(BACKEND_LOGIN_URL)
+
+      // if (!token) {
         const request = await axios.post(BACKEND_LOGIN_URL, {
           email: email,
           password: password,
@@ -34,18 +34,18 @@ const Login = () => {
         console.log(request.status);
         if (request.status === 200) {
           localStorage.setItem("token", request.data.token);
-          //localStorage.setItem("tokenExpirate", request.data.expire);
+          //localStorage.setItem("role", request.data.role);
           setPopupTitle("LittleShop account management information");
           setPopupContent("You have successfully logged in  !");
           await popupHandler();
-          navigate("/");
+          window.location.reload();
         }
-      } else {
-        setPopupTitle("LittleShop account management information");
-        setPopupContent("You are already logged in !");
-        await popupHandler();
-        navigate("/");
-      }
+      // } else {
+      //   setPopupTitle("LittleShop account management information");
+      //   setPopupContent("You are already logged in !");
+      //   await popupHandler();
+      //   navigate("/");
+      // }
     }
     catch (error) {
       console.log(error);

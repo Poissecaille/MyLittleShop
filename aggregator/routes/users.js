@@ -3,14 +3,14 @@ const axios = require('axios');
 
 const roads = {
     // USER MICROSERVICE
-    CREATE_ACCOUNT_URL: "http://localhost:5002/api/register",
-    LOGIN_ACCOUNT_URL: "http://localhost:5002/api/login",
-    DISABLE_ACCOUNT_URL: "http://localhost:5002/api/disable",
-    DEACTIVATE_ACCOUNT_URL: "http://localhost:5002/api/deactivate",
-    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
-    SYNC_ACCOUNT_URL: "http://localhost:5002/api/syncAccount",
+    CREATE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/register`,
+    LOGIN_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/login`,
+    DISABLE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/disable`,
+    DEACTIVATE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/deactivate`,
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
+    SYNC_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/syncAccount`,
     // PRODUCT MICROSERVICE
-    WITHDRAW_SELLER_PRODUCTS_URL: "http://localhost:5003/api/seller/products"
+    WITHDRAW_SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`
 }
 
 // LOGIN
@@ -30,10 +30,12 @@ router.post("/login", async (request, response) => {
             return response.status(200).json({
                 "response": userToLogin.data.response,
                 "token": userToLogin.data.token,
-                "expire": userToLogin.data.expire
+                "role": userToLogin.data.role
+                //"expire": userToLogin.data.expire
             });
         }
     } catch (error) {
+        console.log(error)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -47,7 +49,9 @@ router.post("/login", async (request, response) => {
 // BUYER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
     try {
-        if (!request.body.email || !request.body.password || !request.body.firstName || !request.body.lastName || !request.body.birthDate || !request.body.username) {
+        console.log(request.body)
+        console.log("########################")
+        if (!request.body.email || !request.body.password || !request.body.firstname || !request.body.lastname || !request.body.birthdate || !request.body.username) {
             return response.status(400).json({
                 "response": "Bad json format"
             });
@@ -55,10 +59,10 @@ router.post("/register", async (request, response) => {
         const userToRegister = await axios.post(roads.CREATE_ACCOUNT_URL, {
             email: request.body.email,
             password: request.body.password,
-            firstName: request.body.firstName,
-            lastName: request.body.lastName,
+            firstname: request.body.firstname,
+            lastname: request.body.lastname,
             username: request.body.username,
-            birthDate: request.body.birthDate,
+            birthdate: request.body.birthdate,
             role: "buyer"
         })
 
@@ -80,7 +84,7 @@ router.post("/register", async (request, response) => {
 router.post("/seller/register", async (request, response) => {
 
     try {
-        if (!request.body.email || !request.body.password || !request.body.firstName || !request.body.lastName || !request.body.birthDate || !request.body.username) {
+        if (!request.body.email || !request.body.password || !request.body.firstname || !request.body.lastname || !request.body.birthdate || !request.body.username) {
             return response.status(400).json({
                 "response": "Bad json format"
             });
@@ -96,10 +100,10 @@ router.post("/seller/register", async (request, response) => {
             const userToRegister = await axios.post(roads.CREATE_ACCOUNT_URL, {
                 email: request.body.email,
                 password: request.body.password,
-                firstName: request.body.firstName,
-                lastName: request.body.lastName,
+                firstname: request.body.firstname,
+                lastname: request.body.lastname,
                 username: request.body.username,
-                birthDate: request.body.birthDate,
+                birthdate: request.body.birthdate,
                 role: "seller"
             })
 

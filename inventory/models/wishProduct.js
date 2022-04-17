@@ -20,6 +20,8 @@ const wishProduct = db.define('wishProduct', {
 },
     {
         freezeTableName: true,
-        tableName: "wishProduct"
+        tableName: "wishProduct",
+        createdAt: "created_at",
+        updatedAt: "updated_at"    
     });
     module.exports = wishProduct;

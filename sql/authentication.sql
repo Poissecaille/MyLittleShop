@@ -1,0 +1,48 @@
+-- CREATE USER postgres with encrypted password 'alpha';
+-- CREATE DATABASE shop;
+GRANT ALL PRIVILEGES ON DATABASE shop TO postgres;
+CREATE TYPE role AS ENUM('buyer', 'seller', 'admin');
+-- CREATE TABLE "user"(
+--   id serial PRIMARY KEY,
+--   email VARCHAR (50) UNIQUE NOT NULL,
+--   username VARCHAR (50) UNIQUE NOT NULL,
+--   firstname VARCHAR (50) NOT NULL,
+--   lastname VARCHAR (50) NOT NULL,
+--   password VARCHAR (50) NOT NULL,
+--   birthdate DATE NOT NULL DEFAULT CURRENT_DATE,
+--   role role NOT NULL DEFAULT 'buyer',
+--   activated BOOLEAN NOT NULL DEFAULT TRUE,
+--   created_at DATE NOT NULL DEFAULT CURRENT_DATE,
+--   updated_at DATE NOT NULL DEFAULT CURRENT_DATE
+-- );
+-- INSERT INTO
+--   "user" (
+--     email,
+--     username,
+--     firstname,
+--     lastname,
+--     password,
+--     birthdate,
+--     role,
+--     activated
+--   )
+-- VALUES
+--   (
+--     'admin@hotmail.fr',
+--     'admin',
+--     'admin',
+--     'admin',
+--     'password',
+--     '01/01/1970',
+--     'admin',
+--     TRUE
+--   ),(
+--     'seller@hotmail.fr',
+--     'seller',
+--     'seller',
+--     'seller',
+--     'password',
+--     '01/01/1970',
+--     'seller',
+--     TRUE
+--   );

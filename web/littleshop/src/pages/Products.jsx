@@ -6,15 +6,13 @@ import { BsSuitHeart, BsCart4 } from "react-icons/bs";
 import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
-import { useNavigate } from "react-router-dom";
 
-const BACKEND_PRODUCTS_URL = "http://localhost:5000/products";
-const BACKEND_CART_PRODUCTS_URL = "http://localhost:5000/cartProduct";
+const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
+const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
 const Products = () => {
-  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000);
+  const [maxPrice, setMaxPrice] = useState(100);
   const [productName, setProductName] = useState("");
   const [productCondition, setProductCondition] = useState(null);
   const [productSort, setProductSort] = useState("unitPrice");
@@ -24,7 +22,7 @@ const Products = () => {
   const [popupTitle, setPopupTitle] = useState("");
 
   const popupHandler = (e) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       setShowPopUp(!e);
       setTimeout(() => {
         setShowPopUp(false);
@@ -79,21 +77,15 @@ const Products = () => {
       })
       .then((response) => {
         setProducts(response.data.response);
+        console.log(response.data.response)
       })
       .catch((error) => {
-        console.log(error)
-        if (error.response.status === 403) {
-          localStorage.removeItem("token")
-          setPopupTitle("LittleShop account management information");
-          setPopupContent("You are currently not logged in !");
-          popupHandler().then(() => {
-            navigate("/login");
-          });
-        }
+        console.log(error);
       });
   }, [maxPrice, minPrice, productName, productCondition]);
 
   const addProductToCart = (data) => {
+    console.log(data)
     axios.post(
       BACKEND_CART_PRODUCTS_URL,
       {
@@ -139,14 +131,6 @@ const Products = () => {
             ` "${data.productName}" is already inside cart !`
           );
           await popupHandler(popup);
-        }
-        else if (error.response.status === 403) {
-          localStorage.removeItem("token")
-          setPopupTitle("LittleShop account management information");
-          setPopupContent("You are currently not logged in !");
-          popupHandler().then(() => {
-            navigate("/login");
-          });
         }
       });
   }

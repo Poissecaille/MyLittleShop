@@ -19,7 +19,9 @@ const Order = db.define('order', {
     }
 }, {
     freezeTableName: true,
-    tableName: "order"
+    tableName: "order",
+    createdAt: "created_at",
+    updatedAt: "updated_at"
 }
 );
 

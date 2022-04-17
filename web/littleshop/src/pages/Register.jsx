@@ -7,7 +7,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../style/Registration.css";
 import Popup from "../components/Popup";
 
-const BACKEND_REGISTER_URL = "http://localhost:5000/register";
+console.log(process.env)
+const BACKEND_REGISTER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/register`;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -37,12 +38,12 @@ const Register = () => {
     await axios.post(BACKEND_REGISTER_URL, {
       email: email,
       username: username,
-      firstName: firstname,
-      lastName: lastname,
+      firstname: firstname,
+      lastname: lastname,
       password: password,
-      birthDate: birthdate,
+      birthdate: birthdate,
       role: "buyer",
-    }).then(async (response) => {
+    }).then((response) => {
       console.log(response)
       if (response.status === 201) {
         setPopupTitle("LittleShop account management information");
@@ -50,25 +51,30 @@ const Register = () => {
         localStorage.setItem("account", JSON.stringify({
           email: email,
           username: username,
-          firstName: firstname,
-          lastName: lastname,
+          firstname: firstname,
+          lastname: lastname,
           password: password,
-          birthDate: birthdate,
+          birthdate: birthdate,
           role: "buyer",
         }));
-        await popupHandler();
-        navigate("/login");
+        popupHandler()
+          .then((res) => {
+            console.log(res)
+            navigate("/login");
+          });
       }
     })
-      .catch(async (error) => {
+      .catch((error) => {
+        console.log(BACKEND_REGISTER_URL)
+        console.log(error)
         if (error.response === 409) {
           setPopupTitle("LittleShop account management information");
           setPopupContent("Account creation failed, email or usermail alreay existant !");
-          await popupHandler();
+          popupHandler();
         } else {
           setPopupTitle("LittleShop account management information");
           setPopupContent("Account creation failed !");
-          await popupHandler();
+          popupHandler();
         }
       });
   }
@@ -113,21 +119,15 @@ const Register = () => {
             setPassword(e.target.value);
           }}
         ></input>
-        {/* <label>role</label>
-        <select id="roles" name="roles">
-          onChange={(e) => setRole(e.target.value)}
-          value={role}
-          <option value="buyer">buyer</option>
-          <option value="seller">seller</option>
-        </select> */}
-        {/* <input
-          type="text"
-          onChange={(e) => {
-            setRole(e.target.value);
-          }}
-        ></input> */}
+
         <label className="birthdate">birthdate</label>
         <DatePicker
+          isClearable
+          filterDate={(date) => {
+            return new Date() > date;
+          }}
+          placeholderText="Choose a date"
+          dateFormat="dd-MM-yyyy"
           selected={birthdate}
           onChange={(date) => {
             console.log(date);

@@ -3,13 +3,13 @@ const axios = require('axios');
 
 const roads = {
     // INVENTORY MICROSERVICE
-    GET_CART_ITEMS_URL: "http://localhost:5003/api/cartProducts",
-    CART_MANAGEMENT_URL: "http://localhost:5003/api/cartProduct",
-    SYNC_CART_ITEMS_URL: "http://localhost:5003/api/productsPerId",
+    GET_CART_ITEMS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProducts`,
+    CART_MANAGEMENT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProduct`,
+    SYNC_CART_ITEMS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productsPerId`,
     // USER MICROSERVICE
-    CHECK_TOKEN_URL: "http://localhost:5002/api/checkToken",
-    USER_DATA_URL: "http://localhost:5002/api/userData",
-    SYNC_CART_ITEMS_SELLERS_URL: "http://localhost:5002/api/syncSellersPerProduct"
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
+    USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
+    SYNC_CART_ITEMS_SELLERS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/syncSellersPerProduct`
 }
 
 // CONSULT ALL PRODUCTS IN CART
@@ -110,7 +110,7 @@ router.put("/cartProduct", async (request, response) => {
                 productName: request.body.productName,
                 sellerId: sellerData.data.response.id,
                 quantity: request.body.quantity,
-                quantityVariation:request.body.quantityVariation
+                quantityVariation: request.body.quantityVariation
             });
             return response.status(cartToUpdate.status).json({
                 "response": cartToUpdate.data.response

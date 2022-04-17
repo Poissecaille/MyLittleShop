@@ -8,27 +8,27 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     return queryInterface.bulkInsert('user', [{
       email: "admin@hotmail.fr",
-      firstName: "admin",
-      lastName: "admin",
+      firstname: "admin",
+      lastname: "admin",
       username: "admin",
       password: pass,
-      birthDate: "01/01/1970",
+      birthdate: "01/01/1970",
       role: "admin",
       activated: true,
-      createdAt: now,
-      updatedAt: now
+      created_at: now,
+      updated_at: now
     },
     {
       email: "seller@hotmail.fr",
-      firstName: "seller",
-      lastName: "seller",
+      firstname: "seller",
+      lastname: "seller",
       username: "seller",
       password: pass,
-      birthDate: "01/01/1970",
+      birthdate: "01/01/1970",
       role: "seller",
       activated: true,
-      createdAt: now,
-      updatedAt: now
+      created_at: now,
+      updated_at: now
     },
     ])
   }, async down(queryInterface, Sequelize) {

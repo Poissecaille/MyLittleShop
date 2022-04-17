@@ -27,14 +27,14 @@ router.post("/register", async (request, response) => {
         date = date[0] + " " + date[1].split(".")[0];
         const newUser = new User({
             email: request.body.email,
-            firstName: request.body.firstName,
-            lastName: request.body.lastName,
+            firstname: request.body.firstname,
+            lastname: request.body.lastname,
             username: request.body.username,
             password: CryptoJS.AES.encrypt(request.body.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: request.body.birthDate,
+            birthdate: request.body.birthdate,
             role: request.body.role,
-            createdAt: date,
-            updatedAt: date
+            created_at: date,
+            updated_at: date
         });
         await newUser.save();
         return response.status(201).json({
@@ -84,7 +84,8 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
         return response.status(200).json({
             "response": "Logged in",
             "token": accessToken,
-            "expire": tokenExpiration
+           // "role": user.role
+            //"expire": tokenExpiration
         });
     } catch (error) {
         response.status(error.response.status).json({

@@ -24,10 +24,10 @@ describe('POST /register', () => {
       .send({
         "email": "alexboury@etna-alternance.net",
         "username": buyerName,
-        "firstName": "Alex",
-        "lastName": "Boury",
+        "firstname": "Alex",
+        "lastname": "Boury",
         "password": "alpha",
-        "birthDate": "1994-03-31",
+        "birthdate": "1994-03-31",
         "role": "buyer"
       })
       .set('Accept', 'application/json')
@@ -45,10 +45,10 @@ describe('POST /register', () => {
       .send({
         "email": "alexboury@etna-alternance.com",
         "username": buyerName2,
-        "firstName": "Alex",
-        "lastName": "Boury",
+        "firstname": "Alex",
+        "lastname": "Boury",
         "password": "alpha",
-        "birthDate": "1994-03-31",
+        "birthdate": "1994-03-31",
         "role": "buyer"
       })
       .set('Accept', 'application/json')
@@ -66,10 +66,10 @@ describe('POST /register', () => {
       .send({
         "email": "alexboury@etna-alternance.fr",
         "username": buyerName3,
-        "firstName": "Alex",
-        "lastName": "Boury",
+        "firstname": "Alex",
+        "lastname": "Boury",
         "password": "alpha",
-        "birthDate": "1994-03-31",
+        "birthdate": "1994-03-31",
         "role": "buyer"
       })
       .set('Accept', 'application/json')
@@ -87,10 +87,10 @@ describe('POST /register', () => {
       .send({
         "email": "alexxboury@etna-alternance.net",
         "username": sellerName,
-        "firstName": "Alex",
-        "lastName": "Boury",
+        "firstname": "Alex",
+        "lastname": "Boury",
         "password": "beta",
-        "birthDate": "1994-03-31",
+        "birthdate": "1994-03-31",
         "role": "seller"
       })
       .set('Accept', 'application/json')
@@ -108,10 +108,10 @@ describe('POST /register', () => {
       .send({
         "email": "random@etna-alternance.fr",
         "username": sellerName2,
-        "firstName": "Alex",
-        "lastName": "Boury",
+        "firstname": "Alex",
+        "lastname": "Boury",
         "password": "beta",
-        "birthDate": "1994-03-31",
+        "birthdate": "1994-03-31",
         "role": "seller"
       })
       .set('Accept', 'application/json')
@@ -129,10 +129,10 @@ describe('POST /register', () => {
       .send({
         "email": "alexboury@etna-alternance.net",
         "username": buyerName,
-        "firstName": "Alex",
-        "lastName": "Boury",
+        "firstname": "Alex",
+        "lastname": "Boury",
         "password": "alpha",
-        "birthDate": "1994-03-31",
+        "birthdate": "1994-03-31",
         "role": "buyer"
       })
       .set('Accept', 'application/json')
@@ -148,10 +148,10 @@ describe('POST /register', () => {
       .post('/register')
       .send({
         "username": "random",
-        "firstName": "Alex",
-        "lastName": "Boury",
+        "firstname": "Alex",
+        "lastname": "Boury",
         "password": "alpha",
-        "birthDate": "1994-03-31",
+        "birthdate": "1994-03-31",
         "role": "buyer"
       })
       .set('Accept', 'application/json')
