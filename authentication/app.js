@@ -6,6 +6,7 @@ const { sequelizeDev, sequelizeTest } = require("./settings/database")
 const cors = require('cors');
 const execSync = require('child_process').execSync;
 
+
 // ENVIRONNEMENT SELECTION
 var db;
 var dbName;
