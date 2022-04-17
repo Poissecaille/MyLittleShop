@@ -15,34 +15,26 @@ var db;
 var dbName;
 var force;
 
-if (process.env.NODE_ENV === "development") {
-    db = sequelizeDev
-    dbName = process.env.DB_NAME
-    force = false
-} else if (process.env.NODE_ENV === "test") {
-    db = sequelizeTest
-    dbName = process.env.DBTEST_NAME
-    force = true
-}
-
-
-// DB CONNECTION
-db.authenticate().
-    then(() => {
-        console.log(`Connected to data base ${dbName}...`)
-    })
-    .catch((error) => console.log(error));
-
 // DB ASSOCIATIONS
 //productCategory.hasMany(product);
 //productTag.hasMany(product);
 product.hasMany(productCategory);
 product.hasMany(productTag);
 
-//cart.hasMany(cartProduct)
 
-// DB SYNC
-db.sync({ force: force }).
+if (process.env.NODE_ENV === "development") {
+    db = sequelizeDev
+    dbName = process.env.DB_NAME
+    force = false
+    // DB CONNECTION
+    db.authenticate().
+    then(() => {
+        console.log(`Connected to data base ${dbName}...`)
+    })
+    .catch((error) => console.log(error));
+
+    // DB SYNC
+    db.sync({ force: force }).
     then(
         () => {
             console.log(`database ${dbName} synced!`)
@@ -50,10 +42,25 @@ db.sync({ force: force }).
                 execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
             }
             catch (error) {
-             }
+            }
         }
     )
     .catch((error) => console.log(error));
+
+} else if (process.env.NODE_ENV === "test") {
+    db = sequelizeTest
+    dbName = process.env.DBTEST_NAME
+    force = true
+}
+
+
+
+
+
+
+//cart.hasMany(cartProduct)
+
+
 
 const app = express();
 
@@ -65,7 +72,6 @@ app.use(cors());
 app.use("/api/", productRoute);
 app.use("/api/", cartProductRoute);
 
-//NETWORK SETTINGS
-app.listen(process.env.APP_INVENTORY_PORT, () => {
-    console.log(`Backend is running on port ${process.env.APP_INVENTORY_PORT}`);
-});
+
+
+module.exports = app;

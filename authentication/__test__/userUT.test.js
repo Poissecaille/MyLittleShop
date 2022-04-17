@@ -115,7 +115,7 @@ describe("Auth unit tests", () => {
         expect(result).toBeNull();
     })
 
-    it("Test-Unicity confilct on email", async () => {
+    it("Test-Unicity conflict on email", async () => {
         const fakePerson = {
             firstName: faker.name.firstName(),
             lastName: faker.name.lastName(),
