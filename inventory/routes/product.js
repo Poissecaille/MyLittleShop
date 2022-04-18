@@ -5,6 +5,7 @@ const ProductTag = require("../models/productTag");
 const Product = require("../models/product");
 const Op = Sequelize.Op
 
+
 // DEDICATED ROAD FOR ORDERS RATING
 router.get("/buyer/product", async (request, response) => {
     try {
@@ -373,4 +374,24 @@ router.get("/orderedProduct", async (request, response) => {
     }
 });
 
+
+//DEDICATED ROAD FOR PRODUCTS AVERAGE RATING UPDATE
+router.put("/updateProductRating", async (request, response) => {
+    try {
+        const productToUpdate = await Product.findByPk(request.body.productId)
+        productToUpdate.update(
+            averageRating = request.body.averageRating
+        )
+        await productToUpdate.save();
+        return response.status(productToUpdate.status).json({
+            "response": productToUpdate.data.response
+        });
+    }
+    catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 module.exports = router;

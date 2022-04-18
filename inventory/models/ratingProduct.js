@@ -2,7 +2,7 @@ var db = require("../settings/database");
 const { DataTypes } = require('sequelize');
 process.env.NODE_ENV === "development" ? db = db.sequelizeDev : db = db.sequelizeTest
 
-const QuotationProduct = db.define("quotationProduct", {
+const RatingProduct = db.define("ratingProduct", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -23,9 +23,9 @@ const QuotationProduct = db.define("quotationProduct", {
 },
     {
     freezeTableName: true,
-    tableName: "quotationProduct",
+    tableName: "ratingProduct",
     createdAt: "created_at",
     updatedAt: "updated_at"
     });
 
-module.exports = QuotationProduct;
+module.exports =RatingProduct;

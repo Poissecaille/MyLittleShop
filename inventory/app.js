@@ -7,17 +7,12 @@ const product = require("./models/product");
 const { sequelizeDev, sequelizeTest } = require("./settings/database")
 const execSync = require('child_process').execSync;
 
-//const cart = require("./models/cart");
-//const cartProduct = require("./models/cartProduct");
-
 // ENVIRONNEMENT SELECTION
 var db;
 var dbName;
 var force;
 
 // DB ASSOCIATIONS
-//productCategory.hasMany(product);
-//productTag.hasMany(product);
 product.hasMany(productCategory);
 product.hasMany(productTag);
 
@@ -28,24 +23,24 @@ if (process.env.NODE_ENV === "development") {
     force = false
     // DB CONNECTION
     db.authenticate().
-    then(() => {
-        console.log(`Connected to data base ${dbName}...`)
-    })
-    .catch((error) => console.log(error));
+        then(() => {
+            console.log(`Connected to data base ${dbName}...`)
+        })
+        .catch((error) => console.log(error));
 
     // DB SYNC
     db.sync({ force: force }).
-    then(
-        () => {
-            console.log(`database ${dbName} synced!`)
-            try {
-                execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
+        then(
+            () => {
+                console.log(`database ${dbName} synced!`)
+                try {
+                    execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
+                }
+                catch (error) {
+                }
             }
-            catch (error) {
-            }
-        }
-    )
-    .catch((error) => console.log(error));
+        )
+        .catch((error) => console.log(error));
 
 } else if (process.env.NODE_ENV === "test") {
     db = sequelizeTest
@@ -53,25 +48,18 @@ if (process.env.NODE_ENV === "development") {
     force = true
 }
 
-
-
-
-
-
-//cart.hasMany(cartProduct)
-
-
-
 const app = express();
 
 //ROUTES
 const productRoute = require("./routes/product");
 const cartProductRoute = require("./routes/cartProduct");
+const RatingProductRoute = require("./routes/ratingProduct");
+
 app.use(express.json());
 app.use(cors());
 app.use("/api/", productRoute);
 app.use("/api/", cartProductRoute);
-
+app.use("/api/", RatingProductRoute);
 
 
 module.exports = app;

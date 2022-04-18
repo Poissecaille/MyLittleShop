@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import "../style/Login.css";
 import Popup from "../components/Popup";
 const BACKEND_LOGIN_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/login`;
+//localStorage.clear()
+
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -27,19 +29,30 @@ const Login = () => {
       console.log(BACKEND_LOGIN_URL)
 
       // if (!token) {
-        const request = await axios.post(BACKEND_LOGIN_URL, {
-          email: email,
-          password: password,
-        });
-        console.log(request.status);
-        if (request.status === 200) {
-          localStorage.setItem("token", request.data.token);
-          //localStorage.setItem("role", request.data.role);
-          setPopupTitle("LittleShop account management information");
-          setPopupContent("You have successfully logged in  !");
-          await popupHandler();
-          window.location.reload();
+      const request = await axios.post(BACKEND_LOGIN_URL, {
+        email: email,
+        password: password,
+      });
+      console.log(request.status);
+      if (request.status === 200) {
+        if (localStorage.getItem("token")) {
+          console.log("token", localStorage.getItem("token"))
+          localStorage.removeItem("token")
+          if (localStorage.getItem("account")) {
+            console.log("account", localStorage.getItem("account"))
+            localStorage.removeItem("account")
+          }
         }
+        localStorage.setItem("token", request.data.token);
+        //localStorage.setItem("role", request.data.role);
+        //localStorage.setItem("password",password);
+        setPopupTitle("LittleShop account management information");
+        setPopupContent("You have successfully logged in  !");
+        await popupHandler();
+        navigate("/");
+        window.location.reload();
+
+      }
       // } else {
       //   setPopupTitle("LittleShop account management information");
       //   setPopupContent("You are already logged in !");
@@ -66,7 +79,7 @@ const Login = () => {
         ></input>
         <label>password</label>
         <input
-          type="text"
+          type="password"
           onChange={(e) => {
             setPassword(e.target.value);
           }}

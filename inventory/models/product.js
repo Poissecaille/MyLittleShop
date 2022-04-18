@@ -32,13 +32,16 @@ const Product = db.define('product', {
     },
     onSale: {
         type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true
+    },
+    averageRating: {
+        type: DataTypes.SMALLINT, allowNull: false, defaultValue: 0
     }
 },
     {
         freezeTableName: true,
         tableName: "product",
         createdAt: "created_at",
-        updatedAt: "updated_at"    
+        updatedAt: "updated_at"
     });
 
 module.exports = Product;

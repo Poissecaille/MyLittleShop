@@ -61,6 +61,7 @@ const Account = () => {
   };
   const deleteAccount = async () => {
     try {
+      console.log(account)
       const request = await axios.put(
         BACKEND_DELETE_ACCOUNT_URL,
         {
@@ -112,9 +113,6 @@ const Account = () => {
         </p>
         <p>
           <b>Lastname:</b> {account.lastname}
-        </p>
-        <p>
-          <b>Password:</b> {account.password}
         </p>
         <p>
           <b>Birthdate:</b>{" "}
