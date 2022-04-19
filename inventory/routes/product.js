@@ -82,7 +82,7 @@ router.get("/buyer/products", async (request, response) => {
             where: {
                 [Op.and]: [
                     { id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
-                    { name: request.query.productName !== undefined ? { [Op.substring]: request.query.productName } : { [Op.not]: null } },
+                    // { name: request.query.productName !== undefined ? { [Op.substring]: request.query.productName } : { [Op.not]: null } },
                     // { productCategoryId: request.query.category !== undefined ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
                     // { productTagId: request.query.tag !== undefined ? { [Op.in]: tagsIds } : { [Op.not]: null } },
                     { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },

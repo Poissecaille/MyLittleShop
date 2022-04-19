@@ -7,7 +7,6 @@ import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
 import ReactStars from "react-rating-stars-component";
-
 const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
 const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
 const Products = () => {

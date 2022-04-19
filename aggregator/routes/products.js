@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const axios = require('axios');
+const Fuse = require('fuse.js')
 
 const roads = {
     // PRODUCT MICROSERVICE
@@ -91,7 +92,7 @@ router.get("/products", async (request, response) => {
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
                     sellerId: sellerIds ? sellerIds : null,
-                    productName: request.query.productName ? request.query.productName : null,
+                    //productName: request.query.productName ? request.query.productName : null,
                     category: request.query.category ? request.query.category : null,
                     tag: request.query.tag ? request.query.tag : null,
                     lowerPrice: request.query.lowerPrice ? request.query.lowerPrice : 0,
@@ -118,10 +119,31 @@ router.get("/products", async (request, response) => {
                     }
                 }
             }
-            return response.status(products.status).json({
-                "response": products.data.response,
-                "rows": products.data.rows
-            });
+            if (request.query.productName!==""){
+                const options = {
+                    isCaseSensitive: false,
+                    shouldSort: true,
+                    keys: [
+                        "name"
+                    ], threshold: 0.2
+                };
+                const fuse = new Fuse(products.data.response, options);
+                const result = fuse.search(request.query.productName);
+                var final = [];
+                for (let i = 0; i < result.length; i++) {
+                    console.log(final)
+                    final.push(result[i].item)
+                }
+                return response.status(products.status).json({
+                    "response": final,
+                    "rows": result.length
+                });
+            }else{
+                return response.status(products.status).json({
+                    "response": products.data.response,
+                    "rows": products.data.rows
+                });
+            }
         } else if (userRole == "seller") {
             const products = await axios.get(roads.SEARCH_PRODUCTS_SELLER_URL, {
                 params: {
