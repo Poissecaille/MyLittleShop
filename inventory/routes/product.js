@@ -379,12 +379,12 @@ router.get("/orderedProduct", async (request, response) => {
 router.put("/updateProductRating", async (request, response) => {
     try {
         const productToUpdate = await Product.findByPk(request.body.productId)
-        productToUpdate.update(
-            averageRating = request.body.averageRating
-        )
+        await productToUpdate.update({
+            averageRating: request.body.averageRating
+        });
         await productToUpdate.save();
-        return response.status(productToUpdate.status).json({
-            "response": productToUpdate.data.response
+        return response.status(200).json({
+            "response": productToUpdate
         });
     }
     catch (error) {

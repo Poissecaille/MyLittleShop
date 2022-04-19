@@ -34,7 +34,7 @@ const Product = db.define('product', {
         type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true
     },
     averageRating: {
-        type: DataTypes.SMALLINT, allowNull: false, defaultValue: 0
+        type: DataTypes.FLOAT, allowNull: false, defaultValue: 0
     }
 },
     {

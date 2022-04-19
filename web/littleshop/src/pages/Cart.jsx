@@ -9,7 +9,6 @@ const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGR
 const BACKEND_ORDER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/orderProducts`;
 const SYNC_CART_BACKEND_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncCart`;
 var initialCartPrice = 0;
-// localStorage.removeItem("cartProduct")
 const Cart = () => {
   const navigate = useNavigate();
   var [cartPrice, setCartPrice] = useState(initialCartPrice);

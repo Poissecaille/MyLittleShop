@@ -49,17 +49,15 @@ router.post("/ratingProduct", async (request, response) => {
                     'Authorization': request.headers.authorization
                 }
             });
-            for (let i = 0; i > allProductRatings.data.response.length; i++) {
+            for (let i = 0; i < allProductRatings.data.response.length; i++) {
                 rates.push(allProductRatings.data.response[i].value)
             }
             const newAverage = averageFromArray(rates);
             await axios.put(roads.UPDATE_PRODUCT_AVERAGE_RATING,
                 {
-                    averageRating: newAverage
+                    averageRating: newAverage,
+                    productId: request.body.productId
                 })
-            console.log("########")
-            console.log(newAverage)
-            console.log("########")
             return response.status(newRating.status).json({
                 "response": newRating.data.response
             });

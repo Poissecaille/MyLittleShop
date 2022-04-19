@@ -6,6 +6,7 @@ import { BsSuitHeart, BsCart4 } from "react-icons/bs";
 import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
+import ReactStars from "react-rating-stars-component";
 
 const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
 const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
@@ -26,11 +27,10 @@ const Products = () => {
       setShowPopUp(!e);
       setTimeout(() => {
         setShowPopUp(false);
-        resolve()
+        resolve();
       }, 2000);
-    })
+    });
   };
-
 
   const handleCartQuantity = (e) => {
     setCartQuantity(parseInt(e.target.value, 10));
@@ -40,7 +40,7 @@ const Products = () => {
   };
   const handleSort = (e) => {
     setProductSort(e.target.value);
-    window.location.reload()
+    window.location.reload();
   };
   const handleMinPrice = (e) => {
     setTimeout(() => {
@@ -77,7 +77,7 @@ const Products = () => {
       })
       .then((response) => {
         setProducts(response.data.response);
-        console.log(response.data.response)
+        console.log(response.data.response);
       })
       .catch((error) => {
         console.log(error);
@@ -85,25 +85,26 @@ const Products = () => {
   }, [maxPrice, minPrice, productName, productCondition]);
 
   const addProductToCart = (data) => {
-    console.log(data)
-    axios.post(
-      BACKEND_CART_PRODUCTS_URL,
-      {
-        productName: data.productName,
-        quantity: data.quantity,
-        sellerUsername: data.sellerUsername,
-      },
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      }
-    )
+    console.log(data);
+    axios
+      .post(
+        BACKEND_CART_PRODUCTS_URL,
+        {
+          productName: data.productName,
+          quantity: data.quantity,
+          sellerUsername: data.sellerUsername,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      )
       .then(async (response) => {
         if (response.status === 201) {
           if (localStorage.getItem("cartProduct") === null) {
             localStorage.setItem("cartProduct", "[]");
           }
           var oldCart = JSON.parse(localStorage.getItem("cartProduct"));
-          console.log(oldCart)
+          console.log(oldCart);
 
           oldCart.push({
             id: data.id,
@@ -113,7 +114,7 @@ const Products = () => {
             sellerUsername: data.sellerUsername,
             unitPrice: data.unitPrice,
             condition: data.condition,
-            availableQuantity: data.availableQuantity
+            availableQuantity: data.availableQuantity,
           });
           localStorage.setItem("cartProduct", JSON.stringify(oldCart));
           setPopupTitle("LittleShop product management information");
@@ -127,13 +128,11 @@ const Products = () => {
       .catch(async (error) => {
         if (error.response.status === 409) {
           setPopupTitle("LittleShop product management information");
-          setPopupContent(
-            ` "${data.productName}" is already inside cart !`
-          );
+          setPopupContent(` "${data.productName}" is already inside cart !`);
           await popupHandler(popup);
         }
       });
-  }
+  };
   return (
     <div>
       <Navbar />
@@ -248,6 +247,16 @@ const Products = () => {
                 <b>Description: </b>
                 {product.description}
               </p>
+              <p>
+                <b>Average Rating:</b>
+              </p>
+              <ReactStars
+                count={5}
+                value={product.averageRating}
+                size={24}
+                activeColor="#FF7F7F"
+                edit={false}
+              ></ReactStars>
               <label>quantity:</label>
               <input
                 type="number"
@@ -269,7 +278,7 @@ const Products = () => {
                     quantity: cartQuantity,
                     unitPrice: product.unitPrice,
                     condition: product.condition,
-                    availableQuantity: product.availableQuantity
+                    availableQuantity: product.availableQuantity,
                   })
                 }
               >

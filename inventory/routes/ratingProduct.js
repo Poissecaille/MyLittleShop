@@ -12,7 +12,7 @@ router.get("/ratingsProducts", async (request, response) => {
             }
         });
         return response.status(200).json({
-            "response": productRatings.data.response,
+            "response": productRatings,
         });
     } catch (error) {
         console.log(error)
