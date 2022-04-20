@@ -79,18 +79,6 @@ module.exports = {
     },
     {
       name: "Gold",
-      productId: 5,
-      created_at: now,
-      updated_at: now
-    },
-    {
-      name: "Bracelet",
-      productId: 5,
-      created_at: now,
-      updated_at: now
-    },
-    {
-      name: "Gold",
       productId: 6,
       created_at: now,
       updated_at: now

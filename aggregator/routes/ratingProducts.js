@@ -20,7 +20,7 @@ const roads = {
 router.post("/ratingProduct", async (request, response) => {
     try {
         console.log(request.body)
-        if (!request.body.productId || !request.body.value) {
+        if (!request.body.productId || !request.body.value || request.body.value < 0 && request.body.value > 5) {
             return response.status(400).json({
                 "response": "Bad json format",
             });

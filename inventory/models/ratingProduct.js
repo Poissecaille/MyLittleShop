@@ -9,10 +9,10 @@ const RatingProduct = db.define("ratingProduct", {
         autoIncrement: true
     },
     ownerId: {
-        type: DataTypes.INTEGER, allowNull: false
+        type: DataTypes.INTEGER, allowNull: false, unique: "compositePK"
     },
     productId: {
-        type: DataTypes.INTEGER, allowNull: false
+        type: DataTypes.INTEGER, allowNull: false, unique: "compositePK"
     },
     value: {
         type: DataTypes.SMALLINT, allowNull: false
@@ -22,10 +22,10 @@ const RatingProduct = db.define("ratingProduct", {
     }
 },
     {
-    freezeTableName: true,
-    tableName: "ratingProduct",
-    createdAt: "created_at",
-    updatedAt: "updated_at"
+        freezeTableName: true,
+        tableName: "ratingProduct",
+        createdAt: "created_at",
+        updatedAt: "updated_at"
     });
 
-module.exports =RatingProduct;
+module.exports = RatingProduct;

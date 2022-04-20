@@ -23,7 +23,7 @@ const Products = () => {
   const [maxPrice, setMaxPrice] = useState(100);
   const [productName, setProductName] = useState("");
   const [productCondition, setProductCondition] = useState(null);
-  const [productSort, setProductSort] = useState("unitPrice");
+  //const [productSort, setProductSort] = useState("unitPrice");
   const [cartQuantity, setCartQuantity] = useState(0);
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
@@ -78,7 +78,12 @@ const Products = () => {
       })
       .then((response) => {
         setCategories(response.data.response);
-        console.log(categories);
+        // let tmp = [];
+        // for (let i = 0; i < response.data.response.length; i++) {
+        //   tmp.push(response.data.response[i].name);
+        // }
+        // setCategories(tmp);
+        console.log(response.data.response);
       })
       .catch((error) => {
         console.log(error);
@@ -92,7 +97,12 @@ const Products = () => {
       })
       .then((response) => {
         setTags(response.data.response);
-        console.log(tags);
+        // let tmp = [];
+        // for (let i = 0; i < response.data.response.length; i++) {
+        //   tmp.push(response.data.response[i].name);
+        // }
+        // setCategories(tmp);
+        console.log(response.data.response);
       })
       .catch((error) => {
         console.log(error);
@@ -110,6 +120,8 @@ const Products = () => {
           higherPrice: maxPrice,
           productName: productName,
           condition: productCondition,
+          category: category,
+          tag: tag,
         },
       })
       .then((response) => {
@@ -119,7 +131,7 @@ const Products = () => {
       .catch((error) => {
         console.log(error);
       });
-  }, [maxPrice, minPrice, productName, productCondition]);
+  }, [maxPrice, minPrice, productName, productCondition, category, tag]);
 
   const addProductToCart = (data) => {
     console.log(data);
@@ -240,6 +252,7 @@ const Products = () => {
             }}
             value={category}
           >
+            <option value="all">all</option>
             {categories.map((category) => (
               <option value={category}>{category}</option>
             ))}
@@ -257,6 +270,7 @@ const Products = () => {
             }}
             value={tag}
           >
+            <option value="all">all</option>
             {tags.map((tag) => (
               <option value={tag}>{tag}</option>
             ))}
@@ -327,6 +341,7 @@ const Products = () => {
                 size={24}
                 activeColor="#FF7F7F"
                 edit={false}
+                half={true}
               ></ReactStars>
               <label>quantity:</label>
               <input

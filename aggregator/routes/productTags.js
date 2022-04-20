@@ -3,7 +3,7 @@ const axios = require('axios');
 
 const roads = {
     // INVENTORY MICROSERVICE
-    TAGS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productTags`,
+    TAGS_NAMES_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productTagsNames`,
     // AUTHENTICATION MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
 }
@@ -16,7 +16,7 @@ router.get("/productTags", async (request, response) => {
                 'Authorization': request.headers.authorization
             }
         });
-        const tags = await axios.get(roads.TAGS_URL)
+        const tags = await axios.get(roads.TAGS_NAMES_URL)
         return response.status(tags.status).json({
             "response": tags.data.response
         });

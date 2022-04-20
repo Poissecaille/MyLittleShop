@@ -3,7 +3,7 @@ const axios = require('axios');
 
 const roads = {
     // INVENTORY MICROSERVICE
-    CATEGORIES_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productCategories`,
+    CATEGORIES_NAMES_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productCategoriesNames`,
     // AUTHENTICATION MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
 }
@@ -16,7 +16,7 @@ router.get("/productCategories", async (request, response) => {
                 'Authorization': request.headers.authorization
             }
         });
-        const categories = await axios.get(roads.CATEGORIES_URL)
+        const categories = await axios.get(roads.CATEGORIES_NAMES_URL)
         return response.status(categories.status).json({
             "response": categories.data.response
         });

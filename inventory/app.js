@@ -34,17 +34,14 @@ if (process.env.NODE_ENV === "development") {
             () => {
                 console.log(`database ${dbName} synced!`)
                 try {
-                    console.log("#1")
                     execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
-                } catch (error) { }
-                console.log("#2")
+                } catch (error) { console.log(error) }
                 try {
                     execSync('npx sequelize-cli  db:seed --seed 20220205122444-categories.js', { encoding: 'utf-8' });
-                } catch (error) { }
-                console.log("#3")
+                } catch (error) { console.log(error) }
                 try {
                     execSync('npx sequelize-cli  db:seed --seed 20220213104607-tags.js', { encoding: 'utf-8' });
-                } catch (error) { }
+                } catch (error) { console.log(error) }
             }
         )
         .catch((error) => console.log(error));
