@@ -7,10 +7,18 @@ import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
 import ReactStars from "react-rating-stars-component";
+
 const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
 const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
+const BACKEND_CATEGORIES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productCategories`;
+const BACKEND_TAGS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productTags`;
+
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [tag, setTag] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100);
   const [productName, setProductName] = useState("");
@@ -37,10 +45,10 @@ const Products = () => {
   const handleCondition = (e) => {
     setProductCondition(e.target.value);
   };
-  const handleSort = (e) => {
-    setProductSort(e.target.value);
-    window.location.reload();
-  };
+  // const handleSort = (e) => {
+  //   setProductSort(e.target.value);
+  //   window.location.reload();
+  // };
   const handleMinPrice = (e) => {
     setTimeout(() => {
       setMinPrice(e.target.value);
@@ -60,6 +68,36 @@ const Products = () => {
       }
     }, 300);
   };
+
+  useEffect(() => {
+    axios
+      .get(BACKEND_CATEGORIES_URL, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        setCategories(response.data.response);
+        console.log(categories);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    axios
+      .get(BACKEND_TAGS_URL, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        setTags(response.data.response);
+        console.log(tags);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   useEffect(() => {
     axios
@@ -190,7 +228,41 @@ const Products = () => {
             <option value="renovated">renovated</option>
           </select>
         </div>
-        <div className="dropdown-sort">
+        <div className="dropdown-categories">
+          <label>
+            <b>category:</b>
+          </label>
+          <select
+            name="categories"
+            id="categories"
+            onChange={(e) => {
+              setCategory(e.target.value);
+            }}
+            value={category}
+          >
+            {categories.map((category) => (
+              <option value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+        <div className="dropdown-tags">
+          <label>
+            <b>tag:</b>
+          </label>
+          <select
+            name="tags"
+            id="tags"
+            onChange={(e) => {
+              setTag(e.target.value);
+            }}
+            value={tag}
+          >
+            {tags.map((tag) => (
+              <option value={tag}>{tag}</option>
+            ))}
+          </select>
+        </div>
+        {/* <div className="dropdown-sort">
           <label>
             <b>Sort by:</b>
           </label>
@@ -203,7 +275,7 @@ const Products = () => {
             <option value="unitPrice">unitPrice</option>
             <option value="condition">condition</option>
           </select>
-        </div>
+        </div> */}
       </div>
 
       <div className="container">
