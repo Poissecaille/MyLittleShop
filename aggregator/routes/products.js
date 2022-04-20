@@ -3,36 +3,17 @@ const axios = require('axios');
 const Fuse = require('fuse.js')
 
 const roads = {
-    // PRODUCT MICROSERVICE
+    // INVENTORY MICROSERVICE
     SEARCH_PRODUCTS_BUYER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/buyer/products`,
     SEARCH_PRODUCTS_SELLER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
     PRODUCT_SELLER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/product`,
-    // USER MICROSERVICE
+    // AUTHENTICATION MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
     // MAILER SERVICE
     MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/mailer`
 }
 
-//EVALUATE A BOUGHT PRODUCT
-// router.post("/product/evaluation",async(request,response)=>{
-//     try{
-//         if (!request.body.productName){
-//             return response.status(400).json({
-//                 "response": "Bad json format",
-//             });    
-//         }
-//         const user = await axios.get(roads.CHECK_TOKEN_URL, {
-//             headers: {
-//                 'Authorization': request.headers.authorization
-//             }
-//         });
-//         const userId = user.data.response.id
-//         const userRole = user.data.response.role
-//         if (userRole == "buyer") {
-//             const productToEvaluate = await axios.get(roads.)
-//     }
-// })
 
 //GET PRODUCTS FOR BUYERS AND SELLERS
 router.get("/products", async (request, response) => {
@@ -119,7 +100,7 @@ router.get("/products", async (request, response) => {
                     }
                 }
             }
-            if (request.query.productName!==""){
+            if (request.query.productName !== "") {
                 const options = {
                     isCaseSensitive: false,
                     shouldSort: true,
@@ -138,7 +119,7 @@ router.get("/products", async (request, response) => {
                     "response": final,
                     "rows": result.length
                 });
-            }else{
+            } else {
                 return response.status(products.status).json({
                     "response": products.data.response,
                     "rows": products.data.rows

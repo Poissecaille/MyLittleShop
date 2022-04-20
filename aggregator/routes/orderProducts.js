@@ -2,7 +2,7 @@ const router = require("express").Router();
 const axios = require('axios');
 
 const roads = {
-    // USER MICROSERVICE
+    // AUTHENTICATION MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     GET_ONE_USER_ADDRESS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddress`,
     GET_DELIVERY_USER_ADDRESS: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/deliveryUserAddress`,

@@ -21,7 +21,7 @@ router.get("/buyer/product", async (request, response) => {
             });
         } else {
             return response.status(200).json({
-                "response": productToRate.data.response,
+                "response": productToRate.data.response
             });
         }
     } catch (error) {
@@ -77,7 +77,7 @@ router.get("/buyer/products", async (request, response) => {
                 }
             }
         );
-        console.log("ASSERTION_TEST", request.query)
+       
         const products = await Product.findAndCountAll({
             where: {
                 [Op.and]: [

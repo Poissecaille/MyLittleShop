@@ -2,6 +2,8 @@
 const CryptoJS = require("crypto-js")
 const env = require("dotenv").config();
 const pass = CryptoJS.AES.encrypt(process.env.ADMIN_PASSWORD, process.env.PASSWORD_SECRET).toString()
+const passBuyer = CryptoJS.AES.encrypt(process.env.BUYER_PASSWORD, process.env.PASSWORD_SECRET).toString()
+
 const now = new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')
 
 module.exports = {
@@ -30,6 +32,30 @@ module.exports = {
       created_at: now,
       updated_at: now
     },
+    {
+      email: "alex@hotmail.fr",
+      firstname: "alex",
+      lastname: "boury",
+      username: "alex",
+      password: passBuyer,
+      birthdate: "03/31/1994",
+      role: "buyer",
+      activated: true,
+      created_at: now,
+      updated_at: now
+    },
+    {
+      email: "rayane@hotmail.fr",
+      firstname: "rayane",
+      lastname: "serir",
+      username: "rayane",
+      password: passBuyer,
+      birthdate: "06/27/1997",
+      role: "buyer",
+      activated: true,
+      created_at: now,
+      updated_at: now
+    }
     ])
   }, async down(queryInterface, Sequelize) {
     return queryInterface.bulkDelete('user', null, {});

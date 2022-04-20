@@ -8,7 +8,8 @@ const products = require("./routes/products");
 const cartProducts = require("./routes/cartProducts");
 const userAddresses = require("./routes/userAddresses");
 const orderProducts = require("./routes/orderProducts");
-const RatingProduct = require("./routes/ratingProducts");
+const ratingProducts = require("./routes/ratingProducts");
+const productCategories = require("./routes/productCategories");
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.use("/", products);
 app.use("/", cartProducts);
 app.use("/", userAddresses);
 app.use("/", orderProducts);
-app.use("/", RatingProduct);
-
+app.use("/", ratingProducts);
+app.use("/", productCategories);
 
 module.exports = app;

@@ -2,7 +2,7 @@ const router = require("express").Router();
 const axios = require('axios');
 
 const roads = {
-    // USER MICROSERVICE
+    // AUTHENTICATION MICROSERVICE
     CREATE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/register`,
     LOGIN_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/login`,
     DISABLE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/disable`,

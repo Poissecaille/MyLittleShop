@@ -34,10 +34,17 @@ if (process.env.NODE_ENV === "development") {
             () => {
                 console.log(`database ${dbName} synced!`)
                 try {
+                    console.log("#1")
                     execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
-                }
-                catch (error) {
-                }
+                } catch (error) { }
+                console.log("#2")
+                try {
+                    execSync('npx sequelize-cli  db:seed --seed 20220205122444-categories.js', { encoding: 'utf-8' });
+                } catch (error) { }
+                console.log("#3")
+                try {
+                    execSync('npx sequelize-cli  db:seed --seed 20220213104607-tags.js', { encoding: 'utf-8' });
+                } catch (error) { }
             }
         )
         .catch((error) => console.log(error));
@@ -53,13 +60,14 @@ const app = express();
 //ROUTES
 const productRoute = require("./routes/product");
 const cartProductRoute = require("./routes/cartProduct");
-const RatingProductRoute = require("./routes/ratingProduct");
+const ratingProductRoute = require("./routes/ratingProduct");
+const productCategoriesRoute = require("./routes/productCategory");
 
 app.use(express.json());
 app.use(cors());
 app.use("/api/", productRoute);
 app.use("/api/", cartProductRoute);
-app.use("/api/", RatingProductRoute);
-
+app.use("/api/", ratingProductRoute);
+app.use("/api/", productCategoriesRoute);
 
 module.exports = app;

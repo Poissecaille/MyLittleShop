@@ -8,15 +8,18 @@ const ProductCategory = db.define('productCategory', {
         primaryKey: true,
         autoIncrement: true
     },
+    productId: {
+        type: DataTypes.INTEGER, unique: "compositePK", allowNull: false
+    },
     name: {
-        type: DataTypes.STRING, unique: false
-    }, //freezeTableName: true
+        type: DataTypes.STRING, unique: "compositePK", allowNull: false
+    }, 
 },
     {
         freezeTableName: true,
         tableName: "productCategory",
         createdAt: "created_at",
-        updatedAt: "updated_at"    
+        updatedAt: "updated_at"
     }
 );
 module.exports = ProductCategory;

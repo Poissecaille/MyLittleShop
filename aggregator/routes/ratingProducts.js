@@ -3,7 +3,7 @@ const axios = require('axios');
 const averageFromArray = require("../utils/functions");
 
 const roads = {
-    // USER MICROSERVICE
+    // AUTHENTICATION MICROSERVICE
     USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     // INVENTORY MICROSERVICE
