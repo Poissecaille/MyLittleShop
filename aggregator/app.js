@@ -10,6 +10,7 @@ const userAddresses = require("./routes/userAddresses");
 const orderProducts = require("./routes/orderProducts");
 const ratingProducts = require("./routes/ratingProducts");
 const productCategories = require("./routes/productCategories");
+const productTags = require("./routes/productTags");
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.use("/", userAddresses);
 app.use("/", orderProducts);
 app.use("/", ratingProducts);
 app.use("/", productCategories);
+app.use("/", productTags);
 
 module.exports = app;

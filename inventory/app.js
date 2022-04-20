@@ -62,6 +62,7 @@ const productRoute = require("./routes/product");
 const cartProductRoute = require("./routes/cartProduct");
 const ratingProductRoute = require("./routes/ratingProduct");
 const productCategoriesRoute = require("./routes/productCategory");
+const productTagsRoute = require("./routes/productTag");
 
 app.use(express.json());
 app.use(cors());
@@ -69,5 +70,6 @@ app.use("/api/", productRoute);
 app.use("/api/", cartProductRoute);
 app.use("/api/", ratingProductRoute);
 app.use("/api/", productCategoriesRoute);
+app.use("/api/", productTagsRoute);
 
 module.exports = app;
