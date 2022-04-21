@@ -9,6 +9,12 @@ const Op = Sequelize.Op
 router.get("/userData", async (request, response) => {
     try {
         var userData;
+        if (request.query.userId) {
+            const user = await User.findByPk(request.query.userId);
+            return response.status(200).json({
+                "response": user
+            });
+        }
         if (!request.query.sellerUsername) {
             const users = await User.findAll({
                 where: {

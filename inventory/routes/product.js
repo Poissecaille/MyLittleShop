@@ -258,29 +258,29 @@ router.put("/seller/product", async (request, response) => {
                 "response": "Product not found for current user"
             });
         }
-        if (request.body.categoryNames) {
-            var categoryIds = []
-            request.body.categoryNames.forEach(async (categoryName) => {
-                await ProductCategory.findOne({
-                    where: {
-                        name: categoryName
-                    }
-                });
-                categoryIds.push(categoryName.id)
-            })
-        }
-        if (request.body.tagNames) {
-            var tagsIds = []
-            request.body.tagNames.forEach(async (tagName) => {
-                await ProductTag.findOne({
-                    where: {
-                        name: tagName
-                    }
-                });
-                tagsIds.push(tagName.id)
-            })
-        }
-        if (request.body.availableQuantity !== undefined && request.body.availableQuantity == 0) {
+        // if (request.body.categoryNames) {
+        //     var categoryIds = []
+        //     request.body.categoryNames.forEach(async (categoryName) => {
+        //         await ProductCategory.findOne({
+        //             where: {
+        //                 name: categoryName
+        //             }
+        //         });
+        //         categoryIds.push(categoryName.id)
+        //     })
+        // }
+        // if (request.body.tagNames) {
+        //     var tagsIds = []
+        //     request.body.tagNames.forEach(async (tagName) => {
+        //         await ProductTag.findOne({
+        //             where: {
+        //                 name: tagName
+        //             }
+        //         });
+        //         tagsIds.push(tagName.id)
+        //     })
+        // }
+        if (request.body.availableQuantity !== undefined || request.body.availableQuantity == 0) {
             if (request.body.onSale == true)
                 return response.status(400).json({
                     "response": "Bad json format",
@@ -294,8 +294,8 @@ router.put("/seller/product", async (request, response) => {
             description: request.body.description !== undefined ? request.body.description : productToUpdate.description,
             unitPrice: request.body.unitPrice !== undefined ? request.body.unitPrice : productToUpdate.unitPrice,
             availableQuantity: request.body.availableQuantity !== undefined ? request.body.availableQuantity : productToUpdate.availableQuantity,
-            productCategoryId: categoryIds !== undefined ? categoryIds : productToUpdate.productCategoryId,
-            productTagId: tagsIds !== undefined ? tagsIds : productToUpdate.productTagId,
+            //productCategoryId: categoryIds !== undefined ? categoryIds : productToUpdate.productCategoryId,
+            //productTagId: tagsIds !== undefined ? tagsIds : productToUpdate.productTagId,
             onSale: request.body.onSale !== undefined ? request.body.onSale : productToUpdate.onSale
         });
         return response.status(200).json({

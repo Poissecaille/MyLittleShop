@@ -33,7 +33,7 @@ const Form = (props) => {
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          }
         }
       )
       .then((response) => {
@@ -75,7 +75,7 @@ const Form = (props) => {
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          }
         }
       )
       .then((response) => {
@@ -97,10 +97,22 @@ const Form = (props) => {
         console.log(error);
       });
   };
+
+  const closeForm = () => {
+    props.updateDisplay();
+  };
+
   if (props.modify) {
     return (
       <div className="form-container">
         <div className="form-inner">
+        <button
+            onClick={() => {
+              closeForm();
+            }}
+          >
+            X
+          </button>
           <div className="form-wrapper">
             <h1>Address editor</h1>
             <label>
@@ -171,6 +183,13 @@ const Form = (props) => {
   return props.trigger ? (
     <div className="form-container">
       <div className="form-inner">
+      <button
+            onClick={() => {
+              closeForm();
+            }}
+          >
+            X
+          </button>
         <div className="form-wrapper">
           <h1>Address form</h1>
           <label>
@@ -221,7 +240,7 @@ const Form = (props) => {
       </div>
     </div>
   ) : (
-    ""
+    <></>
   );
 };
 export default Form;

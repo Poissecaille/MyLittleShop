@@ -2,6 +2,7 @@
 const CryptoJS = require("crypto-js")
 const env = require("dotenv").config();
 const pass = CryptoJS.AES.encrypt(process.env.ADMIN_PASSWORD, process.env.PASSWORD_SECRET).toString()
+const passSeller = CryptoJS.AES.encrypt(process.env.SELLER_PASSWORD, process.env.PASSWORD_SECRET).toString()
 const passBuyer = CryptoJS.AES.encrypt(process.env.BUYER_PASSWORD, process.env.PASSWORD_SECRET).toString()
 
 const now = new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')
@@ -25,7 +26,7 @@ module.exports = {
       firstname: "seller",
       lastname: "seller",
       username: "seller",
-      password: pass,
+      password: passSeller,
       birthdate: "01/01/1970",
       role: "seller",
       activated: true,

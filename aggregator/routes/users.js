@@ -13,6 +13,27 @@ const roads = {
     WITHDRAW_SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`
 }
 
+//GET USER ROLE FOR DYNAMIC FRONT RENDERING
+router.get("/userRole", async (request, response) => {
+    try {
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userRole = user.data.response.role;
+        return response.status(200).json({
+            "response": userRole
+        })
+    }
+    catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 // LOGIN
 router.post("/login", async (request, response) => {
     if (!request.body.email || !request.body.password) {

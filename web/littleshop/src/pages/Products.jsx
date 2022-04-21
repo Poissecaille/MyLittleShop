@@ -3,15 +3,25 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import { useEffect } from "react";
 import { BsSuitHeart, BsCart4 } from "react-icons/bs";
+import { BiEdit } from "react-icons/bi";
+import {
+  MdOutlineRemoveShoppingCart,
+  MdAddShoppingCart,
+  MdPostAdd,
+} from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
 import ReactStars from "react-rating-stars-component";
+import ProductForm from "../components/ProductForm";
 
 const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
+const BACKEND_PRODUCT_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/product`;
 const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
 const BACKEND_CATEGORIES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productCategories`;
 const BACKEND_TAGS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productTags`;
+const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -23,11 +33,15 @@ const Products = () => {
   const [maxPrice, setMaxPrice] = useState(100);
   const [productName, setProductName] = useState("");
   const [productCondition, setProductCondition] = useState(null);
-  //const [productSort, setProductSort] = useState("unitPrice");
   const [cartQuantity, setCartQuantity] = useState(0);
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
+  const [numberOfProducts, setNumberOfProducts] = useState(0);
+  const [role, setRole] = useState("buyer");
+  const [modify, setModify] = useState(false);
+  const [productToUpdate, setProductToUpdate] = useState("");
+  const [form, setShowForm] = useState(false);
 
   const popupHandler = (e) => {
     return new Promise((resolve) => {
@@ -78,12 +92,6 @@ const Products = () => {
       })
       .then((response) => {
         setCategories(response.data.response);
-        // let tmp = [];
-        // for (let i = 0; i < response.data.response.length; i++) {
-        //   tmp.push(response.data.response[i].name);
-        // }
-        // setCategories(tmp);
-        console.log(response.data.response);
       })
       .catch((error) => {
         console.log(error);
@@ -97,15 +105,20 @@ const Products = () => {
       })
       .then((response) => {
         setTags(response.data.response);
-        // let tmp = [];
-        // for (let i = 0; i < response.data.response.length; i++) {
-        //   tmp.push(response.data.response[i].name);
-        // }
-        // setCategories(tmp);
-        console.log(response.data.response);
       })
       .catch((error) => {
         console.log(error);
+      });
+
+    axios
+      .get(BACKEND_USER_ROLE, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        console.log(response.data.response);
+        setRole(response.data.response);
       });
   }, []);
 
@@ -126,7 +139,8 @@ const Products = () => {
       })
       .then((response) => {
         setProducts(response.data.response);
-        console.log(response.data.response);
+        setNumberOfProducts(response.data.rows);
+        console.log(response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -134,7 +148,6 @@ const Products = () => {
   }, [maxPrice, minPrice, productName, productCondition, category, tag]);
 
   const addProductToCart = (data) => {
-    console.log(data);
     axios
       .post(
         BACKEND_CART_PRODUCTS_URL,
@@ -182,6 +195,59 @@ const Products = () => {
         }
       });
   };
+
+  const removeProductFromSells = (data) => {
+    console.log(data);
+    axios
+      .put(
+        BACKEND_PRODUCT_URL,
+        {
+          name: data.name,
+          onSale: false,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data.response);
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const addProductToSells = (data) => {
+    console.log(data);
+    axios
+      .put(
+        BACKEND_PRODUCT_URL,
+        {
+          name: data.name,
+          onSale: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data.response);
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const displayForm = (e) => {
+    setShowForm(!e);
+  };
+
   return (
     <div>
       <Navbar />
@@ -291,11 +357,42 @@ const Products = () => {
           </select>
         </div> */}
       </div>
-
+      <div className="products-found">
+        <p>
+          <b>Products founds:</b>
+          {numberOfProducts}
+        </p>
+      </div>
+      {role === "seller" ? (
+        <button
+          onClick={() => {
+            setModify(false);
+            displayForm();
+          }}
+        >
+          <MdPostAdd /> Add new Product
+        </button>
+      ) : (
+        <></>
+      )}
       <div className="container">
         <Popup trigger={popup} title={popupTitle} value={popupContent} />
+        <ProductForm
+          trigger={form}
+          updateDisplay={() => {
+            displayForm(form);
+            console.log(form);
+          }}
+          modify={modify}
+          productToUpdate={productToUpdate}
+        ></ProductForm>
         {products.map((product) => (
           <div className="product-card" key={product.id}>
+            {product.onSale ? (
+              <div class="green-circle" />
+            ) : (
+              <div class="red-circle" />
+            )}
             <div className="product-img">
               <img
                 src={require("../images/box.png")}
@@ -355,36 +452,77 @@ const Products = () => {
                 edit={false}
                 half={true}
               ></ReactStars>
-              <label>quantity:</label>
-              <input
-                type="number"
-                id="quantity"
-                name="quantity"
-                min="0"
-                max={product.availableQuantity}
-                onInput={handleCartQuantity}
-              ></input>
               <br></br>
-              <button
-                className="cart-button"
-                onClick={() =>
-                  addProductToCart({
-                    id: product.id,
-                    productName: product.name,
-                    label: product.label,
-                    sellerUsername: product.sellerUsername,
-                    quantity: cartQuantity,
-                    unitPrice: product.unitPrice,
-                    condition: product.condition,
-                    availableQuantity: product.availableQuantity,
-                  })
-                }
-              >
-                Add to cart <BsCart4 />
-              </button>
-              <button className="wish-button">
-                Add to whishlist <BsSuitHeart />
-              </button>
+              {role !== "seller" ? (
+                <>
+                  <label>quantity:</label>
+                  <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    min="0"
+                    max={product.availableQuantity}
+                    onInput={handleCartQuantity}
+                  ></input>
+                  <br></br>
+                </>
+              ) : (
+                <></>
+              )}
+              {role === "seller" ? (
+                <>
+                  <button
+                    className="product-edit-btn"
+                    onClick={() => {
+                      setProductToUpdate(product);
+                      setModify(true);
+                      displayForm();
+                    }}
+                  >
+                    <BiEdit /> Modify your product
+                  </button>
+                  <button
+                    onClick={() => {
+                      addProductToSells(product);
+                    }}
+                  >
+                    <MdAddShoppingCart /> Add product to sells
+                  </button>
+                  <button
+                    onClick={() => {
+                      removeProductFromSells(product);
+                    }}
+                  >
+                    <MdOutlineRemoveShoppingCart /> Remove product from sells
+                  </button>
+                  <button>
+                    <RiDeleteBin6Line /> Delete product
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="cart-button"
+                    onClick={() =>
+                      addProductToCart({
+                        id: product.id,
+                        productName: product.name,
+                        label: product.label,
+                        sellerUsername: product.sellerUsername,
+                        quantity: cartQuantity,
+                        unitPrice: product.unitPrice,
+                        condition: product.condition,
+                        availableQuantity: product.availableQuantity,
+                      })
+                    }
+                  >
+                    Add to cart <BsCart4 />
+                  </button>
+                  <button className="wish-button">
+                    Add to whishlist <BsSuitHeart />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}

@@ -20,6 +20,7 @@ const roads = {
 //GET PRODUCTS FOR BUYERS AND SELLERS
 router.get("/products", async (request, response) => {
     try {
+
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -27,6 +28,7 @@ router.get("/products", async (request, response) => {
         });
         const userId = user.data.response.id
         const userRole = user.data.response.role
+        var productIds = [];
         if (userRole == "buyer") {
             if (request.query.condition) {
                 if (request.query.condition != "new" && request.query.condition != "occasion" && request.query.condition != "renovated" && request.query.condition != "all") {
@@ -50,12 +52,8 @@ router.get("/products", async (request, response) => {
             }
 
             var filter;
-            var sellerData;
             var sellerIds = [];
             var sellerNames = [];
-            var productIds = [];
-            var categoriesPerProduct = [];
-            var tagsPerProduct = [];
 
 
             if (!request.query.filter) {
@@ -67,7 +65,7 @@ router.get("/products", async (request, response) => {
             } else {
                 filter = request.query.filter;
             }
-            sellerData = await axios.get(roads.USER_DATA_URL, {
+            const sellerData = await axios.get(roads.USER_DATA_URL, {
                 params: {
                     sellerUsername: request.query.sellerUsername
                 }
@@ -91,8 +89,6 @@ router.get("/products", async (request, response) => {
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
                     sellerId: sellerIds ? sellerIds : null,
-                    // category: request.query.category ? category : null,
-                    // tag: request.query.tag ? tag : null,
                     category: request.query.category ? request.query.category : null,
                     tag: request.query.tag ? request.query.tag : null,
                     lowerPrice: request.query.lowerPrice ? request.query.lowerPrice : 0,
@@ -121,13 +117,13 @@ router.get("/products", async (request, response) => {
                     }
                 }
             }
-            categoriesPerProduct = await axios.get(roads.CATEGORIES_PER_PRODUCT_URL,
+            const categoriesPerProduct = await axios.get(roads.CATEGORIES_PER_PRODUCT_URL,
                 {
                     params: {
                         productIds: productIds
                     }
                 })
-            tagsPerProduct = await axios.get(roads.TAGS_PER_PRODUCT_URL,
+            const tagsPerProduct = await axios.get(roads.TAGS_PER_PRODUCT_URL,
                 {
                     params: {
                         productIds: productIds
@@ -173,14 +169,87 @@ router.get("/products", async (request, response) => {
                 });
             }
         } else if (userRole == "seller") {
-            const products = await axios.get(roads.SEARCH_PRODUCTS_SELLER_URL, {
+            var categoriesPerProduct = [];
+            var tagsPerProduct = [];
+
+            const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
-                    sellerId: userId
+                    sellerId: userId,
+                    category: request.query.category ? request.query.category : null,
+                    tag: request.query.tag ? request.query.tag : null,
+                    lowerPrice: request.query.lowerPrice ? request.query.lowerPrice : 0,
+                    higherPrice: request.query.higherPrice ? request.query.higherPrice : Infinity,
+                    condition: request.query.condition ? request.query.condition : null,
+                    filter: filter
                 }
             });
-            return response.status(products.status).json({
-                "response": products.data.response
+
+            for (let i = 0; i < products.data.response.length; i++) {
+                productIds.push(products.data.response[i].id)
+            }
+            if (products.data.response.length > 0) {
+                categoriesPerProduct = await axios.get(roads.CATEGORIES_PER_PRODUCT_URL,
+                    {
+                        params: {
+                            productIds: productIds
+                        }
+                    })
+                tagsPerProduct = await axios.get(roads.TAGS_PER_PRODUCT_URL,
+                    {
+                        params: {
+                            productIds: productIds
+                        }
+                    })
+
+            }
+            const sellerData = await axios.get(roads.USER_DATA_URL, {
+                params: {
+                    sellerUsername: request.query.sellerUsername
+                }
             });
+
+            for (let i = 0; i < products.data.response.length; i++) {
+                products.data.response[i].categories = []
+                products.data.response[i].tags = []
+                products.data.response[i].sellerUsername = sellerData.data.response[0].username
+                //products.data.response[i].sellerProduct = true
+                for (let j = 0; j < categoriesPerProduct.data.response.length; j++) {
+                    if (products.data.response[i].id === categoriesPerProduct.data.response[j].productId) {
+                        products.data.response[i].categories.push(categoriesPerProduct.data.response[j].name)
+                    }
+                }
+                for (let k = 0; k < tagsPerProduct.data.response.length; k++) {
+                    if (products.data.response[i].id === tagsPerProduct.data.response[k].productId) {
+                        products.data.response[i].tags.push(tagsPerProduct.data.response[k].name)
+                    }
+                }
+            }
+
+            if (request.query.productName !== "") {
+                const options = {
+                    isCaseSensitive: false,
+                    shouldSort: true,
+                    keys: [
+                        "name"
+                    ], threshold: 0.2
+                };
+                const fuse = new Fuse(products.data.response, options);
+                const result = fuse.search(request.query.productName);
+                final = [];
+                for (let i = 0; i < result.length; i++) {
+                    final.push(result[i].item)
+                }
+                return response.status(products.status).json({
+                    "response": final,
+                    "rows": result.length
+                });
+            } else {
+                return response.status(products.status).json({
+                    "response": products.data.response,
+                    "rows": products.data.rows
+                });
+            }
+
         } else {
             return response.status(401).json({ "response": "Unauthorized" });
         }
