@@ -1,27 +1,29 @@
 const router = require("express").Router();
 const ProductCategory = require("../models/productCategory");
 const { QueryTypes } = require('sequelize');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op
 const { sequelizeDev, sequelizeTest } = require("../settings/database")
 
-// // GET SPECIFIC CATEGORY DATA FOR PRODUCT FILTER
-// router.get("/productCategory", async (request, response) => {
-//     try {
-//         const productCategory = await ProductCategory.findOne({
-//             where: {
-//                 name: request.query.name
-//             }
-//         })
-//         return response.status(200).json({
-//             "response": productCategory
-//         }) 
-//     }
-//     catch (error) {
-//         console.log(error)
-//         response.status(error.response.status).json({
-//             "response": error.response.data.response
-//         });
-//     }
-// });
+// GET CATEGORIES FOR PRODUCTS
+router.get("/productCategories", async (request, response) => {
+    try {
+        const productCategories = await ProductCategory.findAll({
+            where: {
+                productId:{[Op.in]:request.query.productIds}
+            }
+        })
+        return response.status(200).json({
+            "response": productCategories
+        }) 
+    }
+    catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 // GET ALL CATEGORIES NAMES FOR FRONT END DROPDOWN
 router.get("/productCategoriesNames", async (request, response) => {

@@ -7,8 +7,8 @@ const roads = {
     SEARCH_PRODUCTS_BUYER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/buyer/products`,
     SEARCH_PRODUCTS_SELLER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
     PRODUCT_SELLER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/product`,
-    // PRODUCT_CATEGORY_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productCategory`,
-    // PRODUCT_TAG_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productTag`,
+    CATEGORIES_PER_PRODUCT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productCategories`,
+    TAGS_PER_PRODUCT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productTags`,
     // AUTHENTICATION MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
@@ -51,10 +51,12 @@ router.get("/products", async (request, response) => {
 
             var filter;
             var sellerData;
-            // var category;
-            // var tag;
             var sellerIds = [];
             var sellerNames = [];
+            var productIds = [];
+            var categoriesPerProduct = [];
+            var tagsPerProduct = [];
+
 
             if (!request.query.filter) {
                 filter = "unitPrice";
@@ -85,27 +87,6 @@ router.get("/products", async (request, response) => {
                 console.log("NAMES:", sellerNames)
             }
 
-            // if (request.query.category) {
-            //     category = await axios.get(roads.PRODUCT_CATEGORY_URL,
-            //         {
-            //             params: {
-            //                 name: request.query.category
-            //             }
-            //         }
-            //     )
-
-            // }
-
-            // if (request.query.tag) {
-            //     tag = await axios.get(roads.PRODUCT_TAG_URL,
-            //         {
-            //             params: {
-            //                 name: request.query.tag
-            //             }
-            //         }
-            //     )
-
-            // }
             console.log(request.query.category, request.query.tag)
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
@@ -122,6 +103,7 @@ router.get("/products", async (request, response) => {
             });
             if (sellerIds && sellerIds.length > 0) {
                 for (let i = 0; i < products.data.response.length; i++) {
+                    productIds.push(products.data.response[i].id)
                     for (let j = 0; j < sellerIds.length; j++) {
                         if (products.data.response[i].sellerId === sellerIds[j]) {
                             products.data.response[i].sellerUsername = sellerNames[j]
@@ -131,10 +113,38 @@ router.get("/products", async (request, response) => {
             }
             else {
                 for (let i = 0; i < products.data.response.length; i++) {
+                    productIds.push(products.data.response[i].id)
                     for (let j = 0; j < sellerData.data.response.length; j++) {
                         if (sellerData.data.response[j].id == products.data.response[i].sellerId) {
                             products.data.response[i].sellerUsername = sellerData.data.response[j].username
                         }
+                    }
+                }
+            }
+            categoriesPerProduct = await axios.get(roads.CATEGORIES_PER_PRODUCT_URL,
+                {
+                    params: {
+                        productIds: productIds
+                    }
+                })
+            tagsPerProduct = await axios.get(roads.TAGS_PER_PRODUCT_URL,
+                {
+                    params: {
+                        productIds: productIds
+                    }
+                })
+
+            for (let i = 0; i < products.data.response.length; i++) {
+                products.data.response[i].categories = []
+                products.data.response[i].tags = []
+                for (let j = 0; j < categoriesPerProduct.data.response.length; j++) {
+                    if (products.data.response[i].id === categoriesPerProduct.data.response[j].productId) {
+                        products.data.response[i].categories.push(categoriesPerProduct.data.response[j].name)
+                    }
+                }
+                for (let k = 0; k < tagsPerProduct.data.response.length; k++) {
+                    if (products.data.response[i].id === tagsPerProduct.data.response[k].productId) {
+                        products.data.response[i].tags.push(tagsPerProduct.data.response[k].name)
                     }
                 }
             }
@@ -150,7 +160,6 @@ router.get("/products", async (request, response) => {
                 const result = fuse.search(request.query.productName);
                 var final = [];
                 for (let i = 0; i < result.length; i++) {
-                    console.log(final)
                     final.push(result[i].item)
                 }
                 return response.status(products.status).json({

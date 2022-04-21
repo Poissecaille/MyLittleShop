@@ -328,6 +328,18 @@ const Products = () => {
                 <b>Condition: </b>
                 {product.condition}
               </p>
+              <p>
+                <b>Categories:</b>
+                {product.categories.map((category) => (
+                  <p>{`- ${category}`}</p>
+                ))}
+              </p>
+              <p>
+                <b>Tags:</b>
+                {product.tags.map((tag) => (
+                  <p>{`- ${tag}`}</p>
+                ))}
+              </p>
               <p className="card-content-description">
                 <b>Description: </b>
                 {product.description}
