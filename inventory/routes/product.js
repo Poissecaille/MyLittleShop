@@ -36,9 +36,10 @@ router.get("/buyer/product", async (request, response) => {
 router.get("/buyer/products", async (request, response) => {
     try {
         var sellersIds = [];
-        // var categoriesIds = [];
-        // var tagsIds = [];
+        var productsIdsPerCategory = [];
+        var productsIdsPerTag = [];
         var productsIds = [];
+
         if (Array.isArray(request.query.sellerId)) {
             console.log(request.query.sellerId)
             request.query.sellerId.forEach(
@@ -49,7 +50,7 @@ router.get("/buyer/products", async (request, response) => {
         } else {
             sellersIds.push(parseInt(request.query.sellerId))
         }
-        if (request.query.category) {
+        if (request.query.category || request.query.tag) {
             console.log(request.query.category)
             const productCategories = await ProductCategory.findAll({
                 where:
@@ -58,25 +59,30 @@ router.get("/buyer/products", async (request, response) => {
                 }
             });
             for (let i = 0; i < productCategories.length; i++) {
-                productsIds.push(productCategories[i].productId)
+                productsIdsPerCategory.push(productCategories[i].productId)
             }
-        }
-        if (request.query.tag) {
-            const productTags = await ProductTag.findAll({
-                where:
-                {
-                    name: request.query.tag,
+            if (request.query.tag) {
+                const productTags = await ProductTag.findAll({
+                    where:
+                    {
+                        name: request.query.tag,
+                    }
+                });
+                for (let i = 0; i < productTags.length; i++) {
+                    productsIdsPerTag.push(productTags[i].productId)
                 }
-            });
-            for (let i = 0; i < productTags.length; i++) {
-                productsIds.push(productTags[i].productId)
+                productsIds = productsIdsPerCategory.filter((value) => productsIdsPerTag.includes(value));
+            } else {
+                for (let i = 0; i < productsIdsPerCategory.length; i++) {
+                    productsIds.push(productsIdsPerCategory[i])
+                }
             }
         }
-
         const products = await Product.findAndCountAll({
             where: {
                 [Op.and]: [
-                    { id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
+                    //{ id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
+                    { id: request.query.category || request.query.tag ? { [Op.in]: productsIds } : { [Op.not]: null } },
                     { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },
                     { unitPrice: { [Op.between]: [request.query.lowerPrice, request.query.higherPrice] } },
                     { condition: request.query.condition !== undefined ? { [Op.eq]: request.query.condition } : { [Op.not]: null } },
