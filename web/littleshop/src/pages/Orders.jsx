@@ -134,6 +134,7 @@ const Order = () => {
                           ratingChanged(e);
                           displayForm();
                         }}
+                        style={{zIndex:0}}
                       >
                       </ReactStars> : ""}</td>
                   </tr>

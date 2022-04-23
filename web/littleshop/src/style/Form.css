@@ -1,4 +1,4 @@
-.form-container{
+.form-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -8,20 +8,42 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
 }
+
 .form-inner {
     position: relative;
     width: 100%;
     height: 80%;
     max-width: 640px;
     background-color: white;
-  }
-.form-wrapper{
+}
+
+.form-wrapper {
     width: 100%;
     height: 100%;
     padding-left: 30%;
-    padding-top: 10%;
+    padding-top: 0%;
 }
-label{
-    display:table-row;
+
+label {
+    display: table-row;
+}
+
+.categories {
+    position: absolute;
+    left: 20%;
+    bottom: 5%;
+}
+
+.tags {
+    position: absolute;
+    right: 20%;
+    bottom: 5%;
+}
+
+.product-form-btn {
+    position: absolute;
+    bottom: 1%;
+    left: 40%;
 }

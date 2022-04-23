@@ -49,7 +49,8 @@ const RatingForm = (props) => {
                         value={props.rating}
                         size={24}
                         activeColor='#FF7F7F'
-                        edit={false}>
+                        edit={false}
+                        style={{zIndex:0}}>
                     </ReactStars>
                     <input
                         type="text"

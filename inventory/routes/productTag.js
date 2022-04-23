@@ -49,4 +49,36 @@ router.get("/productTagsNames", async (request, response) => {
 });
 
 
+// ADD PRODUCT TAGS 
+router.post("/productTags", async (request, response) => {
+    try {
+        var productTags = []
+        const now = new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')
+        for (let i = 0; i < request.body.productTagsNames.length; i++) {
+            let buffer = {}
+            buffer.productId = request.body.productId
+            buffer.name = request.body.productTagsNames[i]
+            buffer.created_at = now
+            buffer.updated_at = now
+            productTags.push(buffer)
+            buffer = {}
+        }
+        const productTagsToSave = await ProductTag.bulkCreate(productTags)
+        return response.status(productTagsToSave.status).json({
+            "response": productTagsToSave
+        });
+    } catch (error) {
+        console.log(error)
+        if (error.name === "SequelizeUniqueConstraintError") {
+            return response.status(409).json({
+                "response": "Tag already existant for current product"
+            });
+        }
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
+
 module.exports = router;

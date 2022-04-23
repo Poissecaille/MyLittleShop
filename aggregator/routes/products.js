@@ -343,6 +343,47 @@ router.put("/product", async (request, response) => {
             //         mailContent: request.body.mailContent
             //     });
             // }
+
+            if (request.body.categories && request.body.categories.length > 0) {
+                let productCategoriesNames = [];
+                const categories = await axios.get(roads.CATEGORIES_PER_PRODUCT_URL, {
+                    params: {
+                        productIds: [productToUpdate.data.response.id]
+                    }
+                })
+                for (let i = 0; i < request.body.categories.length; i++) {
+                    for (let j = 0; j < categories.data.response.length; j++) {
+                        if (request.body.categories[i] != categories.data.response[j].name) {
+                            productCategoriesNames.push(request.body.categories[i])
+                        }
+                    }
+                }
+                const newCategories = await axios.post(roads.CATEGORIES_PER_PRODUCT_URL, {
+                    productCategoriesNames: productCategoriesNames,
+                    productId: productToUpdate.data.response.id
+                })
+                console.log(newCategories)
+            }
+            if (request.body.tags && request.body.tags.length > 0) {
+                let productTagsNames = [];
+                const tags = await axios.get(roads.TAGS_PER_PRODUCT_URL, {
+                    params: {
+                        productIds: [productToUpdate.data.response.id]
+                    }
+                })
+                for (let i = 0; i < request.body.tags.length; i++) {
+                    for (let j = 0; j < tags.data.response.length; j++) {
+                        if (request.body.tags[i] != tags.data.response[j].name) {
+                            productTagsNames.push(request.body.tags[i])
+                        }
+                    }
+                }
+                const newTags = await axios.post(roads.TAGS_PER_PRODUCT_URL, {
+                    productTagsNames: productTagsNames,
+                    productId: productToUpdate.data.response.id
+                })
+                console.log(newTags)
+            }
             return response.status(productToUpdate.status).json({
                 "response": productToUpdate.data.response
             });

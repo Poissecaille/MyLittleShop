@@ -287,6 +287,7 @@ router.put("/seller/product", async (request, response) => {
                 });
             request.body.onSale = false
         }
+
         await productToUpdate.update({
             name: request.body.newName !== undefined ? request.body.newName : productToUpdate.name,
             label: request.body.label !== undefined ? request.body.label : productToUpdate.label,
@@ -294,8 +295,6 @@ router.put("/seller/product", async (request, response) => {
             description: request.body.description !== undefined ? request.body.description : productToUpdate.description,
             unitPrice: request.body.unitPrice !== undefined ? request.body.unitPrice : productToUpdate.unitPrice,
             availableQuantity: request.body.availableQuantity !== undefined ? request.body.availableQuantity : productToUpdate.availableQuantity,
-            //productCategoryId: categoryIds !== undefined ? categoryIds : productToUpdate.productCategoryId,
-            //productTagId: tagsIds !== undefined ? tagsIds : productToUpdate.productTagId,
             onSale: request.body.onSale !== undefined ? request.body.onSale : productToUpdate.onSale
         });
         return response.status(200).json({

@@ -92,6 +92,7 @@ const Products = () => {
       })
       .then((response) => {
         setCategories(response.data.response);
+        console.log(response.data.response)
       })
       .catch((error) => {
         console.log(error);
@@ -105,6 +106,7 @@ const Products = () => {
       })
       .then((response) => {
         setTags(response.data.response);
+        console.log(response.data.response)
       })
       .catch((error) => {
         console.log(error);
@@ -140,7 +142,6 @@ const Products = () => {
       .then((response) => {
         setProducts(response.data.response);
         setNumberOfProducts(response.data.rows);
-        console.log(response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -379,6 +380,8 @@ const Products = () => {
         <Popup trigger={popup} title={popupTitle} value={popupContent} />
         <ProductForm
           trigger={form}
+          categories={categories}
+          tags={tags}
           updateDisplay={() => {
             displayForm(form);
             console.log(form);
