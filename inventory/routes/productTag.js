@@ -80,5 +80,25 @@ router.post("/productTags", async (request, response) => {
     }
 });
 
+// REMOVE PRODUCT TAGS
+router.delete("/productTags", async (request, response) => {
+    try {
+        const productTagsToDelete = ProductTag.destroy({
+            where: {
+                name: tagsToDelete,
+                productId: productId
+            }
+        });
+        return response.status(productTagsToDelete.status).json({
+            "response": productTagsToDelete
+        });
+    }
+    catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 module.exports = router;

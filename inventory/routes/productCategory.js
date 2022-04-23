@@ -71,10 +71,10 @@ router.post("/productCategories", async (request, response) => {
     try {
         var productCategories = []
         const now = new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')
-        for (let i = 0; i < request.body.productCategoriesNames.length; i++) {
+        for (let i = 0; i < request.body.categoriesToCreate.length; i++) {
             let buffer = {}
             buffer.productId = request.body.productId
-            buffer.name = request.body.productCategoriesNames[i]
+            buffer.name = request.body.categoriesToCreate[i]
             buffer.created_at = now
             buffer.updated_at = now
             productCategories.push(buffer)
@@ -97,5 +97,25 @@ router.post("/productCategories", async (request, response) => {
     }
 });
 
+// REMOVE PRODUCT CATEGORIES
+router.delete("/productCategories", async (request, response) => {
+    try {
+        const productCategoriesToDelete = ProductCategory.destroy({
+            where: {
+                name: categoriesToDelete,
+                productId: productId
+            }
+        });
+        return response.status(productCategoriesToDelete.status).json({
+            "response": productCategoriesToDelete
+        });
+    }
+    catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 module.exports = router;

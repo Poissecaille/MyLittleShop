@@ -344,45 +344,63 @@ router.put("/product", async (request, response) => {
             //     });
             // }
 
-            if (request.body.categories && request.body.categories.length > 0) {
+            if (request.body.categories) {
                 let productCategoriesNames = [];
                 const categories = await axios.get(roads.CATEGORIES_PER_PRODUCT_URL, {
                     params: {
                         productIds: [productToUpdate.data.response.id]
                     }
                 })
-                for (let i = 0; i < request.body.categories.length; i++) {
-                    for (let j = 0; j < categories.data.response.length; j++) {
-                        if (request.body.categories[i] != categories.data.response[j].name) {
-                            productCategoriesNames.push(request.body.categories[i])
-                        }
-                    }
+                for (let i = 0; i < categories.data.response.length; i++) {
+                    productCategoriesNames.push(categories.data.response[i].name)
                 }
+                var categoriesToDelete = productCategoriesNames.filter(element =>
+                    !request.body.categories.includes(element)
+                )
+                var categoriesToCreate = request.body.categories.filter(element =>
+                    !productCategoriesNames.includes(element)
+                )
+
+                console.log("request", request.body.categories)
+                console.log("db", productCategoriesNames)
+                console.log("à créer", categoriesToCreate)
+                console.log("à détruire", categoriesToDelete)
+
                 const newCategories = await axios.post(roads.CATEGORIES_PER_PRODUCT_URL, {
-                    productCategoriesNames: productCategoriesNames,
+                    categoriesToCreate: categoriesToCreate,
                     productId: productToUpdate.data.response.id
-                })
-                console.log(newCategories)
+                });
+                const oldCategories = await axios.delete(roads.CATEGORIES_PER_PRODUCT_URL, {
+                    categoriesToDelete: categoriesToDelete,
+                    productId: productToUpdate.data.response.id
+                });
             }
-            if (request.body.tags && request.body.tags.length > 0) {
+            if (request.body.tags) {
                 let productTagsNames = [];
                 const tags = await axios.get(roads.TAGS_PER_PRODUCT_URL, {
                     params: {
                         productIds: [productToUpdate.data.response.id]
                     }
                 })
-                for (let i = 0; i < request.body.tags.length; i++) {
-                    for (let j = 0; j < tags.data.response.length; j++) {
-                        if (request.body.tags[i] != tags.data.response[j].name) {
-                            productTagsNames.push(request.body.tags[i])
-                        }
-                    }
-                }
+                var tagsToDelete = productTagsNames.filter(element =>
+                    !request.body.tags.includes(element)
+                )
+                var tagsToCreate = request.body.tags.filter(element =>
+                    !productTagsNames.includes(element)
+                )
+                console.log("request", request.body.tags)
+                console.log("db", productTagsNames)
+                console.log("à créer", tagsToCreate)
+                console.log("à détruire", tagsToDelete)
+
                 const newTags = await axios.post(roads.TAGS_PER_PRODUCT_URL, {
-                    productTagsNames: productTagsNames,
+                    tagsToCreate: tagsToCreate,
                     productId: productToUpdate.data.response.id
-                })
-                console.log(newTags)
+                });
+                const oldTags = await axios.delete(roads.TAGS_PER_PRODUCT_URL, {
+                    tagsToDelete: tagsToDelete,
+                    productId: productToUpdate.data.response.id
+                });
             }
             return response.status(productToUpdate.status).json({
                 "response": productToUpdate.data.response
