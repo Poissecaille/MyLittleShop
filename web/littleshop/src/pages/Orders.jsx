@@ -6,17 +6,22 @@ import { useNavigate } from "react-router-dom";
 import ReactStars from "react-rating-stars-component";
 import RatingForm from "../components/RatingForm";
 //const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
-const SYNC_BACKEND_ORDER_URL = "http://localhost:5000/syncOrder";
+const SYNC_BACKEND_ORDER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncOrder`;
+const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
+
 const Order = () => {
   //localStorage.removeItem("orderProduct")
   var orders = localStorage.getItem("orderProduct")
     ? JSON.parse(localStorage.getItem("orderProduct"))
     : [];
+    console.log(orders)
+
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
   const [ratingValue, setRatingValue] = useState(0);
   const [form, setShowForm] = useState(false);
+  const [role, setRole] = useState("buyer");
   const navigate = useNavigate();
   var [billing, setBilling] = useState(0);
 
@@ -40,7 +45,20 @@ const Order = () => {
   };
 
   useEffect(() => {
-    console.log(orders);
+    axios
+      .get(BACKEND_USER_ROLE, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        console.log(response.data.response);
+        setRole(response.data.response);
+      });
+  })
+
+  useEffect(() => {
+    console.log("ABRACADABRA");
     if (!orders || orders.length === 0) {
       axios
         .get(SYNC_BACKEND_ORDER_URL, {
@@ -50,20 +68,20 @@ const Order = () => {
         })
         .then((response) => {
           orders = response.data.response;
-          console.log(orders);
-          if (orders.length === 0) {
-            setPopupTitle("LittleShop Order management information");
-            setPopupContent(
-              `You haven't placed any order yet ${JSON.parse(localStorage["account"]).username
-              } !`
-            );
-            popupHandler().then(() => {
-              navigate("/products");
-            });
-          } else {
-            localStorage.setItem("orderProduct", JSON.stringify(orders));
-            //window.location.reload();
-          }
+          console.log("ORDERS!!", orders);
+          console.log(role)
+          // if (orders.length === 0 && role === "buyer") {
+          //   setPopupTitle("LittleShop Order management information");
+          //   setPopupContent(
+          //     "You haven't placed any order yet!"
+          //   );
+          //   popupHandler().then(() => {
+          //     navigate("/products");
+          //   });
+          // } else {
+          localStorage.setItem("orderProduct", JSON.stringify(orders));
+          //window.location.reload();
+          // }
         })
         .catch((error) => {
           console.log(error);
@@ -134,7 +152,7 @@ const Order = () => {
                           ratingChanged(e);
                           displayForm();
                         }}
-                        style={{zIndex:0}}
+                        style={{ zIndex: 0 }}
                       >
                       </ReactStars> : ""}</td>
                   </tr>

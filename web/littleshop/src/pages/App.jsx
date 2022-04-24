@@ -10,12 +10,14 @@ import Logout from "./Logout";
 import Account from "./Account";
 import Addresses from "./Addresses";
 import Order from "./Orders";
+import Admin from "./Admin";
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route exact path="/" element={<Home />} />
+        <Route exact path="/admin" element={<Admin />} />
         <Route exact path="/login" element={<Login />} />
         <Route exact path="/logout" element={<Logout />} />
         <Route exact path="/register" element={<Register />} />

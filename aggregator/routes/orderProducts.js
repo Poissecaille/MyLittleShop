@@ -147,7 +147,8 @@ router.post("/orderProducts", async (request, response) => {
                 });
                 //TODO ROLLBACK IF NECESSARY
             }
-        } else {
+        }
+        else {
             return response.status(401).json({
                 "response": "Unauthorized"
             });
@@ -303,12 +304,12 @@ router.get("/syncOrder", async (request, response) => {
                     }
                     for (let k = 0; k < productData.data.response.length; k++) {
                         if (productData.data.response[k].id === orders.data.response[i].productId) {
-                            productData.data.response[k].quantity=orders.data.response[i].quantity
+                            productData.data.response[k].quantity = orders.data.response[i].quantity
                             dict.cart = [productData.data.response[k]]
-                            dict.cart[0].productName=dict.cart[0].name
+                            dict.cart[0].productName = dict.cart[0].name
                             delete dict.cart[0].name
-                            dict.cart[0].shipped=orders.data.response[i].shipped
-                            dict.cart[0].shippingDate=orders.data.response[i].shippingDate
+                            dict.cart[0].shipped = orders.data.response[i].shipped
+                            dict.cart[0].shippingDate = orders.data.response[i].shippingDate
                         }
                     }
                 }
@@ -316,6 +317,27 @@ router.get("/syncOrder", async (request, response) => {
             }
             return response.status(200).json({
                 "response": json
+            });
+        } else if (userRole === "seller") {
+            var sellerProductsIds = [];
+            const sellerProducts = await axios.get(roads.SELLER_PRODUCTS_URL, {
+                params: {
+                    sellerId: userId
+                }
+            })
+            for (let i = 0; i < sellerProducts.data.response.length; i++) {
+                sellerProductsIds.push(sellerProducts.data.response[i].id)
+            }
+            console.log("********************")
+            console.log(userId)
+            console.log(sellerProductsIds)
+            const sellerOrders = await axios.get(roads.GET_SELLER_ORDERS_URL, {
+                params: {
+                    productsIds: sellerProductsIds
+                }
+            });
+            return response.status(200).json({
+                "response": sellerOrders.data.response
             });
         }
     }

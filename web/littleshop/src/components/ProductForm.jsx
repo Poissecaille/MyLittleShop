@@ -58,6 +58,8 @@ const ProductForm = (props) => {
           description: description,
           unitPrice: unitPrice,
           availableQuantity: availableQuantity,
+          categories: categories ? categories : null,
+          tags: tags ? tags : tags
         },
         {
           headers: {
@@ -252,6 +254,26 @@ const ProductForm = (props) => {
             value={availableQuantity}
             onInput={(e) => setAvailableQuantity(e.target.value)}
           />
+          <div className="categories">
+            <label>
+              <b>Categories</b>
+            </label>
+            <select multiple={true}>
+              {props.categories.map((category) => (
+                <option value={category} onClick={() => handleMultipleCategories(category)}>{category}</option>
+              ))}
+            </select>
+          </div>
+          <div className="tags">
+            <label>
+              <b>Tags</b>
+            </label>
+            <select multiple={true}>
+              {props.tags.map((tag) => (
+                <option value={tag} onClick={() => handleMultipleTags(tag)}>{tag}</option>
+              ))}
+            </select>
+          </div>
           <br />
           <button className="product-form-btn" onClick={() => addProduct()}>
             Add product <MdOutlineEditLocation />

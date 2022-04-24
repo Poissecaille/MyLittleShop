@@ -7,6 +7,7 @@ const Op = Sequelize.Op
 router.get("/seller/orderProducts", async (request, response) => {
     try {
         console.log("----------------TEST---------------")
+        console.log(request.query.productsIds)
         const orderProducts = await OrderProduct.findAll({
             where: {
                 productId: {
@@ -31,7 +32,7 @@ router.get("/buyer/orderProducts", async (request, response) => {
         console.log("----------------TEST---------------")
         const orderProducts = await OrderProduct.findAll({
             where: {
-                ownerId: request.query.ownerId,
+                ownerId: request.query.ownerId ? request.query.ownerId : { [Op.in]: request.query.buyerIds },
                 productId: request.query.productId !== undefined ? request.query.productId : { [Op.ne]: null },
                 //sellerId: request.query.sellerId !== undefined ? request.query.sellerId : { [Op.ne]: null },
                 shipped: request.query.orderStatus !== undefined ? request.query.orderStatus : { [Op.ne]: null }

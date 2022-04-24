@@ -39,7 +39,6 @@ const Login = () => {
           console.log("token", localStorage.getItem("token"))
           localStorage.removeItem("token")
           if (localStorage.getItem("account")) {
-            console.log("account", localStorage.getItem("account"))
             localStorage.removeItem("account")
           }
         }
@@ -48,6 +47,7 @@ const Login = () => {
         //localStorage.setItem("password",password);
         setPopupTitle("LittleShop account management information");
         setPopupContent("You have successfully logged in  !");
+        localStorage.setItem("account",JSON.stringify())
         await popupHandler();
         navigate("/");
         window.location.reload();

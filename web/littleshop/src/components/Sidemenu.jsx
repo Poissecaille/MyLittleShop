@@ -5,59 +5,90 @@ import { AiOutlineClose, AiOutlineHome } from "react-icons/ai";
 import { GrCatalogOption } from "react-icons/gr"
 import { BsSuitHeart, BsCart4, BsSignpost } from "react-icons/bs"
 import { RiBillLine } from "react-icons/ri"
-import { MdOutlineAccountCircle } from "react-icons/md"
+import { MdOutlineAccountCircle, MdOutlineAdminPanelSettings } from "react-icons/md"
 import '../style/Sidemenu.css'
 import { IconContext } from 'react-icons/lib';
+import { useEffect } from 'react';
+import axios from "axios";
 
-const token = localStorage.getItem("token");
-const sidebarData = [
-    {
-        title: "Home",
-        path: "/",
-        icon: <AiOutlineHome />,
-        className: 'nav-text'
-    },
-    {
-        title: "Account",
-        path: "/account",
-        icon: <MdOutlineAccountCircle />,
-        className: token ? 'nav-text' : 'nav-text-hidden'
-    },
-    {
-        title: "Addresses",
-        path: "/addresses",
-        icon: <BsSignpost />,
-        className: token ? 'nav-text' : 'nav-text-hidden'
-    },
-    {
-        title: "Products",
-        path: "/products",
-        icon: <GrCatalogOption />,
-        className: token ? 'nav-text' : 'nav-text-hidden'
-    },
-    {
-        title: "Cart",
-        path: "/cart",
-        icon: <BsCart4 />,
-        className: token ? 'nav-text' : 'nav-text-hidden'
-    },
-    {
-        title: "Wishlist",
-        path: "/wishlist",
-        icon: <BsSuitHeart />,
-        className: token ? 'nav-text' : 'nav-text-hidden'
-    },
-    {
-        title: "Orders",
-        path: "/orders",
-        icon: <RiBillLine />,
-        className: token ? 'nav-text' : 'nav-text-hidden'
-    },
-]
+//const token = localStorage.getItem("token");
+
+
 
 const Sidemenu = () => {
+
+    const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
     const [sidebar, setSidebar] = useState(false);
+    const [token, setToken] = useState(localStorage.getItem("token"));
     const showSidebar = () => setSidebar(!sidebar);
+    const [role, setRole] = useState("buyer");
+    const sidebarData = [
+        {
+            title: "Home",
+            path: "/",
+            icon: <AiOutlineHome />,
+            className: 'nav-text'
+        },
+        {
+            title: "Account",
+            path: "/account",
+            icon: <MdOutlineAccountCircle />,
+            className: token ? 'nav-text' : 'nav-text-hidden'
+        },
+        {
+            title: "Addresses",
+            path: "/addresses",
+            icon: <BsSignpost />,
+            className: token ? 'nav-text' : 'nav-text-hidden'
+        },
+        {
+            title: "Products",
+            path: "/products",
+            icon: <GrCatalogOption />,
+            className: token ? 'nav-text' : 'nav-text-hidden'
+        },
+        {
+            title: "Cart",
+            path: "/cart",
+            icon: <BsCart4 />,
+            className: token ? 'nav-text' : 'nav-text-hidden'
+        },
+        {
+            title: "Wishlist",
+            path: "/wishlist",
+            icon: <BsSuitHeart />,
+            className: token ? 'nav-text' : 'nav-text-hidden'
+        },
+        {
+            title: "Orders",
+            path: "/orders",
+            icon: <RiBillLine />,
+            className: token ? 'nav-text' : 'nav-text-hidden'
+        },
+        {
+            title: "Admin",
+            path: "/admin",
+            icon: <MdOutlineAdminPanelSettings />,
+            className: role === "admin" ? 'nav-text' : 'nav-text-hidden'
+        },
+    ]
+    useEffect(() => {
+        axios
+            .get(BACKEND_USER_ROLE, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            })
+            .then((response) => {
+                setRole(response.data.response);
+            }).catch((error) => {
+
+            })
+
+    });
+
+
+
     return (
         <>
             <IconContext.Provider value={{ color: "black" }}>

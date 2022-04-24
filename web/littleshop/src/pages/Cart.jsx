@@ -60,8 +60,7 @@ const Cart = () => {
       if (cart.length === 0) {
         setPopupTitle("LittleShop Cart management information");
         setPopupContent(
-          `No product is currently in your cart ${
-            JSON.parse(localStorage["account"]).username
+          `No product is currently in your cart ${JSON.parse(localStorage["account"]).username
           } !`
         );
         popupHandler().then(() => {
@@ -166,67 +165,69 @@ const Cart = () => {
       popupHandler().then(() => {
         navigate("/addresses");
       });
-    }
-    for (let i = 0; i < addresses.length; i++) {
-      if (addresses[i].mainAddress) {
-        console.log(addresses[i]);
-        axios
-          .post(
-            BACKEND_ORDER_URL,
-            {
-              address1: addresses[i].address1,
-              address2: addresses[i].address2,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+    } else {
+      for (let i = 0; i < addresses.length; i++) {
+        if (addresses[i].mainAddress) {
+          console.log(addresses[i]);
+          axios
+            .post(
+              BACKEND_ORDER_URL,
+              {
+                address1: addresses[i].address1,
+                address2: addresses[i].address2,
               },
-            }
-          )
-          .then((response) => {
-            if (response.status === 201) {
-              const defaultNumberOfDaysToDeliver = 3;
-              const nextDate = new Date(
-                Date.now() + defaultNumberOfDaysToDeliver * 24 * 60 * 60 * 1000
-              );
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            )
+            .then((response) => {
+              if (response.status === 201) {
+                const defaultNumberOfDaysToDeliver = 3;
+                const nextDate = new Date(
+                  Date.now() + defaultNumberOfDaysToDeliver * 24 * 60 * 60 * 1000
+                );
 
-              if (!localStorage.getItem("orderProduct")) {
-                localStorage.setItem("orderProduct", "[]");
+                if (!localStorage.getItem("orderProduct")) {
+                  localStorage.setItem("orderProduct", "[]");
+                }
+                var oldOrders = JSON.parse(localStorage.getItem("orderProduct"));
+                console.log("oldOrders", oldOrders);
+                for (let i = 0; i < cart.length; i++) {
+                  cart[i].shipped = "preparation";
+                  cart[i].shippingDate = nextDate;
+                }
+                oldOrders.push({
+                  address: addresses[i],
+                  cart: cart,
+                });
+                console.log("Orders", oldOrders);
+                localStorage.setItem("orderProduct", JSON.stringify(oldOrders));
+                localStorage.removeItem("cartProduct");
+                setPopupTitle("LittleShop Cart management information");
+                setPopupContent(`Cart is validated for ${cartPrice}€!`);
+                popupHandler(popup).then(() => {
+                  navigate("/orders");
+                });
               }
-              var oldOrders = JSON.parse(localStorage.getItem("orderProduct"));
-              console.log("oldOrders", oldOrders);
-              for (let i = 0; i < cart.length; i++) {
-                cart[i].shipped = "preparation";
-                cart[i].shippingDate = nextDate;
+            })
+            .catch((error) => {
+              console.log(error);
+              if (error.response.status === 403) {
+                localStorage.removeItem("token");
+                setPopupTitle("LittleShop account management information");
+                setPopupContent("You are currently not logged in !");
+                popupHandler().then(() => {
+                  navigate("/login");
+                });
               }
-              oldOrders.push({
-                address: addresses[i],
-                cart: cart,
-              });
-              console.log("Orders", oldOrders);
-              localStorage.setItem("orderProduct", JSON.stringify(oldOrders));
-              localStorage.removeItem("cartProduct");
-              setPopupTitle("LittleShop Cart management information");
-              setPopupContent(`Cart is validated for ${cartPrice}€!`);
-              popupHandler(popup).then(() => {
-                navigate("/orders");
-              });
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            if (error.response.status === 403) {
-              localStorage.removeItem("token");
-              setPopupTitle("LittleShop account management information");
-              setPopupContent("You are currently not logged in !");
-              popupHandler().then(() => {
-                navigate("/login");
-              });
-            }
-          });
-        break;
+            });
+          break;
+        }
       }
     }
+
   };
 
   return (

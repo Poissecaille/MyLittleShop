@@ -264,6 +264,7 @@ router.get("/products", async (request, response) => {
     }
 });
 
+//ALLOW A SELLER TO CREATE A PRODUCT
 router.post("/product", async (request, response) => {
     try {
         if (!request.body.name || !request.body.label || !request.body.condition || !request.body.description || !request.body.unitPrice || !request.body.availableQuantity) {
@@ -295,7 +296,22 @@ router.post("/product", async (request, response) => {
                     sellerId: userId,
                 }
             )
-
+            if (newProduct.status === 201) {
+                if (request.body.categories) {
+                    const categoriesToCreate = await axios.post(roads.CATEGORIES_PER_PRODUCT_URL, {
+                        categoriesToCreate: request.body.categories,
+                        productId: newProduct.data.response.id
+                    })
+                }
+            }
+            if (newProduct.status === 201) {
+                if (request.body.tags) {
+                    const tagsToCreate = await axios.post(roads.TAGS_PER_PRODUCT_URL, {
+                        tagsToCreate: request.body.tags,
+                        productId: newProduct.data.response.id
+                    })
+                }
+            }
             return response.status(newProduct.status).json({
                 "response": newProduct.data.response
             });
