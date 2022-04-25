@@ -58,7 +58,7 @@ const Admin = () => {
                 })
         }
 
-    })
+    });
 
     return (
         <>

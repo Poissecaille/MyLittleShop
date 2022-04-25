@@ -113,9 +113,6 @@ router.get("/buyer/products", async (request, response) => {
 // CONSULT PRODUCTS FOR SELLERS
 router.get("/seller/products", async (request, response) => {
     try {
-        console.log(request.query)
-        console.log("##########chap###########")
-        console.log(request.query.sellerId)
         const sellerProducts = await Product.findAll({
             where: {
                 sellerId: request.query.sellerId ? request.query.sellerId : { [Op.in]: request.query.sellerIds },

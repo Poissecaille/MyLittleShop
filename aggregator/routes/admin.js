@@ -4,7 +4,16 @@ const axios = require('axios');
 
 
 const roads = {
-    ADMIN_USER_ACCOUNTS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/admin`,
+    // AUTHENTICATION MISCROSERVICE
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
+    ADMIN_USER_ACCOUNTS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/admin/users`,
+    USER_ADDRESSES_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddresses`,
+    //ORDER MICROSERVICE
+    BUYER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/buyer/orderProducts`,
+    SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`,
+    // INVENTORY MISCROSERVICE
+    SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
+
 }
 
 //ADMIN CONSOLE ROUTE
@@ -26,15 +35,15 @@ router.get("/admin", async (request, response) => {
                 offset: offset
             }
         });
-        for (let i = 0; i < usersToDisplay.response.data.response.length; i++) {
-            if (usersToDisplay.response.data.response[i].role === "seller") {
-                sellerIds.push(usersToDisplay.response.data.response[i].id)
-                usersToDisplay.response.data.response[i].products = []
-            } else if (usersToDisplay.response.data.response[i].role === "buyer") {
-                buyerIds.push(usersToDisplay.response.data.response[i].id)
-                usersToDisplay.response.data.response[i].addresses = []
-                usersToDisplay.response.data.response[i].orders = []
-
+        for (let i = 0; i < usersToDisplay.data.response.length; i++) {
+            if (usersToDisplay.data.response[i].role === "seller") {
+                sellerIds.push(usersToDisplay.data.response[i].id)
+                usersToDisplay.data.response[i].products = []
+                usersToDisplay.data.response[i].orders = []
+            } else if (usersToDisplay.data.response[i].role === "buyer") {
+                buyerIds.push(usersToDisplay.data.response[i].id)
+                usersToDisplay.data.response[i].addresses = []
+                usersToDisplay.data.response[i].orders = []
             }
         }
         const buyerAddresses = await axios.get(roads.USER_ADDRESSES_URL, {
@@ -45,7 +54,7 @@ router.get("/admin", async (request, response) => {
 
         const buyerOrders = await axios.get(roads.BUYER_ORDERS_URL, {
             params: {
-                userIds: buyerIds
+                buyerIds: buyerIds
             }
         });
 
@@ -54,25 +63,50 @@ router.get("/admin", async (request, response) => {
                 sellerIds: sellerIds
             }
         });
-
-        //const sellerOrders = await axios.get(roads.)
-
-        for (let i = 0; i < buyerAddresses.response.data.response.length; i++) {
-            for (let j = 0; j < usersToDisplay.response.data.response.length; j++) {
-                if (buyerAddresses.response.data.response[i].userId === usersToDisplay.response.data.response[j].id) {
-                    usersToDisplay.response.data.response[j].addresses.push(buyerAddresses.response.data.response[i])
-                }
-            }
-            for (let k = 0; k < buyerOrders.response.data.response.length; k++) {
-                if (buyerOrders.response.data.response[k].ownerId === usersToDisplay.response.data.response[j].id) {
-                    usersToDisplay.response.data.response[i].orders.push(buyerOrders.response.data.response[k])
-                }
-            }
-
-            return response.status(200).json({
-                "response": usersToDisplay.data.response
-            });
+        var sellerProductIds = []
+        for (let i = 0; i < sellerProducts.data.response.length; i++) {
+            sellerProductIds.push(sellerProducts.data.response[i].id)
         }
+        const sellerOrders = await axios.get(roads.SELLER_ORDERS_URL, {
+            params: {
+                productsIds: sellerProductIds
+            }
+        })
+        console.log("-------------------------------")
+        console.log(usersToDisplay.data.response)
+        console.log("-------------------------------")
+
+        for (let i = 0; i < usersToDisplay.data.response.length; i++) {
+            for (let j = 0; j < buyerAddresses.data.response.length; j++) {
+                if (buyerAddresses.data.response[j].userId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role != "admin") {
+                    usersToDisplay.data.response[i].addresses.push(buyerAddresses.data.response[j])
+                }
+            }
+            for (let k = 0; k < buyerOrders.data.response.length; k++) {
+                if (buyerOrders.data.response[k].ownerId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role != "admin") {
+                    usersToDisplay.data.response[i].orders.push(buyerOrders.data.response[k])
+                }
+            }
+            for (let l = 0; l < sellerProducts.data.response.length; l++) {
+                if (sellerProducts.data.response[l].sellerId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role != "admin") {
+                    usersToDisplay.data.response[i].products.push(sellerProducts.data.response[l])
+                }
+                for (let m = 0; m < sellerOrders.data.response.length; m++) {
+                    if (sellerOrders.data.response[m].productId === sellerProducts.data.response[l].id && usersToDisplay.data.response[i].role != "admin") {
+                        console.log(usersToDisplay.data.response[i])
+                        usersToDisplay.data.response[i].orders.push(sellerOrders.data.response[m])
+                    }
+                }
+
+            }
+            // for (let m = 0; m < sellerOrders.data.response.length; m++) {
+            //     if(sellerOrders.data.response[m])
+            // }
+
+        }
+        return response.status(200).json({
+            "response": usersToDisplay.data.response
+        });
 
     } else {
         return response.status(401).json({

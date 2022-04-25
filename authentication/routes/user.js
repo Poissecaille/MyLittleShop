@@ -171,13 +171,12 @@ router.get("/syncSellersPerProduct", async (request, response) => {
 });
 
 //ADMIN CONSOLE ROUTE
-router.get("/admin", async (request, response) => {
+router.get("/admin/users", async (request, response) => {
     try {
         const users = await User.findAll({
             limit: request.query.limit,
             offset: request.query.offset
         });
-        console.log(users)
         return response.status(200).json({
             "response": users
         });

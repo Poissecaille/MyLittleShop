@@ -10,9 +10,6 @@ const Op = Sequelize.Op
 // GET ALL USER ADDRESSES
 router.get("/userAddresses", async (request, response) => {
     try {
-        // const userId = request.user.id
-        // const userRole = request.user.role
-        if (userRole == "buyer") {
             const addresses = request.query.userId ?
                 await UserAddress.findAll({
                     where: {
@@ -31,13 +28,14 @@ router.get("/userAddresses", async (request, response) => {
             } else {
                 return response.status(200).json({
                     "response": addresses,
-                    "userRole": userRole
+//                    "userRole": userRole
                 });
             }
-        } else {
-            return response.status(401).json({ "response": "Unauthorized" });
-        }
+        // } else {
+        //     return response.status(401).json({ "response": "Unauthorized" });
+        // }
     } catch (error) {
+        console.log(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
