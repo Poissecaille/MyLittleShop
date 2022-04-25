@@ -11,10 +11,40 @@ const roads = {
     RATE_PRODUCT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/ratingProduct`,
     GET_RATINGS_PER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/ratingsProducts`,
     UPDATE_PRODUCT_AVERAGE_RATING: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/updateProductRating`,
+    GET_RATINGS_PER_USER_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/ratingsProductsPerUser`,
     // ORDER MICROSERVICE
     GET_SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`,
     GET_BUYER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/buyer/orderProducts`,
 }
+
+//GET RATED PRODUCT FOR A USER FOR ORDER PAGE
+router.get("/ratingsProductsPerUser", async (request, response) => {
+    try {
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
+        if (userRole === "buyer") {
+            const ratings = await axios.get(roads.GET_RATINGS_PER_USER_URL, {
+                params: {
+                    ownerId: userId
+                }
+            });
+            return response.status(ratings.status).json({
+                "response": ratings.data.response
+            });
+        }
+    }
+    catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 //POST A RATING ON AN ORDERED PRODUCT
 router.post("/ratingProduct", async (request, response) => {

@@ -94,7 +94,8 @@ router.get("/products", async (request, response) => {
                     lowerPrice: request.query.lowerPrice ? request.query.lowerPrice : 0,
                     higherPrice: request.query.higherPrice ? request.query.higherPrice : Infinity,
                     condition: request.query.condition ? request.query.condition : null,
-                    filter: filter
+                    filter: filter,
+                    onSale: true
                 }
             });
             if (sellerIds && sellerIds.length > 0) {

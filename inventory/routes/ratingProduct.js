@@ -12,7 +12,7 @@ router.get("/ratingsProducts", async (request, response) => {
             }
         });
         return response.status(200).json({
-            "response": productRatings,
+            "response": productRatings
         });
     } catch (error) {
         console.log(error)
@@ -20,7 +20,27 @@ router.get("/ratingsProducts", async (request, response) => {
             "response": error.response.data.response
         });
     }
-})
+});
+
+// DEDICATED ROAD FOR ALL RATES PER USER
+router.get("/ratingsProductsPerUser", async (request, response) => {
+    try {
+        const productRatings = await RatingProduct.findAll({
+            where: {
+                ownerId: request.query.ownerId
+            }
+        });
+        return response.status(200).json({
+            "response": productRatings
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 
 //POST A RATING ON AN ORDERED PRODUCT
 router.post("/ratingProduct", async (request, response) => {

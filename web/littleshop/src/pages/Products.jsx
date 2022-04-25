@@ -92,7 +92,7 @@ const Products = () => {
       })
       .then((response) => {
         setCategories(response.data.response);
-        console.log(response.data.response)
+        console.log(response.data.response);
       })
       .catch((error) => {
         console.log(error);
@@ -106,7 +106,7 @@ const Products = () => {
       })
       .then((response) => {
         setTags(response.data.response);
-        console.log(response.data.response)
+        console.log(response.data.response);
       })
       .catch((error) => {
         console.log(error);
@@ -391,7 +391,7 @@ const Products = () => {
         ></ProductForm>
         {products.map((product) => (
           <div className="product-card" key={product.id}>
-            {product.onSale ? (
+            {product.onSale && product.availableQuantity > 0 ? (
               <div class="green-circle" />
             ) : (
               <div class="red-circle" />

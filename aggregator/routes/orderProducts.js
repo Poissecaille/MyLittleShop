@@ -307,6 +307,7 @@ router.get("/syncOrder", async (request, response) => {
                             productData.data.response[k].quantity = orders.data.response[i].quantity
                             dict.cart = [productData.data.response[k]]
                             dict.cart[0].productName = dict.cart[0].name
+                            dict.cart[0].productId = dict.cart[0].id
                             delete dict.cart[0].name
                             dict.cart[0].shipped = orders.data.response[i].shipped
                             dict.cart[0].shippingDate = orders.data.response[i].shippingDate

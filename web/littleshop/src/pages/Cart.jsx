@@ -59,10 +59,7 @@ const Cart = () => {
       localStorage.setItem("cartProduct", JSON.stringify(cart));
       if (cart.length === 0) {
         setPopupTitle("LittleShop Cart management information");
-        setPopupContent(
-          `No product is currently in your cart ${JSON.parse(localStorage["account"]).username
-          } !`
-        );
+        setPopupContent("No product is currently in your cart !");
         popupHandler().then(() => {
           navigate("/products");
         });
@@ -185,18 +182,23 @@ const Cart = () => {
             .then((response) => {
               if (response.status === 201) {
                 const defaultNumberOfDaysToDeliver = 3;
+                const actuelDate = new Date();
                 const nextDate = new Date(
-                  Date.now() + defaultNumberOfDaysToDeliver * 24 * 60 * 60 * 1000
+                  Date.now() +
+                    defaultNumberOfDaysToDeliver * 24 * 60 * 60 * 1000
                 );
 
                 if (!localStorage.getItem("orderProduct")) {
                   localStorage.setItem("orderProduct", "[]");
                 }
-                var oldOrders = JSON.parse(localStorage.getItem("orderProduct"));
+                var oldOrders = JSON.parse(
+                  localStorage.getItem("orderProduct")
+                );
                 console.log("oldOrders", oldOrders);
-                for (let i = 0; i < cart.length; i++) {
-                  cart[i].shipped = "preparation";
-                  cart[i].shippingDate = nextDate;
+                for (let j = 0; j < cart.length; j++) {
+                  cart[j].shipped = "preparation";
+                  cart[j].shippingDate = nextDate;
+                  cart[j].created_at = actuelDate;
                 }
                 oldOrders.push({
                   address: addresses[i],
@@ -227,7 +229,6 @@ const Cart = () => {
         }
       }
     }
-
   };
 
   return (

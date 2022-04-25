@@ -86,7 +86,8 @@ router.get("/buyer/products", async (request, response) => {
                     { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },
                     { unitPrice: { [Op.between]: [request.query.lowerPrice, request.query.higherPrice] } },
                     { condition: request.query.condition !== undefined ? { [Op.eq]: request.query.condition } : { [Op.not]: null } },
-                    { availableQuantity: { [Op.gt]: 0 } }
+                    { availableQuantity: { [Op.gt]: 0 } },
+                    { onSale: true }
                 ]
             }, sort: [[request.query.filter, "ASC"]]
         });
