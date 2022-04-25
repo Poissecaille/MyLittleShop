@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
+import { IoBan } from "react-icons/io5";
+import AdminForm from "../components/AdminForm";
 import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
 import "../style/Admin.css";
@@ -17,6 +19,7 @@ const Admin = () => {
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
   // const [data, setData] = useState("");
+  const [form, setShowForm] = useState(false);
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
@@ -28,6 +31,10 @@ const Admin = () => {
         resolve();
       }, 2000);
     });
+  };
+
+  const displayForm = (e) => {
+    setShowForm(!e);
   };
 
   useEffect(() => {
@@ -65,12 +72,20 @@ const Admin = () => {
     }
   }, [adminData]);
 
-  return adminData.length > 0 ? (
+  return (
     <>
       <Navbar />
       <h1 className="admin-title">ADMINISTRATION CONSOLE</h1>
       {adminData.map((userData) => (
         <div className="admin-users-card">
+          <AdminForm
+            trigger={form}
+            email={userData.email}
+            updateDisplay={() => {
+              displayForm(form);
+              console.log(form);
+            }}
+          ></AdminForm>
           <div className="admin-img">
             <img
               src={require("../images/star.png")}
@@ -90,10 +105,14 @@ const Admin = () => {
             <b>Role: </b>
             {userData.role}
             <br />
+            <button className="deactivate-user" onClick={() => displayForm()}>
+              Disable User <IoBan />
+            </button>
           </div>
+
           {userData.orders ? (
             <>
-              <b>Orders</b>:{" "}
+              <h4>Orders:</h4>
             </>
           ) : (
             <></>
@@ -112,11 +131,57 @@ const Admin = () => {
                 )}
             </tr>
           </table>
+
+          {/* {userData.addresses ? (
+            <>
+              <h4>Addresses:</h4>
+            </>
+          ) : (
+            <></>
+          )}
+          <table className="addresses-table">
+            <tr>
+              {userData.addresses &&
+                userData.addresses.map((address) =>
+                  Object.keys(address).map((key, index) => <th>{key}</th>)
+                )}
+            </tr>
+            <tr>
+              {userData.addresses &&
+                userData.addresses.map((address) =>
+                  Object.keys(address).map((key, index) => (
+                    <td>{address[key]}</td>
+                  ))
+                )}
+            </tr>
+          </table>
+
+          {userData.products ? (
+            <>
+              <h4>Products:</h4>
+            </>
+          ) : (
+            <></>
+          )}
+          <table className="addresses-table">
+            <tr>
+              {userData.products &&
+                userData.products.map((product) =>
+                  Object.keys(product).map((key, index) => <th>{key}</th>)
+                )}
+            </tr>
+            <tr>
+              {userData.products &&
+                userData.products.map((product) =>
+                  Object.keys(product).map((key, index) => (
+                    <td>{product[key]}</td>
+                  ))
+                )}
+            </tr>
+          </table> */}
         </div>
       ))}
     </>
-  ) : (
-    <>DEBUG</>
   );
 };
 export default Admin;
