@@ -250,7 +250,7 @@ const Products = () => {
   };
 
   return (
-    <div>
+    <>
       <Navbar />
       <div className="filters">
         <h3>filters</h3>
@@ -530,7 +530,7 @@ const Products = () => {
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
 };
 
