@@ -37,10 +37,11 @@ const Login = () => {
       if (request.status === 200) {
         if (localStorage.getItem("token")) {
           console.log("token", localStorage.getItem("token"))
-          localStorage.removeItem("token")
-          if (localStorage.getItem("account")) {
-            localStorage.removeItem("account")
-          }
+          //localStorage.removeItem("token")
+          localStorage.clear()
+          // if (localStorage.getItem("account")) {
+          //   localStorage.removeItem("account")
+          // }
         }
         localStorage.setItem("token", request.data.token);
         //localStorage.setItem("role", request.data.role);

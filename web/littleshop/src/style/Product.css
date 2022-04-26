@@ -83,3 +83,8 @@ width: 1%;
   background-color: red;
   border-radius: 50%;
 }
+
+input[type="number"] {
+  height: 10px;
+  margin-left: 0%;
+}

@@ -22,9 +22,7 @@ const RatingForm = (props) => {
                         Authorization: `Bearer ${localStorage.getItem("token")}`
                     }
                 }).then((response) => {
-                    // if (response.status === 201) {
-                    //     localStorage.
-                    // }
+                    window.location.reload()
                 }).catch((error) => {
                     console.log(error)
                 })
@@ -50,7 +48,7 @@ const RatingForm = (props) => {
                         size={24}
                         activeColor='#FF7F7F'
                         edit={false}
-                        style={{zIndex:0}}>
+                        style={{ zIndex: 0 }}>
                     </ReactStars>
                     <input
                         type="text"

@@ -29,7 +29,8 @@ const Logout = () => {
             setPopupTitle("LittleShop account management information");
             setPopupContent("You have successfully logged out !");
             await popupHandler();
-            localStorage.removeItem("token");
+            //localStorage.removeItem("token");
+            localStorage.clear();
             navigate("/");
             window.location.reload();
         }

@@ -34,7 +34,7 @@ const Cart = () => {
           .get(SYNC_CART_BACKEND_URL, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
+            }
           })
           .then((response) => {
             cart = response.data.response;

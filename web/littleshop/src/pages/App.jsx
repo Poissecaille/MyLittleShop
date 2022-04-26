@@ -11,6 +11,7 @@ import Account from "./Account";
 import Addresses from "./Addresses";
 import Order from "./Orders";
 import Admin from "./Admin";
+import WishList from "./Wishlist";
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
         <Route exact path="/products" element={<Products />} />
         <Route exact path="/cart" element={<Cart />} />
         <Route exact path="/orders" element={<Order />} />
+        <Route exact path="/wishlist" element={<WishList />} />
       </Routes>
     </Router>
   );

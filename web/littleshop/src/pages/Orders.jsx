@@ -5,19 +5,30 @@ import Popup from "../components/Popup";
 import { useNavigate } from "react-router-dom";
 import ReactStars from "react-rating-stars-component";
 import RatingForm from "../components/RatingForm";
-//const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
-const SYNC_BACKEND_ORDER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncOrder`;
-const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
-const USER_RATINGS = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/ratingsProductsPerUser`;
-
+//localStorage.removeItem("orderProduct")
+//localStorage.removeItem("ratings")
 const Order = () => {
+  //const BACKEND_ORDER_URL = "http://localhost:5000/orderProducts";
+  const SYNC_BACKEND_ORDER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncOrder`;
+  const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
+  const USER_RATINGS = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/ratingsProductsPerUser`;
+
   const initOrders = localStorage.getItem("orderProduct")
     ? JSON.parse(localStorage.getItem("orderProduct"))
     : [];
-  const [orders, setOrders] = useState(initOrders);
+  const initRatings = localStorage.getItem("ratings")
+    ? JSON.parse(localStorage.getItem("ratings"))
+    : [];
+
+  //const [orders, setOrders] = useState(initOrders);
   var ratings = localStorage.getItem("ratings")
     ? JSON.parse(localStorage.getItem("ratings"))
     : [];
+  var orders = localStorage.getItem("orderProduct")
+    ? JSON.parse(localStorage.getItem("orderProduct"))
+    : [];
+  console.log(JSON.parse(localStorage.getItem("orderProduct")))
+  // const [ratings, setRatings] = useState(initRatings);
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
@@ -71,24 +82,34 @@ const Order = () => {
             "ratings",
             JSON.stringify(response.data.response)
           );
+          console.log("$$$$$$$$$$$$")
+          ratings = response.data.response
+          console.log(ratings);
+          //setRatings(response.data.response)
           let buffer = orders;
+          console.log(buffer)
           for (let i = 0; i < ratings.length; i++) {
             for (let j = 0; j < buffer.length; j++) {
               for (let k = 0; k < buffer[j].cart.length; k++) {
+                console.log("***", buffer[j].cart[k].productId, ratings[i].productId)
                 if (buffer[j].cart[k].productId === ratings[i].productId) {
+                  console.log("RATE")
                   buffer[j].cart[k].userRate = ratings[i].value;
                 }
               }
             }
           }
-          setOrders(buffer);
-          console.log("91", orders);
+          //setOrders(buffer);
+          orders = buffer
         });
     }
   }, []);
 
   useEffect(() => {
+    //localStorage.removeItem("orderProduct")
     if (!orders || orders.length === 0) {
+      console.log("SYNCHRONISATION")
+
       axios
         .get(SYNC_BACKEND_ORDER_URL, {
           headers: {
@@ -96,6 +117,8 @@ const Order = () => {
           },
         })
         .then((response) => {
+          console.log("€€€€")
+          console.log(response.data.response)
           let buffer = response.data.response;
           for (let i = 0; i < ratings.length; i++) {
             for (let j = 0; j < buffer.length; j++) {
@@ -106,8 +129,10 @@ const Order = () => {
               }
             }
           }
-          setOrders(buffer);
-          if (orders.length === 0 && role === "buyer") {
+          //setOrders(buffer);
+          orders = buffer
+          localStorage.setItem("orderProduct", JSON.stringify(orders))
+          if (buffer.length === 0 && role === "buyer") {
             setPopupTitle("LittleShop Order management information");
             setPopupContent("You haven't placed any order yet!");
             popupHandler().then(() => {
@@ -138,7 +163,7 @@ const Order = () => {
     }
     setBilling(billing);
   }, []);
-  console.log("141", orders);
+
   return role === "buyer" ? (
     <div>
       <Navbar />
@@ -182,7 +207,7 @@ const Order = () => {
                     <td>{cartProduct.created_at}</td>
                     <td>
                       {cartProduct.shipped === "preparation" &&
-                      !cartProduct.userRate ? (
+                        !cartProduct.userRate ? (
                         <ReactStars
                           activeColor={"#FF7F7F"}
                           size={16}
@@ -262,6 +287,7 @@ const Order = () => {
                           size={16}
                           value={cartProduct.averageRating}
                           edit={false}
+                          style={{ zIndex: 0 }}
                         ></ReactStars>
                       </td>
                     </td>

@@ -15,15 +15,17 @@ import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
 import ReactStars from "react-rating-stars-component";
 import ProductForm from "../components/ProductForm";
+import { useNavigate } from "react-router-dom";
 
-const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
-const BACKEND_PRODUCT_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/product`;
-const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
-const BACKEND_CATEGORIES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productCategories`;
-const BACKEND_TAGS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productTags`;
-const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
 
 const Products = () => {
+  const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
+  const BACKEND_PRODUCT_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/product`;
+  const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
+  const BACKEND_CATEGORIES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productCategories`;
+  const BACKEND_TAGS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productTags`;
+  const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
+  const BACKEND_WISHLIST_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/wishProduct`;
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
@@ -42,6 +44,7 @@ const Products = () => {
   const [modify, setModify] = useState(false);
   const [productToUpdate, setProductToUpdate] = useState("");
   const [form, setShowForm] = useState(false);
+  const navigate = useNavigate();
 
   const popupHandler = (e) => {
     return new Promise((resolve) => {
@@ -141,12 +144,59 @@ const Products = () => {
       })
       .then((response) => {
         setProducts(response.data.response);
+        console.log(response.data.response)
         setNumberOfProducts(response.data.rows);
       })
       .catch((error) => {
         console.log(error);
       });
   }, [maxPrice, minPrice, productName, productCondition, category, tag]);
+
+  const addProductToWishList = (data) => {
+    console.log("CEST MA DATA", data)
+
+    axios
+      .post(BACKEND_WISHLIST_URL,
+        {
+          productId: data.id,
+          quantity: data.quantity,
+          availableQuantity: data.availableQuantity
+        }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      .then((response) => {
+        if (localStorage.getItem("wishProduct") === null) {
+          localStorage.setItem("wishProduct", "[]");
+        }
+        var oldWishList = JSON.parse(localStorage.getItem("wishProduct"));
+        oldWishList.push(
+          data
+        )
+        localStorage.setItem("wishProduct", JSON.stringify(oldWishList));
+        setPopupTitle("LittleShop product management information");
+        setPopupContent(
+          `${data.quantity} "${data.name}" have been successfully added to your wishlist !`
+        );
+        popupHandler(popup).then(() => { })
+      })
+      .catch((error) => {
+        console.log(error)
+        if (error.response.status === 403) {
+          localStorage.removeItem("token");
+          setPopupTitle("LittleShop account management information");
+          setPopupContent("You are currently not logged in !");
+          popupHandler().then(() => {
+            navigate("/login");
+          });
+        }
+        else if (error.response.status === 400) {
+          setPopupTitle("LittleShop product management information");
+          setPopupContent("Something went wrong don't forget to add a quantity");
+          popupHandler(popup).then(() => { });
+        }
+
+      });
+  };
 
   const addProductToCart = (data) => {
     axios
@@ -192,6 +242,11 @@ const Products = () => {
         if (error.response.status === 409) {
           setPopupTitle("LittleShop product management information");
           setPopupContent(` "${data.productName}" is already inside cart !`);
+          await popupHandler(popup);
+        }
+        else if (error.response.status === 400) {
+          setPopupTitle("LittleShop product management information");
+          setPopupContent("Something went wrong don't forget to add a quantity");
           await popupHandler(popup);
         }
       });
@@ -391,11 +446,12 @@ const Products = () => {
         ></ProductForm>
         {products.map((product) => (
           <div className="product-card" key={product.id}>
-            {product.onSale && product.availableQuantity > 0 ? (
+
+            {role === "seller" ? product.onSale && product.availableQuantity > 0 ? (
               <div class="green-circle" />
             ) : (
               <div class="red-circle" />
-            )}
+            ) : <></>}
             <div className="product-img">
               <img
                 src={require("../images/box.png")}
@@ -454,6 +510,7 @@ const Products = () => {
                 activeColor="#FF7F7F"
                 edit={false}
                 half={true}
+                style={{ zIndex: 0 }}
               ></ReactStars>
               <br></br>
               {role !== "seller" ? (
@@ -521,7 +578,13 @@ const Products = () => {
                   >
                     Add to cart <BsCart4 />
                   </button>
-                  <button className="wish-button">
+                  <button className="wish-button"
+                    onClick={() => {
+                      product.quantity = cartQuantity;
+                      addProductToWishList(product)
+                    }
+                    }
+                  >
                     Add to whishlist <BsSuitHeart />
                   </button>
                 </>

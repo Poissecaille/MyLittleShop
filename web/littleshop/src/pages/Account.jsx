@@ -11,11 +11,8 @@ const SYNC_ACCOUNT_BACKEND_URL = `http://localhost:${process.env.REACT_APP_AGGRE
 
 const Account = () => {
   const navigate = useNavigate();
-  const [account, setAccount] = useState(
-    localStorage.getItem("account")
-      ? JSON.parse(localStorage.getItem("account"))
-      : {}
-  );
+  const initialAccount = localStorage.getItem("account") === undefined ? JSON.parse(localStorage.getItem("account")) : {};
+  const [account, setAccount] = useState(initialAccount);
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
@@ -29,8 +26,9 @@ const Account = () => {
     //     navigate("/login");
     //   });
     // }
+    if (!account || Object.keys(account).length === 0) {
+      console.log("##############")
 
-    if (isEmpty(localStorage.getItem("account"))) {
       axios
         .get(SYNC_ACCOUNT_BACKEND_URL, {
           headers: {
@@ -43,6 +41,7 @@ const Account = () => {
             JSON.stringify(response.data.response)
           );
           setAccount(response.data.response);
+          console.log(response.data.response)
         })
         .catch((error) => {
           console.log(error);
