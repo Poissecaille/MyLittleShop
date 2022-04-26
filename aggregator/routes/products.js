@@ -173,7 +173,7 @@ router.get("/products", async (request, response) => {
             var categoriesPerProduct = [];
             var tagsPerProduct = [];
 
-            const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
+            const products = await axios.get(roads.SEARCH_PRODUCTS_SELLER_URL, {
                 params: {
                     sellerId: userId,
                     category: request.query.category ? request.query.category : null,
