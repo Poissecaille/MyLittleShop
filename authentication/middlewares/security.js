@@ -4,6 +4,10 @@ const User = require("../models/user");
 
 const checkToken = (request, response, next) => {
     var header;
+    console.log("------------")
+    console.log(request.headers)
+    console.log("------------")
+
     try {
         if (request.headers.authorization) {
             header = request.headers.authorization
@@ -30,6 +34,7 @@ const checkToken = (request, response, next) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
+        console.log(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

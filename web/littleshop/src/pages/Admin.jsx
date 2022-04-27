@@ -51,24 +51,30 @@ const Admin = () => {
   });
 
   useEffect(() => {
-    if (role === "admin") {
-      axios
-        .get(BACKEND_ADMIN_CONSOLE, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          params: {
-            limit: limit,
-            offset: offset,
-          },
-        })
-        .then((response) => {
-          console.log(response.data.response);
-          localStorage.setItem("admin", JSON.stringify(response.data.response));
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    if (!role || role.length === 0) {
+      if (role === "admin") {
+        axios
+          .get(BACKEND_ADMIN_CONSOLE, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            params: {
+              limit: limit,
+              offset: offset,
+            },
+          })
+          .then((response) => {
+            console.log(response.data.response);
+            localStorage.setItem(
+              "admin",
+              JSON.stringify(response.data.response)
+            );
+            //window.location.reload()
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }
   }, [adminData]);
 

@@ -57,6 +57,11 @@ router.post("/ratingProduct", async (request, response) => {
         });
     } catch (error) {
         console.log(error)
+        if (error.name === "SequelizeUniqueConstraintError") {
+            return response.status(409).json({
+                "response": "Product already rated"
+            });
+        }
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

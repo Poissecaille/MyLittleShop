@@ -57,7 +57,7 @@ router.post("/orderProducts", async (request, response) => {
             console.log(cartProduct)
             var orderProduct = new OrderProduct({
                 ownerId: request.body.ownerId,
-                productId: cartProduct.id,
+                productId: cartProduct.productId,
                 addressId: request.body.userAddressId,
                 quantity: cartProduct.quantity
             })

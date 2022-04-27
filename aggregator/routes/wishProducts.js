@@ -168,11 +168,14 @@ router.delete("/wishProduct", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
+            console.log("PREMIER TEST")
             const sellerData = await axios.get(roads.USER_DATA_URL, {
                 params: {
                     sellerUsername: request.body.sellerUsername
                 }
             });
+            console.log("DEUXIEME TEST")
+            console.log(request.body)
             if (!sellerData) {
                 return response.status(404).json({
                     "response": "User not found"

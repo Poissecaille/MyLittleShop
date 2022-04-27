@@ -164,24 +164,17 @@ router.post("/orderProducts", async (request, response) => {
 //UPDATE DELIVERY STATUS FOR SELLERS
 router.put("/orderProduct", async (request, response) => {
     try {
-        if (process.env.NODE_ENV === "test") {
-            if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
-                return response.status(400).json({
-                    "response": "Bad json format"
-                });
-            }
-        }
+        // if (process.env.NODE_ENV === "test") {
+        //     if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
+        //         return response.status(400).json({
+        //             "response": "Bad json format"
+        //         });
+        //     }
+        // }
+        console.log('CHECKING')
+        console.log(request.headers)
         if (!request.body.productName || !request.body.ownerId || !request.body.addressName || !request.body.shipped || !request.body.shippingDate) {
-            if (request.body.shipped !== "shipped" && request.body.shipped !== "delivred") {
-                return response.status(400).json({
-                    "response": "Bad json format"
-                });
-            }
-            if (request.body.shippingDate < Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' '))) {
-                return response.status(400).json({
-                    "response": "Bad json format"
-                });
-            }
+           
             return response.status(400).json({
                 "response": "Bad json format"
             });
@@ -191,14 +184,16 @@ router.put("/orderProduct", async (request, response) => {
                 address1: request.body.addressName
             }
         });
-        // const user = await axios.get(roads.CHECK_TOKEN_URL, {
-        //     headers: {
-        //         'Authorization': request.headers.authorization
-        //     }
-        // })
-        const userId = address.data.id;
-        const userRole = address.data.role;
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        })
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
+        console.log("userId:",userId, "userRole:", userRole)
         if (userRole == "seller") {
+
             const sellerProduct = await axios.get(roads.SELLER_PRODUCTS_URL, {
                 params: {
                     sellerId: userId,
@@ -337,6 +332,43 @@ router.get("/syncOrder", async (request, response) => {
                     productsIds: sellerProductsIds
                 }
             });
+            var deliveryAddressIds = []
+            for (let i = 0; i < sellerOrders.data.response.length; i++) {
+                deliveryAddressIds.push(sellerOrders.data.response[i].addressId)
+            }
+            const userDeliveryAddresses = await axios.get(roads.GET_DELIVERY_USER_ADDRESS, {
+                params: {
+                    addressIds: deliveryAddressIds
+                }
+            });
+            for (let i = 0; i < sellerOrders.data.response.length; i++) {
+                if (!sellerOrders.data.response[i].cart) {
+                    sellerOrders.data.response[i].cart = []
+                }
+                if (!sellerOrders.data.response[i].address) {
+                    sellerOrders.data.response[i].address = {}
+                }
+                for (let j = 0; j < sellerProducts.data.response.length; j++) {
+                    if (sellerOrders.data.response[i].productId === sellerProducts.data.response[j].id) {
+                        sellerOrders.data.response[i].cart.push(sellerProducts.data.response[j])
+                        sellerOrders.data.response[i].cart[0].created_at = sellerOrders.data.response[i].created_at
+                        sellerOrders.data.response[i].cart[0].updated_at = sellerOrders.data.response[i].updated_at
+                        sellerOrders.data.response[i].cart[0].shipped = sellerOrders.data.response[i].shipped
+                        sellerOrders.data.response[i].cart[0].shippingDate = sellerOrders.data.response[i].shippingDate
+                        sellerOrders.data.response[i].cart[0].quantity = sellerOrders.data.response[i].quantity
+                        sellerOrders.data.response[i].cart[0].productName = sellerOrders.data.response[i].cart[0].name
+                    }
+                }
+                for (let k = 0; k < userDeliveryAddresses.data.response.length; k++) {
+                    if (sellerOrders.data.response[i].addressId === userDeliveryAddresses.data.response[k].id) {
+                        //sellerOrders.data.response[i].address.push(userDeliveryAddresses.data.response[k])
+                        Object.keys(userDeliveryAddresses.data.response[k]).forEach(key => sellerOrders.data.response[i].address[key] = userDeliveryAddresses.data.response[k][key]);
+
+                    }
+
+                }
+            }
+            console.log(sellerOrders.data.response)
             return response.status(200).json({
                 "response": sellerOrders.data.response
             });
