@@ -6,6 +6,7 @@ const roads = {
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     GET_ONE_USER_ADDRESS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddress`,
     GET_DELIVERY_USER_ADDRESS: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/deliveryUserAddress`,
+    GET_USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
     //INVENTORY MICROSERVICE
     CART_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProducts`,
     BUYER_PRODUCT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/buyer/products`,
@@ -77,13 +78,14 @@ router.get("/orderProducts", async (request, response) => {
 // MAKE AN ORDER
 router.post("/orderProducts", async (request, response) => {
     try {
-        if (process.env.NODE_ENV === "test") {
-            if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
-                return response.status(400).json({
-                    "response": "Bad json format"
-                });
-            }
-        }
+        // if (process.env.NODE_ENV === "develop") {
+        //     if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
+        //         return response.status(400).json({
+        //             "response": "Bad json format"
+        //         });
+        //     }
+        // }
+        console.log("WOLOLO",request.body)
         if (!request.body.address1 || !request.body.address2) {
             return response.status(400).json({
                 "response": "Bad json format",
@@ -113,11 +115,12 @@ router.post("/orderProducts", async (request, response) => {
                     "response": "No product found in user cart"
                 });
             }
-            console.log("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLOLOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
+            console.log("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLOLOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
                 { data: productsInCart.data.response }
             )
@@ -130,11 +133,23 @@ router.post("/orderProducts", async (request, response) => {
                     userAddressId: userAddressToUse.data.response.id,
                     ownerId: userId
                 });
-                if (ordersProducts.status == 200) {
+                if (ordersProducts.status == 201) {
+                    const userData = await axios.get(roads.GET_USER_DATA_URL, {
+                        params: {
+                            userId: userId
+                        }
+                    })
+                    const mailSubject = "LITTLESHOP Your order has been saved!";
+                    const mailContent = //document.write(
+                        `<><h3>${userData.data.response.firstname} ${userData.data.response.lastname}</h3>
+                        <h2>${JSON.stringify(request.body.orders)}</h2>
+                        </>`
+                    //)
                     await axios.post(roads.MAILER_URL, {
-                        mailRecipient: request.body.mailRecipient,
-                        mailSubject: request.body.mailSubject,
-                        mailContent: request.body.mailContent
+                        //userData.data.response.email
+                        mailRecipient: "boury_a@etna-alternance.net",
+                        mailSubject: mailSubject,
+                        mailContent: mailContent
                     });
                 }
                 return response.status(ordersProducts.status).json({
@@ -174,7 +189,7 @@ router.put("/orderProduct", async (request, response) => {
         console.log('CHECKING')
         console.log(request.headers)
         if (!request.body.productName || !request.body.ownerId || !request.body.addressName || !request.body.shipped || !request.body.shippingDate) {
-           
+
             return response.status(400).json({
                 "response": "Bad json format"
             });
@@ -191,7 +206,7 @@ router.put("/orderProduct", async (request, response) => {
         })
         const userId = user.data.response.id
         const userRole = user.data.response.role
-        console.log("userId:",userId, "userRole:", userRole)
+        console.log("userId:", userId, "userRole:", userRole)
         if (userRole == "seller") {
 
             const sellerProduct = await axios.get(roads.SELLER_PRODUCTS_URL, {

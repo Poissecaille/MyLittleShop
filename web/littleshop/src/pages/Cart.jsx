@@ -34,7 +34,7 @@ const Cart = () => {
           .get(SYNC_CART_BACKEND_URL, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
-            }
+            },
           })
           .then((response) => {
             cart = response.data.response;
@@ -155,6 +155,7 @@ const Cart = () => {
       });
   };
   const validateCart = (data) => {
+    console.log("cart validé", data);
     var addresses = JSON.parse(localStorage.getItem("addresses"));
     if (!addresses || addresses.length === 0) {
       setPopupTitle("LittleShop Account management information");
@@ -172,6 +173,7 @@ const Cart = () => {
               {
                 address1: addresses[i].address1,
                 address2: addresses[i].address2,
+                orders: data,
               },
               {
                 headers: {
