@@ -50,8 +50,9 @@ router.get("/buyer/products", async (request, response) => {
         } else {
             sellersIds.push(parseInt(request.query.sellerId))
         }
-        if (request.query.category || request.query.tag) {
-            console.log(request.query.category)
+        console.log("ERREUR1", request.query)
+        // if (request.query.category || request.query.tag) {
+        if (request.query.category) {
             const productCategories = await ProductCategory.findAll({
                 where:
                 {
@@ -61,28 +62,43 @@ router.get("/buyer/products", async (request, response) => {
             for (let i = 0; i < productCategories.length; i++) {
                 productsIdsPerCategory.push(productCategories[i].productId)
             }
-            if (request.query.tag) {
-                const productTags = await ProductTag.findAll({
-                    where:
-                    {
-                        name: request.query.tag,
-                    }
-                });
-                for (let i = 0; i < productTags.length; i++) {
-                    productsIdsPerTag.push(productTags[i].productId)
-                }
-                productsIds = productsIdsPerCategory.filter((value) => productsIdsPerTag.includes(value));
-            } else {
-                for (let i = 0; i < productsIdsPerCategory.length; i++) {
-                    productsIds.push(productsIdsPerCategory[i])
-                }
+            // 
+            // } else {
+            for (let i = 0; i < productsIdsPerCategory.length; i++) {
+                productsIds.push(productsIdsPerCategory[i])
             }
+            // }
         }
+
+        if (request.query.tag) {
+            const productTags = await ProductTag.findAll({
+                where:
+                {
+                    name: request.query.tag,
+                }
+            });
+            for (let i = 0; i < productTags.length; i++) {
+                productsIdsPerTag.push(productTags[i].productId)
+            }
+            for (let i = 0; i < productsIdsPerTag.length; i++) {
+                productsIds.push(productsIdsPerTag[i])
+            }
+
+        }
+        if (request.query.tag && request.query.category) {
+            productsIds = productsIdsPerCategory.filter((value) => productsIdsPerTag.includes(value));
+        } else if (!request.query.tag && request.query.category) {
+            productsIds = productsIdsPerCategory
+        } else if (request.query.tag && !request.query.category) {
+            productsIds = productsIdsPerTag
+        }
+        console.log("PRODUCT_IDS: ", productsIds, productsIdsPerCategory, productsIdsPerTag)
+
         const products = await Product.findAndCountAll({
             where: {
                 [Op.and]: [
                     //{ id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
-                    { id: request.query.category || request.query.tag ? { [Op.in]: productsIds } : { [Op.not]: null } },
+                    { id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
                     { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },
                     { unitPrice: { [Op.between]: [request.query.lowerPrice, request.query.higherPrice] } },
                     { condition: request.query.condition !== undefined ? { [Op.eq]: request.query.condition } : { [Op.not]: null } },
@@ -103,6 +119,7 @@ router.get("/buyer/products", async (request, response) => {
             });
         }
         else {
+            console.log(error)
             response.status(error.response.status).json({
                 "response": error.response.data.response
             });

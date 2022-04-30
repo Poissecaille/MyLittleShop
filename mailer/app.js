@@ -27,7 +27,7 @@ app.post('/api/mail', async (request, response) => {
                 from: process.env.APP_MAILER_USER,
                 to: request.body.mailRecipient,
                 subject: request.body.mailSubject,
-                text: request.body.mailContent
+                html: request.body.mailContent
             };
             transporter.sendMail(mailSettings, (error, info) => {
                 if (error) {

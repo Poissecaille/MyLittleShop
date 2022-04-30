@@ -70,22 +70,22 @@ router.get("/products", async (request, response) => {
                     sellerUsername: request.query.sellerUsername
                 }
             });
-
-            if (request.query.sellerUsername) {
-                if (Array.isArray(sellerData.data.response)) {
-                    for (let i = 0; i < sellerData.data.response.length; i++) {
-                        sellerIds.push(sellerData.data.response[i].id)
-                        sellerNames.push(sellerData.data.response[i].username)
-                    }
-                } else {
-                    sellerIds.push(sellerData.data.response.id)
-                    sellerNames.push(sellerData.data.response.username)
+            console.log("SELLERS: ", sellerData.data.response)
+            console.log(request.query)
+            //if (request.query.sellerUsername) {
+            if (Array.isArray(sellerData.data.response)) {
+                for (let i = 0; i < sellerData.data.response.length; i++) {
+                    sellerIds.push(sellerData.data.response[i].id)
+                    sellerNames.push(sellerData.data.response[i].username)
                 }
-                console.log("IDS:", sellerIds)
-                console.log("NAMES:", sellerNames)
+            } else {
+                sellerIds.push(sellerData.data.response.id)
+                sellerNames.push(sellerData.data.response.username)
             }
-
-            console.log(request.query.category, request.query.tag)
+            console.log("IDS:", sellerIds)
+            console.log("NAMES:", sellerNames)
+            //}
+            // console.log(request.query.category, request.query.tag)
             const products = await axios.get(roads.SEARCH_PRODUCTS_BUYER_URL, {
                 params: {
                     sellerId: sellerIds ? sellerIds : null,
@@ -98,6 +98,7 @@ router.get("/products", async (request, response) => {
                     onSale: true
                 }
             });
+            console.log("PRODUCTS:",products.data.response)
             if (sellerIds && sellerIds.length > 0) {
                 for (let i = 0; i < products.data.response.length; i++) {
                     productIds.push(products.data.response[i].id)
@@ -117,6 +118,16 @@ router.get("/products", async (request, response) => {
                         }
                     }
                 }
+            }
+            // console.log("ERRRRREUR")
+            // console.log(products.data.response)
+            // console.log(productIds)
+            // console.log(sellerIds)
+            if (products.data.response.length === 0) {
+                return response.status(products.status).json({
+                    "response": products.data.response,
+                    "rows": products.data.response.length
+                });
             }
             const categoriesPerProduct = await axios.get(roads.CATEGORIES_PER_PRODUCT_URL,
                 {

@@ -85,7 +85,7 @@ router.post("/orderProducts", async (request, response) => {
         //         });
         //     }
         // }
-        console.log("WOLOLO",request.body)
+        console.log("WOLOLO", request.body)
         if (!request.body.address1 || !request.body.address2) {
             return response.status(400).json({
                 "response": "Bad json format",
@@ -140,11 +140,14 @@ router.post("/orderProducts", async (request, response) => {
                         }
                     })
                     const mailSubject = "LITTLESHOP Your order has been saved!";
-                    const mailContent = //document.write(
-                        `<><h3>${userData.data.response.firstname} ${userData.data.response.lastname}</h3>
-                        <h2>${JSON.stringify(request.body.orders)}</h2>
-                        </>`
-                    //)
+                    var mailContent =
+                        `<h3>${userData.data.response.firstname} ${userData.data.response.lastname}</h3>`
+                    mailContent += "<p>"
+                    for (let i = 0; i < request.body.orders.length; i++) {
+                        mailContent += JSON.stringify(request.body.orders[i])
+                    }
+                    mailContent += "</p>"
+
                     await axios.post(roads.MAILER_URL, {
                         //userData.data.response.email
                         mailRecipient: "boury_a@etna-alternance.net",
