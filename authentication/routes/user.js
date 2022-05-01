@@ -9,6 +9,12 @@ const Op = Sequelize.Op
 router.get("/userData", async (request, response) => {
     try {
         var userData;
+        if (request.query.userId) {
+            const user = await User.findByPk(request.query.userId);
+            return response.status(200).json({
+                "response": user
+            });
+        }
         if (!request.query.sellerUsername) {
             const users = await User.findAll({
                 where: {
@@ -155,6 +161,24 @@ router.get("/syncSellersPerProduct", async (request, response) => {
         });
         return response.status(200).json({
             "response": sellerData
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
+//ADMIN CONSOLE ROUTE
+router.get("/admin/users", async (request, response) => {
+    try {
+        const users = await User.findAll({
+            limit: request.query.limit,
+            offset: request.query.offset
+        });
+        return response.status(200).json({
+            "response": users
         });
     } catch (error) {
         console.log(error)

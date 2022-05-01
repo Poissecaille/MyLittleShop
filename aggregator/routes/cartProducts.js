@@ -6,7 +6,7 @@ const roads = {
     GET_CART_ITEMS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProducts`,
     CART_MANAGEMENT_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProduct`,
     SYNC_CART_ITEMS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productsPerId`,
-    // USER MICROSERVICE
+    // AUTHENTICATION MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`,
     SYNC_CART_ITEMS_SELLERS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/syncSellersPerProduct`

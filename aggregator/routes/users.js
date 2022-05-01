@@ -2,16 +2,41 @@ const router = require("express").Router();
 const axios = require('axios');
 
 const roads = {
-    // USER MICROSERVICE
+    // AUTHENTICATION MICROSERVICE
     CREATE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/register`,
     LOGIN_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/login`,
     DISABLE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/disable`,
     DEACTIVATE_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/deactivate`,
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     SYNC_ACCOUNT_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/syncAccount`,
+    USER_ADDRESSES_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddresses`,
     // PRODUCT MICROSERVICE
-    WITHDRAW_SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`
+    SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
+    // ORDER MISCROSERVICE
+    BUYER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/buyer/orderProducts`,
+    SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`
 }
+
+//GET USER ROLE FOR DYNAMIC FRONT RENDERING
+router.get("/userRole", async (request, response) => {
+    try {
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userRole = user.data.response.role;
+        return response.status(200).json({
+            "response": userRole
+        })
+    }
+    catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
 
 // LOGIN
 router.post("/login", async (request, response) => {
@@ -176,7 +201,7 @@ router.put("/deactivate", async (request, response) => {
         });
         const sellerId = deactivatedAccount.data.userId
         if (deactivatedAccount.data.userRole == "seller") {
-            const sellerProducts = await axios.put(roads.WITHDRAW_SELLER_PRODUCTS_URL + "?sellerId=" + sellerId)
+            const sellerProducts = await axios.put(roads.SELLER_PRODUCTS_URL + "?sellerId=" + sellerId)
             return response.status(200).json({
                 "response": sellerProducts.data.response
             });
@@ -211,6 +236,8 @@ router.get("/syncAccount", async (request, response) => {
         });
     }
 });
+
+
 
 
 module.exports = router;

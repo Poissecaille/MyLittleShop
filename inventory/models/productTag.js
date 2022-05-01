@@ -8,16 +8,18 @@ const ProductTag = db.define('productTag', {
         primaryKey: true,
         autoIncrement: true
     },
+    productId: {
+        type: DataTypes.INTEGER, unique: "compositePK", allowNull: false
+    },
     name: {
-        type: DataTypes.STRING
-    }, //freezeTableName: true
-
+        type: DataTypes.STRING, unique: "compositePK", allowNull: false
+    },
 },
     {
         freezeTableName: true,
         tableName: "productTag",
         createdAt: "created_at",
-        updatedAt: "updated_at"    
+        updatedAt: "updated_at"
     }
 );
 

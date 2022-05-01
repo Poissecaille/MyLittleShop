@@ -9,7 +9,6 @@ const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGR
 const BACKEND_ORDER_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/orderProducts`;
 const SYNC_CART_BACKEND_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/syncCart`;
 var initialCartPrice = 0;
-// localStorage.removeItem("cartProduct")
 const Cart = () => {
   const navigate = useNavigate();
   var [cartPrice, setCartPrice] = useState(initialCartPrice);
@@ -60,11 +59,7 @@ const Cart = () => {
       localStorage.setItem("cartProduct", JSON.stringify(cart));
       if (cart.length === 0) {
         setPopupTitle("LittleShop Cart management information");
-        setPopupContent(
-          `No product is currently in your cart ${
-            JSON.parse(localStorage["account"]).username
-          } !`
-        );
+        setPopupContent("No product is currently in your cart !");
         popupHandler().then(() => {
           navigate("/products");
         });
@@ -160,6 +155,7 @@ const Cart = () => {
       });
   };
   const validateCart = (data) => {
+    console.log("cart validé", data);
     var addresses = JSON.parse(localStorage.getItem("addresses"));
     if (!addresses || addresses.length === 0) {
       setPopupTitle("LittleShop Account management information");
@@ -167,65 +163,72 @@ const Cart = () => {
       popupHandler().then(() => {
         navigate("/addresses");
       });
-    }
-    for (let i = 0; i < addresses.length; i++) {
-      if (addresses[i].mainAddress) {
-        console.log(addresses[i]);
-        axios
-          .post(
-            BACKEND_ORDER_URL,
-            {
-              address1: addresses[i].address1,
-              address2: addresses[i].address2,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+    } else {
+      for (let i = 0; i < addresses.length; i++) {
+        if (addresses[i].mainAddress) {
+          console.log(addresses[i]);
+          axios
+            .post(
+              BACKEND_ORDER_URL,
+              {
+                address1: addresses[i].address1,
+                address2: addresses[i].address2,
+                orders: data,
               },
-            }
-          )
-          .then((response) => {
-            if (response.status === 201) {
-              const defaultNumberOfDaysToDeliver = 3;
-              const nextDate = new Date(
-                Date.now() + defaultNumberOfDaysToDeliver * 24 * 60 * 60 * 1000
-              );
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            )
+            .then((response) => {
+              if (response.status === 201) {
+                const defaultNumberOfDaysToDeliver = 3;
+                const actuelDate = new Date();
+                const nextDate = new Date(
+                  Date.now() +
+                    defaultNumberOfDaysToDeliver * 24 * 60 * 60 * 1000
+                );
 
-              if (!localStorage.getItem("orderProduct")) {
-                localStorage.setItem("orderProduct", "[]");
+                if (!localStorage.getItem("orderProduct")) {
+                  localStorage.setItem("orderProduct", "[]");
+                }
+                var oldOrders = JSON.parse(
+                  localStorage.getItem("orderProduct")
+                );
+                console.log("oldOrders", oldOrders);
+                for (let j = 0; j < cart.length; j++) {
+                  cart[j].shipped = "preparation";
+                  cart[j].shippingDate = nextDate;
+                  cart[j].created_at = actuelDate;
+                }
+                oldOrders.push({
+                  address: addresses[i],
+                  cart: cart,
+                });
+                console.log("Orders", oldOrders);
+                localStorage.setItem("orderProduct", JSON.stringify(oldOrders));
+                localStorage.removeItem("cartProduct");
+                setPopupTitle("LittleShop Cart management information");
+                setPopupContent(`Cart is validated for ${cartPrice}€!`);
+                popupHandler(popup).then(() => {
+                  navigate("/orders");
+                });
               }
-              var oldOrders = JSON.parse(localStorage.getItem("orderProduct"));
-              console.log("oldOrders", oldOrders);
-              for (let i = 0; i < cart.length; i++) {
-                cart[i].shipped = "preparation";
-                cart[i].shippingDate = nextDate;
+            })
+            .catch((error) => {
+              console.log(error);
+              if (error.response.status === 403) {
+                localStorage.removeItem("token");
+                setPopupTitle("LittleShop account management information");
+                setPopupContent("You are currently not logged in !");
+                popupHandler().then(() => {
+                  navigate("/login");
+                });
               }
-              oldOrders.push({
-                address: addresses[i],
-                cart: cart,
-              });
-              console.log("Orders", oldOrders);
-              localStorage.setItem("orderProduct", JSON.stringify(oldOrders));
-              localStorage.removeItem("cartProduct");
-              setPopupTitle("LittleShop Cart management information");
-              setPopupContent(`Cart is validated for ${cartPrice}€!`);
-              popupHandler(popup).then(() => {
-                navigate("/orders");
-              });
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            if (error.response.status === 403) {
-              localStorage.removeItem("token");
-              setPopupTitle("LittleShop account management information");
-              setPopupContent("You are currently not logged in !");
-              popupHandler().then(() => {
-                navigate("/login");
-              });
-            }
-          });
-        break;
+            });
+          break;
+        }
       }
     }
   };

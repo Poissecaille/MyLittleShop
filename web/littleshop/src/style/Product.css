@@ -14,12 +14,14 @@
   margin-bottom: 2.5%;
   margin-top: 2.5%;
   padding-bottom: 1%;
+  /* border-style: solid;
+  border-color:green;
+  border-width: 2px; */
 }
 input,
 label {
   float: none;
   display: inline-block;
-  vertical-align: middle;
   width: 30%;
   margin: 1%;
 }
@@ -64,4 +66,25 @@ width: 1%;
 
 .product-name input[type="text"] {
   height: 10px;
+}
+
+.green-circle{
+  display: flex;
+  width: 20px;
+  height: 20px;
+  background-color: green;
+  border-radius: 50%;
+}
+
+.red-circle{
+  display: flex;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+input[type="number"] {
+  height: 10px;
+  margin-left: 0%;
 }

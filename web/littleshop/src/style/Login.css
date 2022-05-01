@@ -2,7 +2,7 @@
     margin: 20%;
   }
   
-  input[type="text"] {
+  input {
     width: 70%;
     padding: 12px 20px;
     margin: 8px 0;
@@ -12,7 +12,7 @@
   }
   
   
-  input[type="text"]:focus {
+  input:focus {
       border: 2px solid red;
   }
   

@@ -6,21 +6,28 @@ const Op = Sequelize.Op
 
 router.post("/wishProduct", async (request, response) => {
     try {
-        const wishedProduct = await Product.findOne({
-            where: {
-                name: request.body.productName,
-                sellerId: request.body.sellerId
-            }
-        });
-        if (request.query.quantity > wishedProduct.quantity) {
+        console.log("############")
+        console.log(request.body)
+        // const wishedProduct = await Product.findOne({
+        //     where: {
+        //         name: request.body.productName,
+        //         sellerId: request.body.sellerId
+        //     }
+        // });
+        // if (request.query.quantity > wishedProduct.quantity) {
+        //     return response.status(404).json({
+        //         "response": "Product not in stock"
+        //     })
+        // }
+        if (request.body.quantity > request.body.availableQuantity) {
             return response.status(404).json({
                 "response": "Product not in stock"
             })
         }
         const wishProduct = new WishProduct({
             ownerId: request.body.ownerId,
-            productId: wishedProduct.id,
-            sellerId: request.bodu.sellerId,
+            // productId: wishedProduct.id,
+            productId: request.body.productId,
             quantity: request.body.quantity
         });
         await wishProduct.save();
@@ -29,6 +36,14 @@ router.post("/wishProduct", async (request, response) => {
         })
     } catch (error) {
         console.log(error)
+        if (error.name === "SequelizeUniqueConstraintError") {
+            return response.status(409).json({
+                "response": "Product already rated"
+            });
+        }
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 });
 
@@ -49,6 +64,9 @@ router.get("/wishProducts", async (request, response) => {
         });
     } catch (error) {
         console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 });
 
@@ -109,3 +127,4 @@ router.delete("/wishProduct", async (request, response) => {
         console.log(error)
     }
 });
+module.exports = router;

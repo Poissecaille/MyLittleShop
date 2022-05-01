@@ -114,7 +114,7 @@ const Register = () => {
         ></input>
         <label>password</label>
         <input
-          type="text"
+          type="password"
           onChange={(e) => {
             setPassword(e.target.value);
           }}

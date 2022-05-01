@@ -5,7 +5,7 @@ const roads = {
     // INVENTORY MICROSERVICE
     CRUD_WISHLIST_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/wishProduct`,
     GET_WISHLIST_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/wishProducts`,
-    // USER MICROSERVICE
+    // AUTHENTICATION MICROSERVICE
     CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
     USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`
 }
@@ -13,11 +13,23 @@ const roads = {
 // ADD A PRODUCT IN WISHLIST
 router.post("/wishProduct", async (request, response) => {
     try {
-        if (!request.body.sellerUsername || !request.body.productName || !request.body.quantity) {
+        console.log("############")
+        console.log(request.body)
+        if (!request.body.productId || !request.body.quantity || !request.body.availableQuantity) {
             return response.status(400).json({
                 "response": "Bad json format",
             });
         }
+        // if (!request.body.productName || !request.body.quantity) {
+        //     return response.status(400).json({
+        //         "response": "Bad json format",
+        //     });
+        // }
+        // if (!request.body.sellerId && !request.body.sellerUsername) {
+        //     return response.status(400).json({
+        //         "response": "Bad json format",
+        //     });
+        // }
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -26,16 +38,16 @@ router.post("/wishProduct", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
-            const sellerData = await axios.get(roads.USER_DATA_URL, {
-                params: {
-                    sellerUsername: request.body.sellerUsername
-                }
-            });
-            if (!sellerData) {
-                return response.status(404).json({
-                    "response": "User not found"
-                });
-            }
+            // const sellerData = await axios.get(roads.USER_DATA_URL, {
+            //     params: {
+            //         userId: request.body.userId
+            //     }
+            // });
+            // if (!sellerData) {
+            //     return response.status(404).json({
+            //         "response": "User not found"
+            //     });
+            // }
             // const wishedProduct = await axios.get(roads.BUYER_PRODUCT_URL, {
             //     params: {
             //         sellerId: request.body.sellerName,
@@ -49,8 +61,11 @@ router.post("/wishProduct", async (request, response) => {
             // }
             const wishProduct = await axios.post(roads.CRUD_WISHLIST_URL, {
                 ownerId: userId,
-                productName: request.body.productName,
-                sellerId: sellerData.data.response.id,
+                productId: request.body.productId,
+                availableQuantity: request.body.availableQuantity,
+                //productName: request.body.productName,
+                //sellerId: request.body.sellerId,
+                // sellerId: sellerData.data.response.id,
                 quantity: request.body.quantity
             });
             return response.status(wishProduct.status).json({
@@ -69,7 +84,8 @@ router.post("/wishProduct", async (request, response) => {
     }
 });
 
-router.get("/wishProduct", async (request, response) => {
+// GET ALL PRODUCTS FROM USER WISHLIST
+router.get("/wishProducts", async (request, response) => {
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -152,11 +168,14 @@ router.delete("/wishProduct", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
+            console.log("PREMIER TEST")
             const sellerData = await axios.get(roads.USER_DATA_URL, {
                 params: {
                     sellerUsername: request.body.sellerUsername
                 }
             });
+            console.log("DEUXIEME TEST")
+            console.log(request.body)
             if (!sellerData) {
                 return response.status(404).json({
                     "response": "User not found"
@@ -184,3 +203,5 @@ router.delete("/wishProduct", async (request, response) => {
         });
     }
 });
+
+module.exports = router;

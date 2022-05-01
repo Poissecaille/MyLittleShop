@@ -7,14 +7,14 @@ app.use(express.json());
 
 app.post('/api/mail', async (request, response) => {
     try {
-        if (!request.body.recipient || !request.body.mailSubject || !request.body.mailContent) {
+        if (!request.body.mailRecipient || !request.body.mailSubject || !request.body.mailContent) {
             return response.status(400).json({
                 "response": "Bad json format"
             });
         }
         new Promise((resolve, reject) => {
             var transporter = nodemailer.createTransport({
-                service: 'gmail',
+                service: 'hotmail',
                 secure: false,
                 requireTLS: true,
                 port: 587,
@@ -27,7 +27,7 @@ app.post('/api/mail', async (request, response) => {
                 from: process.env.APP_MAILER_USER,
                 to: request.body.mailRecipient,
                 subject: request.body.mailSubject,
-                text: request.body.mailContent
+                html: request.body.mailContent
             };
             transporter.sendMail(mailSettings, (error, info) => {
                 if (error) {

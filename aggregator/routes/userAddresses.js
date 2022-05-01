@@ -4,13 +4,24 @@ const axios = require('axios');
 const roads = {
     //USER MICROSERVICE
     USER_ADDRESSES_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddresses`,
-    USER_ADDRESS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddress`
+    USER_ADDRESS_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddress`,
+    CHECK_TOKEN_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/checkToken`,
 }
 
 // CONSULT ALL USER ADDRESSES
 router.get("/userAddresses", async (request, response) => {
     try {
+        const user = await axios.get(roads.CHECK_TOKEN_URL, {
+            headers: {
+                'Authorization': request.headers.authorization
+            }
+        });
+        const userId = user.data.response.id
+        const userRole = user.data.response.role
         const addresses = await axios.get(roads.USER_ADDRESSES_URL, {
+            params: {
+                userId: userId
+            },
             headers: {
                 'Authorization': request.headers.authorization
             }

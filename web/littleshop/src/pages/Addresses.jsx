@@ -10,10 +10,10 @@ import {
 import Form from "../components/Form";
 import "../style/Address.css";
 
-const BACKEND_ADDRESSES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userAddresses`;
-const BACKEND_ADDRESS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userAddress`;
 
 const Addresses = () => {
+  const BACKEND_ADDRESSES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userAddresses`;
+  const BACKEND_ADDRESS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userAddress`;
   const [popup, setShowPopUp] = useState(false);
   const [form, setShowForm] = useState(false);
   const [popupContent, setPopupContent] = useState("");
@@ -24,6 +24,10 @@ const Addresses = () => {
   var addresses = localStorage.getItem("addresses")
     ? JSON.parse(localStorage.getItem("addresses"))
     : [];
+  // const initialAddresses = localStorage.getItem("addresses")
+  //   ? JSON.parse(localStorage.getItem("addresses"))
+  //   : [];
+  // const [addresses, setAddresses] = useState(initialAddresses);
 
   const popupHandler = (e) => {
     return new Promise((resolve, reject) => {
@@ -88,43 +92,45 @@ const Addresses = () => {
   };
 
   useEffect(() => {
-    new Promise((resolve) => {
-      // if (!localStorage.getItem("token")) {
-      //   setPopupTitle("LittleShop account management information");
-      //   setPopupContent("You are currently not logged in !");
-      //   popupHandler().then(() => {
-      //     resolve()
-      //     navigate("/login");
-      //   });
-      // }
-      if (addresses.length === 0) {
-        axios
-          .get(BACKEND_ADDRESSES_URL, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          })
-          .then((response) => {
-            addresses = response.data.response;
-            localStorage.setItem("addresses", JSON.stringify(addresses));
-            if (addresses.length === 0) {
-              setPopupTitle("LittleShop Account management information");
-              setPopupContent("You do not have any address yet please add one.");
-              popupHandler().then(() => {
-                resolve();
-              });
-            } else {
-              window.location.reload();
-              resolve();
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      } else {
-        resolve();
-      }
-    });
+    // new Promise((resolve) => {
+    // if (!localStorage.getItem("token")) {
+    //   setPopupTitle("LittleShop account management information");
+    //   setPopupContent("You are currently not logged in !");
+    //   popupHandler().then(() => {
+    //     resolve()
+    //     navigate("/login");
+    //   });
+    // }
+    if (addresses.length === 0) {
+      axios
+        .get(BACKEND_ADDRESSES_URL, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          }
+        })
+        .then((response) => {
+          addresses = response.data.response;
+          console.log(response.data.response)
+          localStorage.setItem("addresses", JSON.stringify(addresses));
+          if (addresses.length === 0) {
+            setPopupTitle("LittleShop Account management information");
+            setPopupContent("You do not have any address yet please add one.");
+            popupHandler().then(() => {
+              //resolve();
+            });
+          } else {
+            window.location.reload();
+            //resolve();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+    // } else {
+    //   resolve();
+    // }
+    // });
   }, []);
 
   return (

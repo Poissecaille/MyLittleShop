@@ -6,31 +6,36 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
 //TODO check if all get succeed when data response is empty
+
 // GET ALL USER ADDRESSES
-router.get("/userAddresses", checkToken, async (request, response) => {
+router.get("/userAddresses", async (request, response) => {
     try {
-        const userId = request.user.id
-        const userRole = request.user.role
-        if (userRole == "buyer") {
-            const addresses = await UserAddress.findAll({
-                where: {
-                    userId: userId,
-                }
-            });
+            const addresses = request.query.userId ?
+                await UserAddress.findAll({
+                    where: {
+                        userId: request.query.userId,
+                    }
+                }) :
+                await UserAddress.findAll({
+                    where: {
+                        userId: { [Op.in]: request.query.userIds },
+                    }
+                });
             if (!addresses) {
                 return response.status(404).json({
-                    "response": "Address not found"
+                    "response": "No addresses found for current user(s)"
                 });
             } else {
                 return response.status(200).json({
                     "response": addresses,
-                    "userRole": userRole
+//                    "userRole": userRole
                 });
             }
-        } else {
-            return response.status(401).json({ "response": "Unauthorized" });
-        }
+        // } else {
+        //     return response.status(401).json({ "response": "Unauthorized" });
+        // }
     } catch (error) {
+        console.log(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

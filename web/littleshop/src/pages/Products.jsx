@@ -3,34 +3,58 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import { useEffect } from "react";
 import { BsSuitHeart, BsCart4 } from "react-icons/bs";
+import { BiEdit } from "react-icons/bi";
+import {
+  MdOutlineRemoveShoppingCart,
+  MdAddShoppingCart,
+  MdPostAdd,
+} from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import "../style/Product.css";
 import { capitalize } from "../utils/functions";
 import Popup from "../components/Popup";
+import ReactStars from "react-rating-stars-component";
+import ProductForm from "../components/ProductForm";
+import { useNavigate } from "react-router-dom";
 
-const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
-const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
+
 const Products = () => {
+  const BACKEND_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/products`;
+  const BACKEND_PRODUCT_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/product`;
+  const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
+  const BACKEND_CATEGORIES_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productCategories`;
+  const BACKEND_TAGS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/productTags`;
+  const BACKEND_USER_ROLE = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/userRole`;
+  const BACKEND_WISHLIST_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/wishProduct`;
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [tag, setTag] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100);
   const [productName, setProductName] = useState("");
   const [productCondition, setProductCondition] = useState(null);
-  const [productSort, setProductSort] = useState("unitPrice");
   const [cartQuantity, setCartQuantity] = useState(0);
   const [popup, setShowPopUp] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
+  const [numberOfProducts, setNumberOfProducts] = useState(0);
+  const [role, setRole] = useState("buyer");
+  const [modify, setModify] = useState(false);
+  const [productToUpdate, setProductToUpdate] = useState("");
+  const [form, setShowForm] = useState(false);
+  const navigate = useNavigate();
 
   const popupHandler = (e) => {
     return new Promise((resolve) => {
       setShowPopUp(!e);
       setTimeout(() => {
         setShowPopUp(false);
-        resolve()
+        resolve();
       }, 2000);
-    })
+    });
   };
-
 
   const handleCartQuantity = (e) => {
     setCartQuantity(parseInt(e.target.value, 10));
@@ -38,10 +62,10 @@ const Products = () => {
   const handleCondition = (e) => {
     setProductCondition(e.target.value);
   };
-  const handleSort = (e) => {
-    setProductSort(e.target.value);
-    window.location.reload()
-  };
+  // const handleSort = (e) => {
+  //   setProductSort(e.target.value);
+  //   window.location.reload();
+  // };
   const handleMinPrice = (e) => {
     setTimeout(() => {
       setMinPrice(e.target.value);
@@ -64,6 +88,47 @@ const Products = () => {
 
   useEffect(() => {
     axios
+      .get(BACKEND_CATEGORIES_URL, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        setCategories(response.data.response);
+        console.log(response.data.response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    axios
+      .get(BACKEND_TAGS_URL, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        setTags(response.data.response);
+        console.log(response.data.response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    axios
+      .get(BACKEND_USER_ROLE, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        console.log(response.data.response);
+        setRole(response.data.response);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios
       .get(BACKEND_PRODUCTS_URL, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -73,37 +138,86 @@ const Products = () => {
           higherPrice: maxPrice,
           productName: productName,
           condition: productCondition,
+          category: category,
+          tag: tag,
         },
       })
       .then((response) => {
         setProducts(response.data.response);
         console.log(response.data.response)
+        setNumberOfProducts(response.data.rows);
       })
       .catch((error) => {
         console.log(error);
       });
-  }, [maxPrice, minPrice, productName, productCondition]);
+  }, [maxPrice, minPrice, productName, productCondition, category, tag]);
+
+  const addProductToWishList = (data) => {
+    console.log("CEST MA DATA", data)
+
+    axios
+      .post(BACKEND_WISHLIST_URL,
+        {
+          productId: data.id,
+          quantity: data.quantity,
+          availableQuantity: data.availableQuantity
+        }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      .then((response) => {
+        if (localStorage.getItem("wishProduct") === null) {
+          localStorage.setItem("wishProduct", "[]");
+        }
+        var oldWishList = JSON.parse(localStorage.getItem("wishProduct"));
+        oldWishList.push(
+          data
+        )
+        localStorage.setItem("wishProduct", JSON.stringify(oldWishList));
+        setPopupTitle("LittleShop product management information");
+        setPopupContent(
+          `${data.quantity} "${data.name}" have been successfully added to your wishlist !`
+        );
+        popupHandler(popup).then(() => { })
+      })
+      .catch((error) => {
+        console.log(error)
+        if (error.response.status === 403) {
+          localStorage.removeItem("token");
+          setPopupTitle("LittleShop account management information");
+          setPopupContent("You are currently not logged in !");
+          popupHandler().then(() => {
+            navigate("/login");
+          });
+        }
+        else if (error.response.status === 400) {
+          setPopupTitle("LittleShop product management information");
+          setPopupContent("Something went wrong don't forget to add a quantity");
+          popupHandler(popup).then(() => { });
+        }
+
+      });
+  };
 
   const addProductToCart = (data) => {
-    console.log(data)
-    axios.post(
-      BACKEND_CART_PRODUCTS_URL,
-      {
-        productName: data.productName,
-        quantity: data.quantity,
-        sellerUsername: data.sellerUsername,
-      },
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      }
-    )
+    axios
+      .post(
+        BACKEND_CART_PRODUCTS_URL,
+        {
+          productName: data.productName,
+          quantity: data.quantity,
+          sellerUsername: data.sellerUsername,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      )
       .then(async (response) => {
         if (response.status === 201) {
           if (localStorage.getItem("cartProduct") === null) {
             localStorage.setItem("cartProduct", "[]");
           }
           var oldCart = JSON.parse(localStorage.getItem("cartProduct"));
-          console.log(oldCart)
+          console.log(oldCart);
 
           oldCart.push({
             id: data.id,
@@ -113,7 +227,7 @@ const Products = () => {
             sellerUsername: data.sellerUsername,
             unitPrice: data.unitPrice,
             condition: data.condition,
-            availableQuantity: data.availableQuantity
+            availableQuantity: data.availableQuantity,
           });
           localStorage.setItem("cartProduct", JSON.stringify(oldCart));
           setPopupTitle("LittleShop product management information");
@@ -127,15 +241,71 @@ const Products = () => {
       .catch(async (error) => {
         if (error.response.status === 409) {
           setPopupTitle("LittleShop product management information");
-          setPopupContent(
-            ` "${data.productName}" is already inside cart !`
-          );
+          setPopupContent(` "${data.productName}" is already inside cart !`);
+          await popupHandler(popup);
+        }
+        else if (error.response.status === 400) {
+          setPopupTitle("LittleShop product management information");
+          setPopupContent("Something went wrong don't forget to add a quantity");
           await popupHandler(popup);
         }
       });
-  }
+  };
+
+  const removeProductFromSells = (data) => {
+    console.log(data);
+    axios
+      .put(
+        BACKEND_PRODUCT_URL,
+        {
+          name: data.name,
+          onSale: false,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data.response);
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const addProductToSells = (data) => {
+    console.log(data);
+    axios
+      .put(
+        BACKEND_PRODUCT_URL,
+        {
+          name: data.name,
+          onSale: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data.response);
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const displayForm = (e) => {
+    setShowForm(!e);
+  };
+
   return (
-    <div>
+    <>
       <Navbar />
       <div className="filters">
         <h3>filters</h3>
@@ -192,7 +362,43 @@ const Products = () => {
             <option value="renovated">renovated</option>
           </select>
         </div>
-        <div className="dropdown-sort">
+        <div className="dropdown-categories">
+          <label>
+            <b>category:</b>
+          </label>
+          <select
+            name="categories"
+            id="categories"
+            onChange={(e) => {
+              setCategory(e.target.value);
+            }}
+            value={category}
+          >
+            <option value="all">all</option>
+            {categories.map((category) => (
+              <option value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+        <div className="dropdown-tags">
+          <label>
+            <b>tag:</b>
+          </label>
+          <select
+            name="tags"
+            id="tags"
+            onChange={(e) => {
+              setTag(e.target.value);
+            }}
+            value={tag}
+          >
+            <option value="all">all</option>
+            {tags.map((tag) => (
+              <option value={tag}>{tag}</option>
+            ))}
+          </select>
+        </div>
+        {/* <div className="dropdown-sort">
           <label>
             <b>Sort by:</b>
           </label>
@@ -205,13 +411,47 @@ const Products = () => {
             <option value="unitPrice">unitPrice</option>
             <option value="condition">condition</option>
           </select>
-        </div>
+        </div> */}
       </div>
-
+      <div className="products-found">
+        <p>
+          <b>Products founds:</b>
+          {numberOfProducts}
+        </p>
+      </div>
+      {role === "seller" ? (
+        <button
+          onClick={() => {
+            setModify(false);
+            displayForm();
+          }}
+        >
+          <MdPostAdd /> Add new Product
+        </button>
+      ) : (
+        <></>
+      )}
       <div className="container">
         <Popup trigger={popup} title={popupTitle} value={popupContent} />
+        <ProductForm
+          trigger={form}
+          categories={categories}
+          tags={tags}
+          updateDisplay={() => {
+            displayForm(form);
+            console.log(form);
+          }}
+          modify={modify}
+          productToUpdate={productToUpdate}
+        ></ProductForm>
         {products.map((product) => (
           <div className="product-card" key={product.id}>
+
+            {role === "seller" ? product.onSale && product.availableQuantity > 0 ? (
+              <div class="green-circle" />
+            ) : (
+              <div class="red-circle" />
+            ) : <></>}
             <div className="product-img">
               <img
                 src={require("../images/box.png")}
@@ -244,45 +484,116 @@ const Products = () => {
                 <b>Condition: </b>
                 {product.condition}
               </p>
+              <p>
+                <b>Categories:</b>
+                {product.categories.map((category) => (
+                  <p>{`- ${category}`}</p>
+                ))}
+              </p>
+              <p>
+                <b>Tags:</b>
+                {product.tags.map((tag) => (
+                  <p>{`- ${tag}`}</p>
+                ))}
+              </p>
               <p className="card-content-description">
                 <b>Description: </b>
                 {product.description}
               </p>
-              <label>quantity:</label>
-              <input
-                type="number"
-                id="quantity"
-                name="quantity"
-                min="0"
-                max={product.availableQuantity}
-                onInput={handleCartQuantity}
-              ></input>
+              <p>
+                <b>Average Rating:</b>
+              </p>
+              <ReactStars
+                count={5}
+                value={product.averageRating}
+                size={24}
+                activeColor="#FF7F7F"
+                edit={false}
+                half={true}
+                style={{ zIndex: 0 }}
+              ></ReactStars>
               <br></br>
-              <button
-                className="cart-button"
-                onClick={() =>
-                  addProductToCart({
-                    id: product.id,
-                    productName: product.name,
-                    label: product.label,
-                    sellerUsername: product.sellerUsername,
-                    quantity: cartQuantity,
-                    unitPrice: product.unitPrice,
-                    condition: product.condition,
-                    availableQuantity: product.availableQuantity
-                  })
-                }
-              >
-                Add to cart <BsCart4 />
-              </button>
-              <button className="wish-button">
-                Add to whishlist <BsSuitHeart />
-              </button>
+              {role !== "seller" ? (
+                <>
+                  <label>quantity:</label>
+                  <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    min="0"
+                    max={product.availableQuantity}
+                    onInput={handleCartQuantity}
+                  ></input>
+                  <br></br>
+                </>
+              ) : (
+                <></>
+              )}
+              {role === "seller" ? (
+                <>
+                  <button
+                    className="product-edit-btn"
+                    onClick={() => {
+                      setProductToUpdate(product);
+                      setModify(true);
+                      displayForm();
+                    }}
+                  >
+                    <BiEdit /> Modify your product
+                  </button>
+                  <button
+                    onClick={() => {
+                      addProductToSells(product);
+                    }}
+                  >
+                    <MdAddShoppingCart /> Add product to sells
+                  </button>
+                  <button
+                    onClick={() => {
+                      removeProductFromSells(product);
+                    }}
+                  >
+                    <MdOutlineRemoveShoppingCart /> Remove product from sells
+                  </button>
+                  <button>
+                    <RiDeleteBin6Line /> Delete product
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="cart-button"
+                    onClick={() =>
+                      addProductToCart({
+                        id: product.id,
+                        productName: product.name,
+                        label: product.label,
+                        sellerUsername: product.sellerUsername,
+                        quantity: cartQuantity,
+                        unitPrice: product.unitPrice,
+                        condition: product.condition,
+                        availableQuantity: product.availableQuantity,
+                      })
+                    }
+                  >
+                    Add to cart <BsCart4 />
+                  </button>
+                  <button className="wish-button"
+                    onClick={() => {
+                      product.quantity = cartQuantity;
+                      addProductToWishList(product)
+                    }
+                    }
+                  >
+                    Add to whishlist <BsSuitHeart />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
 };
 

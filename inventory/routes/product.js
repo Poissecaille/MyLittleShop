@@ -5,6 +5,7 @@ const ProductTag = require("../models/productTag");
 const Product = require("../models/product");
 const Op = Sequelize.Op
 
+
 // DEDICATED ROAD FOR ORDERS RATING
 router.get("/buyer/product", async (request, response) => {
     try {
@@ -20,7 +21,7 @@ router.get("/buyer/product", async (request, response) => {
             });
         } else {
             return response.status(200).json({
-                "response": productToRate.data.response,
+                "response": productToRate.data.response
             });
         }
     } catch (error) {
@@ -35,9 +36,10 @@ router.get("/buyer/product", async (request, response) => {
 router.get("/buyer/products", async (request, response) => {
     try {
         var sellersIds = [];
-        // var categoriesIds = [];
-        // var tagsIds = [];
+        var productsIdsPerCategory = [];
+        var productsIdsPerTag = [];
         var productsIds = [];
+
         if (Array.isArray(request.query.sellerId)) {
             console.log(request.query.sellerId)
             request.query.sellerId.forEach(
@@ -48,46 +50,60 @@ router.get("/buyer/products", async (request, response) => {
         } else {
             sellersIds.push(parseInt(request.query.sellerId))
         }
-        const categories = await ProductCategory.findAll({
-            where:
-            {
-                name: {
-                    [Op.substring]: request.query.category,
+        console.log("ERREUR1", request.query)
+        // if (request.query.category || request.query.tag) {
+        if (request.query.category) {
+            const productCategories = await ProductCategory.findAll({
+                where:
+                {
+                    name: request.query.category
                 }
+            });
+            for (let i = 0; i < productCategories.length; i++) {
+                productsIdsPerCategory.push(productCategories[i].productId)
             }
-        });
-        const tags = await ProductTag.findAll({
-            where:
-            {
-                name: {
-                    [Op.substring]: request.query.tag,
+            // 
+            // } else {
+            for (let i = 0; i < productsIdsPerCategory.length; i++) {
+                productsIds.push(productsIdsPerCategory[i])
+            }
+            // }
+        }
+
+        if (request.query.tag) {
+            const productTags = await ProductTag.findAll({
+                where:
+                {
+                    name: request.query.tag,
                 }
+            });
+            for (let i = 0; i < productTags.length; i++) {
+                productsIdsPerTag.push(productTags[i].productId)
             }
-        });
-        await tags.forEach(
-            (tag) => {
-                productsIds.push(tag.productId)
+            for (let i = 0; i < productsIdsPerTag.length; i++) {
+                productsIds.push(productsIdsPerTag[i])
             }
-        );
-        await categories.forEach(
-            (category) => {
-                if (productsIds.indexOf(category.productId) === -1) {
-                    productsIds.push(category.productId)
-                }
-            }
-        );
-        console.log("ASSERTION_TEST", request.query)
+
+        }
+        if (request.query.tag && request.query.category) {
+            productsIds = productsIdsPerCategory.filter((value) => productsIdsPerTag.includes(value));
+        } else if (!request.query.tag && request.query.category) {
+            productsIds = productsIdsPerCategory
+        } else if (request.query.tag && !request.query.category) {
+            productsIds = productsIdsPerTag
+        }
+        console.log("PRODUCT_IDS: ", productsIds, productsIdsPerCategory, productsIdsPerTag)
+
         const products = await Product.findAndCountAll({
             where: {
                 [Op.and]: [
+                    //{ id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
                     { id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
-                    { name: request.query.productName !== undefined ? { [Op.substring]: request.query.productName } : { [Op.not]: null } },
-                    // { productCategoryId: request.query.category !== undefined ? { [Op.in]: categoriesIds } : { [Op.not]: null } },
-                    // { productTagId: request.query.tag !== undefined ? { [Op.in]: tagsIds } : { [Op.not]: null } },
                     { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },
                     { unitPrice: { [Op.between]: [request.query.lowerPrice, request.query.higherPrice] } },
                     { condition: request.query.condition !== undefined ? { [Op.eq]: request.query.condition } : { [Op.not]: null } },
-                    { availableQuantity: { [Op.gt]: 0 } }
+                    { availableQuantity: { [Op.gt]: 0 } },
+                    { onSale: true }
                 ]
             }, sort: [[request.query.filter, "ASC"]]
         });
@@ -103,6 +119,7 @@ router.get("/buyer/products", async (request, response) => {
             });
         }
         else {
+            console.log(error)
             response.status(error.response.status).json({
                 "response": error.response.data.response
             });
@@ -113,12 +130,9 @@ router.get("/buyer/products", async (request, response) => {
 // CONSULT PRODUCTS FOR SELLERS
 router.get("/seller/products", async (request, response) => {
     try {
-        console.log(request.query)
-        console.log("##########chap###########")
-        console.log(request.query.sellerId)
         const sellerProducts = await Product.findAll({
             where: {
-                sellerId: request.query.sellerId,
+                sellerId: request.query.sellerId ? request.query.sellerId : { [Op.in]: request.query.sellerIds },
             }
         });
         if (!sellerProducts) {
@@ -259,35 +273,36 @@ router.put("/seller/product", async (request, response) => {
                 "response": "Product not found for current user"
             });
         }
-        if (request.body.categoryNames) {
-            var categoryIds = []
-            request.body.categoryNames.forEach(async (categoryName) => {
-                await ProductCategory.findOne({
-                    where: {
-                        name: categoryName
-                    }
-                });
-                categoryIds.push(categoryName.id)
-            })
-        }
-        if (request.body.tagNames) {
-            var tagsIds = []
-            request.body.tagNames.forEach(async (tagName) => {
-                await ProductTag.findOne({
-                    where: {
-                        name: tagName
-                    }
-                });
-                tagsIds.push(tagName.id)
-            })
-        }
-        if (request.body.availableQuantity !== undefined && request.body.availableQuantity == 0) {
+        // if (request.body.categoryNames) {
+        //     var categoryIds = []
+        //     request.body.categoryNames.forEach(async (categoryName) => {
+        //         await ProductCategory.findOne({
+        //             where: {
+        //                 name: categoryName
+        //             }
+        //         });
+        //         categoryIds.push(categoryName.id)
+        //     })
+        // }
+        // if (request.body.tagNames) {
+        //     var tagsIds = []
+        //     request.body.tagNames.forEach(async (tagName) => {
+        //         await ProductTag.findOne({
+        //             where: {
+        //                 name: tagName
+        //             }
+        //         });
+        //         tagsIds.push(tagName.id)
+        //     })
+        // }
+        if (request.body.availableQuantity !== undefined || request.body.availableQuantity == 0) {
             if (request.body.onSale == true)
                 return response.status(400).json({
                     "response": "Bad json format",
                 });
             request.body.onSale = false
         }
+
         await productToUpdate.update({
             name: request.body.newName !== undefined ? request.body.newName : productToUpdate.name,
             label: request.body.label !== undefined ? request.body.label : productToUpdate.label,
@@ -295,8 +310,6 @@ router.put("/seller/product", async (request, response) => {
             description: request.body.description !== undefined ? request.body.description : productToUpdate.description,
             unitPrice: request.body.unitPrice !== undefined ? request.body.unitPrice : productToUpdate.unitPrice,
             availableQuantity: request.body.availableQuantity !== undefined ? request.body.availableQuantity : productToUpdate.availableQuantity,
-            productCategoryId: categoryIds !== undefined ? categoryIds : productToUpdate.productCategoryId,
-            productTagId: tagsIds !== undefined ? tagsIds : productToUpdate.productTagId,
             onSale: request.body.onSale !== undefined ? request.body.onSale : productToUpdate.onSale
         });
         return response.status(200).json({
@@ -374,20 +387,23 @@ router.get("/orderedProduct", async (request, response) => {
 });
 
 
-
-router.get("/productsAll", async (request, response) => {
+//DEDICATED ROAD FOR PRODUCTS AVERAGE RATING UPDATE
+router.put("/updateProductRating", async (request, response) => {
     try {
-        const products = await Product.findAll();
-        return response.status(200).json({
-            "response": products
+        const productToUpdate = await Product.findByPk(request.body.productId)
+        await productToUpdate.update({
+            averageRating: request.body.averageRating
         });
-    } catch (error) {
+        await productToUpdate.save();
+        return response.status(200).json({
+            "response": productToUpdate
+        });
+    }
+    catch (error) {
         console.log(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }
 });
-
-
 module.exports = router;
