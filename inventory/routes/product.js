@@ -215,7 +215,7 @@ router.put("/products", async (request, response) => {
 })
 
 
-// ADD A PRODUCT FOR SELLERS //TODO HANDLE PRODUCT CATEGOEY AND TAG FOR PUT AND POST
+// ADD A PRODUCT FOR SELLERS //TODO HANDLE PRODUCT CATEGORY AND TAG FOR PUT AND POST
 router.post("/seller/product", async (request, response) => {
     try {
         const newSellerProduct = new Product({
@@ -372,5 +372,22 @@ router.get("/orderedProduct", async (request, response) => {
         });
     }
 });
+
+
+
+router.get("/productsAll", async (request, response) => {
+    try {
+        const products = await Product.findAll();
+        return response.status(200).json({
+            "response": products
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 
 module.exports = router;

@@ -23,22 +23,22 @@ describe("UserAddress unit tests", () => {
 
     it("Test-save should be able to create a new address without throwing error", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -70,22 +70,22 @@ describe("UserAddress unit tests", () => {
 
     it("Test-findOne should be able to get an address using userId", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -129,22 +129,22 @@ describe("UserAddress unit tests", () => {
 
     it("Test-findAll should be able to get all address using userId", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -175,22 +175,22 @@ describe("UserAddress unit tests", () => {
 
     it("Test-update should be able to modify address using userId", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date

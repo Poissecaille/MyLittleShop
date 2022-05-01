@@ -23,12 +23,12 @@ describe("POST /api/register", () => {
 
   it('register with correct data and create buyer account', (done) => {
     const fakePerson = {
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
+      firstname: faker.name.firstName(),
+      lastname: faker.name.lastName(),
       email: faker.internet.email(),
       username: faker.internet.userName(),
       password: faker.internet.password(),
-      birthDate: faker.date.past(),
+      birthdate: faker.date.past(),
       role: "buyer",
     }
     request(app)
@@ -36,10 +36,10 @@ describe("POST /api/register", () => {
       .send({
         "email": fakePerson.email,
         "username": fakePerson.username,
-        "firstName": fakePerson.firstName,
-        "lastName": fakePerson.lastName,
+        "firstname": fakePerson.firstname,
+        "lastname": fakePerson.lastname,
         "password": fakePerson.password,
-        "birthDate": fakePerson.birthDate,
+        "birthdate": fakePerson.birthdate,
         "role": fakePerson.role
       })
       .set('Accept', 'application/json')
@@ -53,12 +53,12 @@ describe("POST /api/register", () => {
   });
   it('register violate unique username constraint', (done) => {
     const fakePerson = {
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
+      firstname: faker.name.firstName(),
+      lastname: faker.name.lastName(),
       email: faker.internet.email(),
       username: faker.internet.userName(),
       password: faker.internet.password(),
-      birthDate: faker.date.past(),
+      birthdate: faker.date.past(),
       role: "buyer",
     }
     request(app)
@@ -66,10 +66,10 @@ describe("POST /api/register", () => {
       .send({
         "email": faker.internet.email(),
         "username": fakePerson.username,
-        "firstName": faker.name.firstName(),
-        "lastName": faker.name.lastName(),
+        "firstname": faker.name.firstName(),
+        "lastname": faker.name.lastName(),
         "password": faker.internet.password(),
-        "birthDate": faker.date.past(),
+        "birthdate": faker.date.past(),
         "role": fakePerson.role
       })
       .set('Accept', 'application/json')
@@ -85,10 +85,10 @@ describe("POST /api/register", () => {
       .send({
         "email": fakePerson.email,
         "username": fakePerson.username,
-        "firstName": fakePerson.firstName,
-        "lastName": fakePerson.lastName,
+        "firstname": fakePerson.firstname,
+        "lastname": fakePerson.lastname,
         "password": fakePerson.password,
-        "birthDate": fakePerson.birthDate,
+        "birthdate": fakePerson.birthdate,
         "role": fakePerson.role
       })
       .set('Accept', 'application/json')
@@ -101,12 +101,12 @@ describe("POST /api/register", () => {
   });
   it('register violate unique email constraint', (done) => {
     const fakePerson = {
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
+      firstname: faker.name.firstName(),
+      lastname: faker.name.lastName(),
       email: faker.internet.email(),
       username: faker.internet.userName(),
       password: faker.internet.password(),
-      birthDate: faker.date.past(),
+      birthdate: faker.date.past(),
       role: "buyer",
     }
     request(app)
@@ -114,10 +114,10 @@ describe("POST /api/register", () => {
       .send({
         "email": fakePerson.email,
         "username": faker.internet.userName(),
-        "firstName": faker.name.firstName(),
-        "lastName": faker.name.lastName(),
+        "firstname": faker.name.firstName(),
+        "lastname": faker.name.lastName(),
         "password": faker.internet.password(),
-        "birthDate": faker.date.past(),
+        "birthdate": faker.date.past(),
         "role": fakePerson.role
       })
       .set('Accept', 'application/json')
@@ -133,10 +133,10 @@ describe("POST /api/register", () => {
       .send({
         "email": fakePerson.email,
         "username": fakePerson.username,
-        "firstName": fakePerson.firstName,
-        "lastName": fakePerson.lastName,
+        "firstname": fakePerson.firstname,
+        "lastname": fakePerson.lastname,
         "password": fakePerson.password,
-        "birthDate": fakePerson.birthDate,
+        "birthdate": fakePerson.birthdate,
         "role": fakePerson.role
       })
       .set('Accept', 'application/json')

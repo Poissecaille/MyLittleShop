@@ -1,0 +1,2893 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Artillery report</title>
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
+
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic' rel='stylesheet' type='text/css'>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css' rel='stylesheet' type='text/css'>
+  <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.js" charset="utf-8"></script>
+
+  <style>
+  body, p, li {
+    font-family: sans-serif;
+    font-size: 10pt;
+  }
+
+  h1 {
+    font-size: 18pt;
+    font-weight: bold;
+  }
+
+  #errorsContainer > p {
+    color: #009900;
+  }
+
+  #footer {
+    padding: 1em;
+    font-size: 0.8em;
+    color: #999;
+    text-align: center;
+    margin-top: 1em;
+    background-color: #eee;
+  }
+  #editor {
+    font-size: 8pt;
+    height: 20em;
+  }
+
+  .chart-container {
+    margin: 20px 0px;
+  }
+  </style>
+
+  <style>
+    h1 {
+      line-height: 200%;
+    }
+
+    body {
+      background-color: #fcfcfc;
+    }
+
+    .container {
+      width: 100%;
+      min-width: 960px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="row" id="header">
+  <div class="col-lg-offset-4">
+    <pre style="font-family: monospace; font-size: 10pt; font-weight: 700; background-color: #fcfcfc; border: none;">
+        ___         __  _ ____                  _
+  _____/   |  _____/ /_(_) / /__  _______  __  (_)___  _____
+ /____/ /| | / ___/ __/ / / / _ \/ ___/ / / / / / __ \/____/
+/____/ ___ |/ /  / /_/ / / /  __/ /  / /_/ / / / /_/ /____/
+    /_/  |_/_/   \__/_/_/_/\___/_/   \__, (_)_/\____/
+                                    /____/
+    </pre>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class="text-center" id="page-title">Test run on <span id="timestamp"></span></h1>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-3">
+    <h4>
+      Summary
+    </h4>
+    <table class="table table-bordered table-hover table-condensed">
+      <tbody>
+        <tr>
+          <td>Test duration</td>
+          <td><span id="testDuration">0</span> sec</td>
+        </tr>
+        <tr>
+          <td>Virtual Users created</td>
+          <td><span id="vuCreated">0</span></td>
+        </tr>
+
+        <tr>
+          <td>Virtual Users completed</td>
+          <td><span id="vuCompleted">0</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-lg-5" id="scenarioCountsContainer">
+    <div>
+      <h4>
+        Scenario counts
+      </h4>
+      <p></p>
+
+      <table class="table table-bordered table-hover table-condensed" id="scenarioCounts">
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-3">
+    <div id="errorsContainer">
+      <h4>
+        Errors
+      </h4>
+      <p></p>
+
+      <table class="table table-bordered table-hover table-condensed" id="errors">
+      </table>
+    </div>
+  </div>
+</div> <!-- /.row -->
+
+<div class="row">
+  <div class="col-lg-12" id="customCountersContainer">
+    <div>
+      <h4>
+        Counters
+      </h4>
+      <p></p>
+
+      <table class="table table-bordered table-hover table-condensed" id="customCountersTable">
+      </table>
+    </div>
+  </div>
+</div> <!-- /.row -->
+
+<div class="row">
+  <div class="text-center col-lg-12">
+    <h3>Charts</h3>
+  </div>
+</div>
+
+<div id="errorsChartsRow" class="row">
+  <div class="chart-container text-center col-lg-12">
+    <h4>
+      <i class="fas fa-chart-area"></i> Errors at intervals
+    </h4>
+    <canvas id="errorsAtIntervalsChart"></canvas>
+  </div>
+</div>
+
+<div id="customCountersChartsRow" class="row">
+  <div class="chart-container text-center col-lg-12">
+    <h4>
+      <i class="fas fa-chart-area"></i>Counters at intervals
+    </h4>
+    <canvas id="customCountersAtIntervalsChart"></canvas>
+  </div>
+</div>
+
+<div id="customStats"></div>
+
+<div class="row">
+  <div class="codes-line text-center col-lg-12"></div>
+</div>
+<div class="row">
+  <div class="errors-line text-center col-lg-12"></div>
+</div>
+
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2">
+    <h3 class="text-center">Raw report data</h3>
+    <p>This is the raw JSON stats output that the report was generated from.</p>
+    <div id="editor">
+    </div>
+  </div>
+</div>
+
+<script charset="utf-8">
+const Report = {
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.0": 1000,
+      "vusers.created": 1000,
+      "http.requests": 10000,
+      "http.codes.200": 10000,
+      "http.responses": 10000,
+      "vusers.failed": 0,
+      "vusers.completed": 1000
+    },
+    "histograms": {
+      "http.response_time": {
+        "mapping": {
+          "relativeAccuracy": 0.009999999999999957,
+          "_offset": 0,
+          "gamma": 1.02020202020202,
+          "_multiplier": 34.65620375188833,
+          "minPossible": 1.135012422773875e-308,
+          "maxPossible": 1.7620952510036562e+308
+        },
+        "store": {
+          "chunkSize": 128,
+          "bins": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            2,
+            1,
+            0,
+            0,
+            3,
+            1,
+            1,
+            2,
+            2,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            2,
+            1,
+            2,
+            2,
+            1,
+            4,
+            2,
+            3,
+            3,
+            3,
+            1,
+            1,
+            4,
+            5,
+            2,
+            4,
+            4,
+            5,
+            3,
+            5,
+            4,
+            4,
+            4,
+            3,
+            4,
+            5,
+            5,
+            5,
+            7,
+            4,
+            7,
+            6,
+            5,
+            6,
+            8,
+            8,
+            8,
+            6,
+            8,
+            6,
+            8,
+            7,
+            7,
+            9,
+            10,
+            10,
+            12,
+            12,
+            9,
+            12,
+            10,
+            14,
+            14,
+            16,
+            14,
+            10,
+            12,
+            11,
+            9,
+            11,
+            18,
+            22,
+            20,
+            17,
+            15,
+            16,
+            12,
+            19,
+            22,
+            26,
+            17,
+            23,
+            19,
+            24,
+            26,
+            6,
+            22,
+            21,
+            21,
+            26,
+            21,
+            16,
+            26,
+            39,
+            49,
+            49,
+            120,
+            131,
+            76,
+            146,
+            334,
+            955,
+            1505,
+            1403,
+            1156,
+            1115,
+            793,
+            625,
+            355,
+            129,
+            87,
+            64,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "count": 10000,
+          "minKey": 241,
+          "maxKey": 496,
+          "offset": 241
+        },
+        "negativeStore": {
+          "chunkSize": 128,
+          "bins": [],
+          "count": 0,
+          "minKey": null,
+          "maxKey": null,
+          "offset": 0
+        },
+        "zeroCount": 0,
+        "count": 10000,
+        "min": 296,
+        "max": 5305,
+        "sum": 43398191
+      },
+      "vusers.session_length": {
+        "mapping": {
+          "relativeAccuracy": 0.009999999999999957,
+          "_offset": 0,
+          "gamma": 1.02020202020202,
+          "_multiplier": 34.65620375188833,
+          "minPossible": 1.135012422773875e-308,
+          "maxPossible": 1.7620952510036562e+308
+        },
+        "store": {
+          "chunkSize": 128,
+          "bins": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            17,
+            21,
+            31,
+            35,
+            69,
+            275,
+            332,
+            217,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "count": 1000,
+          "minKey": 403,
+          "maxKey": 658,
+          "offset": 403
+        },
+        "negativeStore": {
+          "chunkSize": 128,
+          "bins": [],
+          "count": 0,
+          "minKey": null,
+          "maxKey": null,
+          "offset": 0
+        },
+        "zeroCount": 0,
+        "count": 1000,
+        "min": 38895.532295,
+        "max": 45297.04836,
+        "sum": 43422088.70323904
+      }
+    },
+    "rates": {
+      "http.request_rate": 218
+    },
+    "http.request_rate": null,
+    "firstCounterAt": 1651407316411,
+    "firstHistogramAt": 1651407316822,
+    "lastCounterAt": 1651407363071,
+    "lastHistogramAt": 1651407363071,
+    "firstMetricAt": 1651407316411,
+    "lastMetricAt": 1651407363071,
+    "period": 1651407360000,
+    "summaries": {
+      "http.response_time": {
+        "min": 296,
+        "max": 5305,
+        "count": 10000,
+        "p50": 4492.8,
+        "median": 4492.8,
+        "p75": 4676.2,
+        "p90": 4867,
+        "p95": 4965.3,
+        "p99": 5168,
+        "p999": 5272.4
+      },
+      "vusers.session_length": {
+        "min": 38895.5,
+        "max": 45297,
+        "count": 1000,
+        "p50": 43928,
+        "median": 43928,
+        "p75": 43928,
+        "p90": 44815.4,
+        "p95": 44815.4,
+        "p99": 44815.4,
+        "p999": 45720.8
+      }
+    }
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.0": 1000,
+        "vusers.created": 1000,
+        "http.requests": 1609,
+        "http.codes.200": 609,
+        "http.responses": 609
+      },
+      "histograms": {
+        "http.response_time": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              0,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              0,
+              2,
+              1,
+              0,
+              0,
+              3,
+              1,
+              1,
+              2,
+              2,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              1,
+              2,
+              2,
+              1,
+              4,
+              2,
+              3,
+              3,
+              3,
+              1,
+              1,
+              4,
+              5,
+              2,
+              4,
+              4,
+              5,
+              3,
+              5,
+              4,
+              4,
+              4,
+              3,
+              4,
+              5,
+              5,
+              5,
+              7,
+              4,
+              7,
+              6,
+              5,
+              6,
+              8,
+              8,
+              8,
+              6,
+              8,
+              6,
+              8,
+              7,
+              7,
+              9,
+              10,
+              10,
+              12,
+              12,
+              9,
+              12,
+              10,
+              14,
+              14,
+              16,
+              14,
+              10,
+              12,
+              11,
+              9,
+              11,
+              18,
+              22,
+              20,
+              17,
+              15,
+              16,
+              12,
+              19,
+              20,
+              22,
+              12,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 609,
+            "minKey": 277,
+            "maxKey": 404,
+            "offset": 277
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 609,
+          "min": 296,
+          "max": 2882,
+          "sum": 1128000
+        }
+      },
+      "rates": {
+        "http.request_rate": 450
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1651407316411,
+      "firstHistogramAt": 1651407316822,
+      "lastCounterAt": 1651407319996,
+      "lastHistogramAt": 1651407319995,
+      "firstMetricAt": 1651407316411,
+      "lastMetricAt": 1651407319996,
+      "period": "1651407310000",
+      "summaries": {
+        "http.response_time": {
+          "min": 296,
+          "max": 2882,
+          "count": 609,
+          "p50": 1939.5,
+          "median": 1939.5,
+          "p75": 2416.8,
+          "p90": 2671,
+          "p95": 2780,
+          "p99": 2836.2,
+          "p999": 2893.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "http.codes.200": 2190,
+        "http.responses": 2190,
+        "http.requests": 2189
+      },
+      "histograms": {
+        "http.response_time": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2,
+              4,
+              5,
+              21,
+              19,
+              24,
+              26,
+              6,
+              22,
+              21,
+              21,
+              26,
+              21,
+              16,
+              26,
+              26,
+              17,
+              15,
+              21,
+              36,
+              20,
+              26,
+              47,
+              89,
+              282,
+              591,
+              401,
+              62,
+              63,
+              176,
+              58,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 2190,
+            "minKey": 334,
+            "maxKey": 461,
+            "offset": 334
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 2190,
+          "min": 2737,
+          "max": 4970,
+          "sum": 9525144
+        }
+      },
+      "rates": {
+        "http.request_rate": 219
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1651407320000,
+      "firstHistogramAt": 1651407320000,
+      "lastCounterAt": 1651407329998,
+      "lastHistogramAt": 1651407329998,
+      "firstMetricAt": 1651407320000,
+      "lastMetricAt": 1651407329998,
+      "period": "1651407320000",
+      "summaries": {
+        "http.response_time": {
+          "min": 2737,
+          "max": 4970,
+          "count": 2190,
+          "p50": 4492.8,
+          "median": 4492.8,
+          "p75": 4583.6,
+          "p90": 4867,
+          "p95": 4867,
+          "p99": 4965.3,
+          "p999": 4965.3
+        }
+      }
+    },
+    {
+      "counters": {
+        "http.requests": 2120,
+        "http.codes.200": 2119,
+        "http.responses": 2119
+      },
+      "histograms": {
+        "http.response_time": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              116,
+              335,
+              289,
+              253,
+              220,
+              228,
+              369,
+              174,
+              12,
+              62,
+              61,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 2119,
+            "minKey": 356,
+            "maxKey": 483,
+            "offset": 356
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 2119,
+          "min": 4274,
+          "max": 5305,
+          "sum": 9914485
+        }
+      },
+      "rates": {
+        "http.request_rate": 212
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1651407330000,
+      "firstHistogramAt": 1651407330000,
+      "lastCounterAt": 1651407339995,
+      "lastHistogramAt": 1651407339993,
+      "firstMetricAt": 1651407330000,
+      "lastMetricAt": 1651407339995,
+      "period": "1651407330000",
+      "summaries": {
+        "http.response_time": {
+          "min": 4274,
+          "max": 5305,
+          "count": 2119,
+          "p50": 4676.2,
+          "median": 4676.2,
+          "p75": 4867,
+          "p90": 4965.3,
+          "p95": 5168,
+          "p99": 5272.4,
+          "p999": 5272.4
+        }
+      }
+    },
+    {
+      "counters": {
+        "http.codes.200": 2162,
+        "http.responses": 2162,
+        "http.requests": 2162
+      },
+      "histograms": {
+        "http.response_time": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              18,
+              196,
+              224,
+              234,
+              290,
+              520,
+              332,
+              80,
+              123,
+              117,
+              25,
+              3,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 2162,
+            "minKey": 360,
+            "maxKey": 487,
+            "offset": 360
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 2162,
+          "min": 4223,
+          "max": 5263,
+          "sum": 10041839
+        }
+      },
+      "rates": {
+        "http.request_rate": 216
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1651407340001,
+      "firstHistogramAt": 1651407340001,
+      "lastCounterAt": 1651407349996,
+      "lastHistogramAt": 1651407349994,
+      "firstMetricAt": 1651407340001,
+      "lastMetricAt": 1651407349996,
+      "period": "1651407340000",
+      "summaries": {
+        "http.response_time": {
+          "min": 4223,
+          "max": 5263,
+          "count": 2162,
+          "p50": 4676.2,
+          "median": 4676.2,
+          "p75": 4770.6,
+          "p90": 4965.3,
+          "p95": 5065.6,
+          "p99": 5168,
+          "p999": 5168
+        }
+      }
+    },
+    {
+      "counters": {
+        "http.codes.200": 2261,
+        "http.responses": 2261,
+        "http.requests": 1920,
+        "vusers.failed": 0,
+        "vusers.completed": 341
+      },
+      "histograms": {
+        "http.response_time": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              13,
+              152,
+              502,
+              610,
+              289,
+              212,
+              313,
+              170,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 2261,
+            "minKey": 357,
+            "maxKey": 484,
+            "offset": 357
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 2261,
+          "min": 4172,
+          "max": 4774,
+          "sum": 10094912
+        },
+        "vusers.session_length": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              17,
+              21,
+              31,
+              35,
+              69,
+              168,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 341,
+            "minKey": 465,
+            "maxKey": 592,
+            "offset": 465
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 341,
+          "min": 38895.532295,
+          "max": 43239.041254,
+          "sum": 14343690.72055
+        }
+      },
+      "rates": {
+        "http.request_rate": 208
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1651407350000,
+      "firstHistogramAt": 1651407350000,
+      "lastCounterAt": 1651407359998,
+      "lastHistogramAt": 1651407359998,
+      "firstMetricAt": 1651407350000,
+      "lastMetricAt": 1651407359998,
+      "period": "1651407350000",
+      "summaries": {
+        "http.response_time": {
+          "min": 4172,
+          "max": 4774,
+          "count": 2261,
+          "p50": 4403.8,
+          "median": 4403.8,
+          "p75": 4583.6,
+          "p90": 4676.2,
+          "p95": 4770.6,
+          "p99": 4770.6,
+          "p999": 4770.6
+        },
+        "vusers.session_length": {
+          "min": 38895.5,
+          "max": 43239,
+          "count": 341,
+          "p50": 42205.5,
+          "median": 42205.5,
+          "p75": 43058.1,
+          "p90": 43058.1,
+          "p95": 43058.1,
+          "p99": 43058.1,
+          "p999": 43058.1
+        }
+      }
+    },
+    {
+      "counters": {
+        "http.codes.200": 659,
+        "http.responses": 659,
+        "vusers.failed": 0,
+        "vusers.completed": 659
+      },
+      "histograms": {
+        "http.response_time": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              13,
+              32,
+              34,
+              99,
+              95,
+              56,
+              107,
+              117,
+              52,
+              54,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 659,
+            "minKey": 352,
+            "maxKey": 479,
+            "offset": 352
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 659,
+          "min": 3642,
+          "max": 4422,
+          "sum": 2693811
+        },
+        "vusers.session_length": {
+          "mapping": {
+            "relativeAccuracy": 0.009999999999999957,
+            "_offset": 0,
+            "gamma": 1.02020202020202,
+            "_multiplier": 34.65620375188833,
+            "minPossible": 1.135012422773875e-308,
+            "maxPossible": 1.7620952510036562e+308
+          },
+          "store": {
+            "chunkSize": 128,
+            "bins": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              107,
+              332,
+              217,
+              3,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 659,
+            "minKey": 470,
+            "maxKey": 597,
+            "offset": 470
+          },
+          "negativeStore": {
+            "chunkSize": 128,
+            "bins": [],
+            "count": 0,
+            "minKey": null,
+            "maxKey": null,
+            "offset": 0
+          },
+          "zeroCount": 0,
+          "count": 659,
+          "min": 43121.044208,
+          "max": 45297.04836,
+          "sum": 29078397.982689034
+        }
+      },
+      "rates": {},
+      "firstCounterAt": 1651407360000,
+      "firstHistogramAt": 1651407360000,
+      "lastCounterAt": 1651407363071,
+      "lastHistogramAt": 1651407363071,
+      "firstMetricAt": 1651407360000,
+      "lastMetricAt": 1651407363071,
+      "period": "1651407360000",
+      "summaries": {
+        "http.response_time": {
+          "min": 3642,
+          "max": 4422,
+          "count": 659,
+          "p50": 4147.4,
+          "median": 4147.4,
+          "p75": 4231.1,
+          "p90": 4316.6,
+          "p95": 4403.8,
+          "p99": 4403.8,
+          "p999": 4403.8
+        },
+        "vusers.session_length": {
+          "min": 43121,
+          "max": 45297,
+          "count": 659,
+          "p50": 43928,
+          "median": 43928,
+          "p75": 44815.4,
+          "p90": 44815.4,
+          "p95": 44815.4,
+          "p99": 44815.4,
+          "p999": 45720.8
+        }
+      }
+    }
+  ]
+};
+const editor = ace.edit("editor");
+editor.getSession().setMode("ace/mode/javascript");
+editor.setValue(JSON.stringify(Report, null, 2));
+editor.gotoLine(1);
+editor.setHighlightActiveLine(false);
+
+const l = _;
+
+$("#timestamp").html(
+  moment(Report.aggregate.period).format("DD MMM YYYY HH:mm:SS")
+);
+// $('#testDuration').html(Math.floor((l.last(Report.intermediate).lastCounterAt - Report.intermediate[0].firstCounterAt)/1000));
+$("#testDuration").html(l.size(Report.intermediate) * 10);
+$("#vuCompleted").html(Report.aggregate.counters["vusers.completed"]);
+$("#vuCreated").html(Report.aggregate.counters["vusers.created"]);
+
+const chartBgColors = {
+  red: "rgba(255, 99, 132, 0.2)",
+  orange: "rgba(255, 159, 64, 0.2)",
+  yellow: "rgba(255, 205, 86, 0.2)",
+  green: "rgba(75, 192, 192, 0.2)",
+  blue: "rgba(54, 162, 235, 0.2)",
+};
+
+const chartBorderColors = {
+  red: "rgb(255, 99, 132)",
+  orange: "rgb(255, 159, 64)",
+  yellow: "rgb(255, 205, 86)",
+  green: "rgb(75, 192, 192)",
+  blue: "rgb(54, 162, 235)",
+};
+
+const getHttpColor = (httpCode) => {
+  const code = parseInt(httpCode, 10);
+
+  if (code >= 100 && code < 200) {
+    return chartBorderColors.blue;
+  } else if (code >= 200 && code < 300) {
+    return chartBorderColors.green;
+  } else if (code >= 300 && code < 400) {
+    return chartBorderColors.red;
+  } else if (code >= 400 && code < 500) {
+    return chartBorderColors.yellow;
+  }
+
+  return chartBorderColors.orange;
+}
+
+const getLatencyColor = (latency) => {
+  switch(latency) {
+    case "min":
+      return chartBorderColors.red;
+    case "max":
+      return chartBorderColors.orange;
+    case "median":
+      return chartBorderColors.yellow;
+    case "p95":
+      return chartBorderColors.green;
+    case "p99":
+      return chartBorderColors.green;
+    default:
+      return '';
+  }
+};
+
+const getCustomStats = (stats) =>
+  l.omitBy(
+    stats,
+    (_, key) =>
+      key.startsWith("errors.") ||
+      key.startsWith("core.") ||
+      key.startsWith("engine.")
+  );
+
+const scenarioCounts = l.pickBy(Report.aggregate.counters, (_, key) =>
+  key.startsWith("vusers.created_by_name")
+);
+
+if (l.size(scenarioCounts) > 0) {
+  l.each(scenarioCounts, function (count, key) {
+    const [, , name] = key.split(".");
+
+    const $tdName = $("<td>" + name + "</td>");
+    const percentage =
+      Math.round(
+        (count / Report.aggregate.counters["vusers.created"]) *
+          100 *
+          1000
+      ) / 1000;
+    const $tdCount = $("<td>" + count + " (" + percentage + "%)" + "</td>");
+    $("<tr></tr>")
+      .append($tdName)
+      .append($tdCount)
+      .appendTo($("#scenarioCounts"));
+  });
+} else {
+  $("#scenarioCountsContainer").hide();
+}
+
+const httpCodes = l.pickBy(Report.aggregate.counters, (_, key) =>
+  key.startsWith("http.codes")
+);
+
+const errors = l.pickBy(Report.aggregate.counters, (_, key) =>
+  key.startsWith("errors.")
+);
+if (l.size(errors) > 0) {
+  l.each(errors, function (count, error) {
+    const [, errorDetail] = error.split("errors.");
+
+    $("<tr></tr>")
+      .append($("<td>" + errorDetail + "</td>"))
+      .append($("<td>" + count + "</td>"))
+      .appendTo($("#errors"));
+  });
+} else {
+  $("#errorsContainer > p").html(
+    "&#10004; Test completed without network or OS errors."
+  );
+}
+
+const getTimePeriodAggregates = (summaries) => {
+  const summary =
+    summaries["socketio.response_time"] ||
+    summaries["http.response_time"];
+  const metrics = ["min", "max", "median", "p95", "p99"];
+
+  return l.pickBy(summary, (_, key) => metrics.includes(key));
+};
+
+const getLatencyDistribution = (data) => {
+  return l.reduce(
+    data,
+    (acc, value, key) => {
+      acc.labels.push(key);
+      acc.values.push(value);
+
+      return acc;
+    },
+    { labels: [], values: [] }
+  );
+};
+
+const randomRgbColor = () => {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+
+  return "rgb(" + r + ", " + g + ", " + b + ")";
+};
+
+const latencyDistributionData = getLatencyDistribution(
+  getTimePeriodAggregates(Report.aggregate.summaries)
+);
+
+const latencyAtIntervalsData = (intermediates = []) => {
+  const data = intermediates.reduce(
+    (acc, entry, idx) => {
+      const latencies = getTimePeriodAggregates(entry.summaries);
+
+      l.each(latencies, (latency, key) => {
+        acc.values[key] = acc.values[key] || [];
+
+        acc.values[key].push(latency);
+      });
+
+      acc.labels.push((idx + 1) * 10);
+
+      return acc;
+    },
+    { labels: [], values: {} }
+  );
+
+  return {
+    labels: data.labels,
+    datasets: l.map(data.values, (entry, key) => {
+      const color = getLatencyColor(key);
+
+      return {
+        label: key,
+        data: entry,
+        fill: false,
+        backgroundColor: color,
+        borderColor: color,
+        tension: 0.5,
+      };
+    })
+  };
+};
+
+const getCounterDataset = (intermediates = [], counterKeys) => {
+  let counterKey = "";
+
+  if (intermediates[0]) {
+    for (const key of counterKeys) {
+      if (key in intermediates[0].counters) {
+        counterKey = key;
+        break;
+      }
+    }
+  }
+
+  const data = intermediates.reduce(
+    (acc, entry, idx) => {
+      const count = entry.counters[counterKey] || 0;
+
+      acc.labels.push((idx + 1) * 10);
+      acc.values.push(count);
+
+      return acc;
+    },
+    { labels: [], values: [] }
+  );
+
+  return {
+    labels: data.labels,
+    datasets: [
+      {
+        data: data.values,
+        fill: false,
+        borderColor: randomRgbColor(),
+        tension: 0.5,
+      },
+    ],
+  };
+};
+
+const getMeanRpsData = (intermediates = []) => {
+  const data = intermediates.reduce(
+    (acc, entry, idx) => {
+      const count =
+        entry.rates["http.request_rate"] ||
+        entry.rates["socketio.emit_rate"] ||
+        entry.rates["websocket.send_rate"] ||
+        0;
+
+      acc.labels.push((idx + 1) * 10);
+      acc.values.push(count);
+
+      return acc;
+    },
+    { labels: [], values: [] }
+  );
+
+  return {
+    labels: data.labels,
+    datasets: [
+      {
+        data: data.values,
+        fill: false,
+        borderColor: randomRgbColor(),
+        tension: 0.5,
+      },
+    ],
+  };
+};
+
+const getHttpCodesAtIntervalsData = (intermediates = []) => {
+  const data = intermediates.reduce(
+    (acc, entry, idx) => {
+      const httpCodes = l.pickBy(entry.counters, (_, key) =>
+        key.startsWith("http.codes")
+      );
+
+      if (l.size(httpCodes) > 0) {
+        l.each(httpCodes, (count, key) => {
+          let [, , , code] = key.split(".");
+          code = parseInt(code, 10);
+
+          acc.values[code] = acc.values[code] || [];
+
+          acc.values[code].push(count);
+        });
+      }
+
+      acc.labels.push((idx + 1) * 10);
+
+      return acc;
+    },
+    { labels: [], values: {} }
+  );
+
+  return {
+    labels: data.labels,
+    datasets: l.map(data.values, (entry, key) => {
+      const color = getHttpColor(key);
+
+      return {
+        label: key,
+        data: entry,
+        fill: false,
+        backgroundColor: color,
+        borderColor: color,
+        tension: 0.5,
+      };
+    }),
+  };
+};
+
+const getHttpCodesData = (counters) => {
+  const httpCodes = l.pickBy(counters, (_, key) =>
+    key.startsWith("http.codes")
+  );
+  const labels = [];
+  const data = [];
+  const bgColors = [
+    "rgba(54, 232, 235, 0.5)",
+    "rgba(54, 235, 93, 0.5)",
+    "rgba(229, 235, 54, 0.5)",
+    "rgba(166, 54, 235, 0.5)",
+    "rgba(235, 54, 69, 0.5)",
+  ];
+
+  if (l.size(httpCodes) > 0) {
+    l.each(httpCodes, function (count, key) {
+      let [, , , code] = key.split(".");
+      code = parseInt(code, 10);
+
+      labels.push(code);
+      data.push(count);
+    });
+  }
+
+  return {
+    labels,
+    datasets: [
+      {
+        backgroundColor: labels.map(getHttpColor),
+        hoverOffset: 4,
+        data,
+      },
+    ],
+  };
+};
+
+if (l.size(errors) > 0) {
+  const getErrorsAtIntervalsData = (intermediates = []) => {
+    const data = intermediates.reduce(
+      (acc, entry, idx) => {
+        const errorsCounters = l.pickBy(entry.counters, (_, key) =>
+          key.startsWith("errors.")
+        );
+
+        l.each(errorsCounters, (count, key) => {
+          const [, errorDetail] = key.split("errors.");
+
+          acc.values[errorDetail] = acc.values[errorDetail] || [];
+
+          acc.values[errorDetail].push(count);
+        });
+
+        acc.labels.push((idx + 1) * 10);
+
+        return acc;
+      },
+      { labels: [], values: {} }
+    );
+
+    return {
+      labels: data.labels,
+      datasets: l.map(data.values, (entry, key) => {
+        return {
+          label: key,
+          data: entry,
+          fill: false,
+          backgroundColor: Object.values(chartBgColors),
+          borderColor: Object.values(chartBorderColors),
+          tension: 0.5,
+        };
+      })
+    };
+  };
+
+  new Chart(document.getElementById("errorsAtIntervalsChart"), {
+    type: "line",
+    data: getErrorsAtIntervalsData(Report.intermediate),
+    options: {
+      plugins: { legend: { position: "bottom" } },
+      aspectRatio: 3.5,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "ms",
+          },
+        },
+      },
+    },
+  });
+} else {
+  $("#errorsChartsRow").hide();
+}
+
+const customCounters = getCustomStats(Report.aggregate.counters);
+if (l.size(customCounters) > 0) {
+  let rows = [];
+
+  l.each(customCounters, function (count, key) {
+    const row = $("<tr></tr>")
+      .append($("<td>" + key + "</td>"))
+      .append($("<td>" + count + "</td>"));
+
+    rows.push(row);
+  });
+
+  if (rows.length > 5) {
+    const visibleRows = rows.slice(0, 5);
+    const hiddenRows = rows.slice(5).map((row) => row.addClass("hidden"));
+
+    rows = [
+      ...visibleRows,
+      $(
+        '<tr id="expandCustomCountersRow"><td class="text-center" colspan="2"><a href="" id="expandCustomCounters">Expand</a></td></tr>'
+      ),
+      ...hiddenRows,
+    ];
+  }
+
+  rows.forEach((row) => row.appendTo($("#customCountersTable")));
+
+  if (rows.length > 5) {
+    $("#expandCustomCounters").on("click", (e) => {
+      e.preventDefault();
+
+      $("#customCountersTable tr").removeClass("hidden");
+      $("#expandCustomCountersRow").addClass("hidden");
+    });
+  }
+
+  const getCustomStatsAtIntervalsData = (intermediates = []) => {
+    const data = intermediates.reduce(
+      (acc, entry, idx) => {
+        const customCounters = getCustomStats(entry.counters);
+
+        l.each(customCounters, (count, key) => {
+          acc.values[key] = acc.values[key] || [];
+
+          acc.values[key].push(count);
+        });
+
+        acc.labels.push((idx + 1) * 10);
+
+        return acc;
+      },
+      { labels: [], values: {} }
+    );
+
+    return {
+      labels: data.labels,
+      datasets: l.map(data.values, (entry, key) => {
+        color = randomRgbColor();
+
+        return {
+          label: key,
+          data: entry,
+          fill: false,
+          backgroundColor: color,
+          borderColor: color,
+          tension: 0.5,
+        };
+      }),
+    };
+  };
+
+  new Chart(document.getElementById("customCountersAtIntervalsChart"), {
+    type: "line",
+    data: getCustomStatsAtIntervalsData(Report.intermediate),
+    options: {
+      plugins: { legend: { position: "bottom" } },
+      aspectRatio: 2.5,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "ms",
+          },
+        },
+      },
+    },
+  });
+} else {
+  $("#customCountersChartsRow").hide();
+  $("#customCountersContainer").hide();
+}
+
+const customStats = getCustomStats(Report.aggregate.summaries);
+const customStatsContainer = $("#customStats");
+if (l.size(customStats) > 0) {
+  let $row;
+
+  Object.entries(customStats).forEach((stats, idx) => {
+    const [statsName, statsData] = stats;
+    const canvasId = "customMetric_" + idx;
+
+    if (idx === 0 || idx % 0 === 0) {
+      $row = $('<div class="row"></div>');
+    }
+
+    $row.append(
+      [
+        '<div class="chart-container text-center col-lg-6"><h4><i class="fas fa-chart-bar"></i> ',
+        statsName,
+        '</h4><canvas id="',
+        canvasId,
+        '"></canvas></div>',
+      ].join("")
+    );
+
+    $row.appendTo(customStatsContainer);
+
+    const { labels, values } = getLatencyDistribution(
+      l.pickBy(statsData, (_, key) =>
+        ["min", "max", "median", "p95", "p99"].includes(key)
+      )
+    );
+
+    setTimeout(function () {
+      new Chart(document.getElementById(canvasId), {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              data: values,
+              backgroundColor: Object.values(chartBgColors),
+              borderColor: Object.values(chartBorderColors),
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "ms",
+              },
+            },
+          },
+        },
+      });
+    });
+  });
+} else {
+  customStatsContainer.hide();
+}
+</script>
+<div id="footer">
+  <footer>This report was created with <a href="https://artillery.io">Artillery</a> - free open-source load-testing for HTTP and WebSockets</footer>
+</div>
+
+</body>
+</html>

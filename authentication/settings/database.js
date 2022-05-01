@@ -13,8 +13,8 @@ var sequelizeTest = new Sequelize({
     database: process.env.DBTEST_NAME,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    host: process.env.AUTH_DB_HOST,
-    port: process.env.AUTH_DB_PORT,
+    host: process.env.AUTH_DB_TEST_HOST,
+    port: process.env.AUTH_DB_TEST_PORT,
     dialect: process.env.DIALECT,
     logging: false
 });

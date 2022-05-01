@@ -1,8 +1,12 @@
-FROM node:14-alpine
+FROM node:14-alpine as test
 WORKDIR /authentication
 COPY . /authentication/
 RUN npm i
-ARG PASSWORD_SECRET
-ENV PASSWORD_SECRET $PASSWORD_SECRET
-RUN npm test
+CMD [ "npm", "test" ]
+
+
+FROM node:14-alpine as development
+WORKDIR /authentication
+COPY . /authentication/
+RUN npm i
 CMD [ "npm", "start" ]

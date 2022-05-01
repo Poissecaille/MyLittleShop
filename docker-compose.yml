@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.7"
 services:
   auth_db:
     image: postgres:latest
@@ -15,6 +15,19 @@ services:
       - ./auth-db/db-data/:/var/lib/postgresql/data/
     #  - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
     #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
+    restart: on-failure
+
+  auth_db_test:
+    image: postgres:latest
+    ports:
+      - "${AUTH_DB_TEST_PORT}:${AUTH_DB_TEST_PORT}"
+    container_name: shop_auth_db_test
+    environment:
+      - PGPORT=${AUTH_DB_TEST_PORT}
+      - DB_NAME=${DBTEST_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DBTEST_NAME}
     restart: on-failure
 
   inventory_db:
@@ -34,6 +47,19 @@ services:
     #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
+  inventory_db_test:
+    image: postgres:latest
+    ports:
+      - "${INVENTORY_DB_TEST_PORT}:${INVENTORY_DB_TEST_PORT}"
+    container_name: shop_inventory_db_test
+    environment:
+      - PGPORT=${INVENTORY_DB_TEST_PORT}
+      - DB_NAME=${DBTEST_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DBTEST_NAME}
+    restart: on-failure
+
   order_db:
     image: postgres:latest
     ports:
@@ -51,7 +77,24 @@ services:
     #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
+  order_db_test:
+    image: postgres:latest
+    ports:
+      - "${ORDER_DB_TEST_PORT}:${ORDER_DB_TEST_PORT}"
+    container_name: order_db_test
+    environment:
+      - PGPORT=${ORDER_DB_TEST_PORT}
+      - DB_NAME=${DBTEST_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DBTEST_NAME}
+    restart: on-failure
+
   aggregator:
+    #deploy:
+    #  mode: replicated
+    #  replicas: 2
+    image: aggregator:latest
     build: ./aggregator/
     ports:
       - "${APP_AGGREGATOR_PORT}:${APP_AGGREGATOR_PORT}"
@@ -74,9 +117,14 @@ services:
       - ./aggregator:/aggregator
 
   authentication:
-    build: ./authentication/
+    image: authentication:latest
+    build: 
+      context: ./authentication/
+      dockerfile: Dockerfile
+      target: ${NODE_ENV}
     ports:
       - "${APP_AUTHENTICATION_PORT}:${APP_AUTHENTICATION_PORT}"
+    
     environment:
       - APP_AUTHENTICATION_PORT=${APP_AUTHENTICATION_PORT}
       - NODE_ENV=${NODE_ENV}
@@ -93,12 +141,20 @@ services:
     container_name: shop_authentication
     depends_on:
       - auth_db
+      - auth_db_test
     restart: on-failure
     volumes:
       - ./authentication:/authentication
 
   inventory:
-    build: ./inventory/
+    #deploy:
+    #    mode: replicated
+    #    replicas: 4
+    image: inventory:latest
+    build: 
+      context: ./inventory/
+      dockerfile: Dockerfile
+      target: ${NODE_ENV}
     ports:
       - "${APP_INVENTORY_PORT}:${APP_INVENTORY_PORT}"
     environment:
@@ -111,17 +167,21 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - INVENTORY_DB_HOST=${INVENTORY_DB_HOST}
+      - INVENTORY_DB_TEST_HOST=${INVENTORY_DB_TEST_HOST}
       - INVENTORY_DB_PORT=${INVENTORY_DB_PORT}
+      - INVENTORY_DB_TEST_PORT=${INVENTORY_DB_TEST_PORT}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - PASSWORD_SECRET=${PASSWORD_SECRET}
     container_name: shop_inventory
     depends_on:
       - inventory_db
+      - inventory_db_test
     restart: on-failure
     volumes:
       - ./inventory:/inventory
 
   mailer:
+    image: mailer:latest
     build: ./mailer/
     ports:
       - "${APP_MAILER_PORT}:${APP_MAILER_PORT}"
@@ -138,7 +198,11 @@ services:
       - ./mailer:/mailer
 
   orders:
-    build: ./orders/
+    image: orders:latest
+    build: 
+      context: ./orders/
+      dockerfile: Dockerfile
+      target: ${NODE_ENV}
     ports:
       - "${APP_ORDER_PORT}:${APP_ORDER_PORT}"
     environment:
@@ -151,17 +215,21 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - ORDER_DB_HOST=${ORDER_DB_HOST}
+      - ORDER_DB_TEST_HOST=${ORDER_DB_TEST_HOST}
       - ORDER_DB_PORT=${ORDER_DB_PORT}
+      - ORDER_DB_TEST_PORT=${ORDER_DB_TEST_PORT}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - PASSWORD_SECRET=${PASSWORD_SECRET}
     container_name: shop_order
     depends_on:
       - order_db
+      - order_db_test
     restart: on-failure
     volumes:
       - ./orders:/orders
 
   web:
+    image: web:latest
     build: ./web/littleshop/
     environment:
       - CHOKIDAR_USEPOLLING=true

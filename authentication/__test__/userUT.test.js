@@ -1,17 +1,17 @@
-//const  app  = require('../app') //important
+const  app  = require('../app') //important
 const CryptoJS = require("crypto-js")
 const { faker } = require('@faker-js/faker');
-//const { sequelizeTest } = require("../settings/database")
-//const User = require("../models/user");
+const { sequelizeTest } = require("../settings/database")
 const parseDate = require('../utils/utils');
-//const { UniqueConstraintError } = require("sequelize")
+const User = require("../models/user");
+const { UniqueConstraintError } = require("sequelize")
 var difflib = require('difflib');
 const env = require("dotenv").config();
-//const db = sequelizeTest
+const db = sequelizeTest
+
 
 describe("Crypto unit tests", () => {
     it("Test-cryptoJs should be inconsistent with encrypting result" , () => {
-        console.log("###########",process.env.PASSWORD_SECRET)
         let secret = faker.random.alphaNumeric(5)
         let original = faker.random.alphaNumeric(10);
         let crypted = CryptoJS.AES.encrypt(original, secret).toString();
@@ -39,7 +39,7 @@ describe("Crypto unit tests", () => {
 })
 
 
-/*describe("Auth unit tests", () => {
+describe("Auth unit tests", () => {
 
     beforeAll(async () => {
         jest.restoreAllMocks();
@@ -52,23 +52,22 @@ describe("Crypto unit tests", () => {
 
     it("Test-findOne Should return one correct user by email", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
-            
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
             username: fakePerson.username,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -86,23 +85,23 @@ describe("Crypto unit tests", () => {
 
     it("Test-findOne Shouldn't return any user", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
 
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -119,34 +118,34 @@ describe("Crypto unit tests", () => {
 
     it("Test-Unicity conflict on email", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
 
         const fakePerson2 = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : fakePerson.email,
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
             
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -155,11 +154,11 @@ describe("Crypto unit tests", () => {
 
         const user2 = new User({
             email: fakePerson2.email,
-            firstName: fakePerson2.firstName,
-            lastName: fakePerson2.lastName,
+            firstname: fakePerson2.firstname,
+            lastname: fakePerson2.lastname,
             username: fakePerson2.username,
             password: CryptoJS.AES.encrypt(fakePerson2.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson2.birthDate,
+            birthdate: fakePerson2.birthdate,
             role: fakePerson2.role,
             createdAt: fakePerson2.date,
             updatedAt: fakePerson2.date
@@ -170,34 +169,34 @@ describe("Crypto unit tests", () => {
 
     it("Test-Unicity confilct on username", async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
 
         const fakePerson2 = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: fakePerson.username,
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
             
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -206,11 +205,11 @@ describe("Crypto unit tests", () => {
 
         const user2 = new User({
             email: fakePerson2.email,
-            firstName: fakePerson2.firstName,
-            lastName: fakePerson2.lastName,
+            firstname: fakePerson2.firstname,
+            lastname: fakePerson2.lastname,
             username: fakePerson2.username,
             password: CryptoJS.AES.encrypt(fakePerson2.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson2.birthDate,
+            birthdate: fakePerson2.birthdate,
             role: fakePerson2.role,
             createdAt: fakePerson2.date,
             updatedAt: fakePerson2.date
@@ -221,23 +220,23 @@ describe("Crypto unit tests", () => {
 
     it("Test- findByPk should return one correct user",async () => {
         const fakePerson = {
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstname: faker.name.firstName(),
+            lastname: faker.name.lastName(),
             email : faker.internet.email(),
             username: faker.internet.userName(),
             password: faker.internet.password(),
-            birthDate : faker.date.past(),
+            birthdate : faker.date.past(),
             role: "buyer",
             date: parseDate(new Date())
         }
             
         const user = new User({
             email: fakePerson.email,
-            firstName: fakePerson.firstName,
-            lastName: fakePerson.lastName,
+            firstname: fakePerson.firstname,
+            lastname: fakePerson.lastname,
             username: fakePerson.username,
             password: CryptoJS.AES.encrypt(fakePerson.password, process.env.PASSWORD_SECRET).toString(),
-            birthDate: fakePerson.birthDate,
+            birthdate: fakePerson.birthdate,
             role: fakePerson.role,
             createdAt: fakePerson.date,
             updatedAt: fakePerson.date
@@ -247,4 +246,4 @@ describe("Crypto unit tests", () => {
         expect(result.dataValues).toEqual(user.dataValues);
     })
 
-})*/
+})
