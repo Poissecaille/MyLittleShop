@@ -16,6 +16,6 @@ var sequelizeTest = new Sequelize({
     host: process.env.INVENTORY_DB_TEST_HOST,
     port: process.env.INVENTORY_DB_TEST_PORT,
     dialect: process.env.DIALECT,
-    logging: false
+    logging:false
 });
 module.exports = { sequelizeDev, sequelizeTest };

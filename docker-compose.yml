@@ -137,6 +137,8 @@ services:
       - AUTH_DB_HOST=${AUTH_DB_HOST}
       - AUTH_DB_PORT=${AUTH_DB_PORT}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - BUYER_PASSWORD=${BUYER_PASSWORD}
+      - SELLER_PASSWORD=${SELLER_PASSWORD}
       - PASSWORD_SECRET=${PASSWORD_SECRET}
     container_name: shop_authentication
     depends_on:
