@@ -14,7 +14,7 @@ services:
     volumes:
       - ./auth-db/db-data/:/var/lib/postgresql/data/
     #  - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
-    #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
+      - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
   auth_db_test:
@@ -44,7 +44,7 @@ services:
     volumes:
       - ./inventory-db/db-data/:/var/lib/postgresql/data/
     #  - ./sql/inventory.sql:/docker-entrypoint-initdb.d/inventory.sql
-    #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
+      - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
   inventory_db_test:
@@ -74,7 +74,7 @@ services:
     volumes:
       - ./order-db/db-data/:/var/lib/postgresql/data/
     #  - ./sql/order.sql:/docker-entrypoint-initdb.d/order.sql
-    #  - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
+      - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
   order_db_test:

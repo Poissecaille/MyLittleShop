@@ -139,6 +139,7 @@ router.put("/wishProduct", async (request, response) => {
                 {
                     ownerId: userId,
                     sellerId: sellerData.data.response.id,
+                    sellerUsername: sellerData.data.response.username,
                     productName: request.body.productName,
                     quantity: request.body.quantity
                 });

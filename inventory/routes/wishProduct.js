@@ -72,6 +72,8 @@ router.get("/wishProducts", async (request, response) => {
 
 router.put("/wishProduct", async (request, response) => {
     try {
+        console.log("#####",request.body,"#####")
+
         const wishedProduct = await Product.findOne({
             where: {
                 name: request.body.productName,
@@ -85,9 +87,8 @@ router.put("/wishProduct", async (request, response) => {
         }
         const wishProductToUpdate = await WishProduct.findOne({
             where: {
-                ownerId: request.body.userId,
+                ownerId: request.body.ownerId,
                 productId: wishedProduct.id,
-                sellerId: request.body.sellerId
             }
         });
         await wishProductToUpdate.update({
