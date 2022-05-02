@@ -14,10 +14,11 @@ app.post('/api/mail', async (request, response) => {
         }
         new Promise((resolve, reject) => {
             var transporter = nodemailer.createTransport({
-                service: 'hotmail',
+                host: 'smtp-mail.outlook.com',
                 secure: false,
                 requireTLS: true,
                 port: 587,
+                debug: true,
                 auth: {
                     user: process.env.APP_MAILER_USER,
                     pass: process.env.APP_MAILER_PASSWORD
@@ -32,9 +33,10 @@ app.post('/api/mail', async (request, response) => {
             transporter.sendMail(mailSettings, (error, info) => {
                 if (error) {
                     console.log(error)
-                    return response.status(424).json({
-                        "response": "An error occured during mail sending"
-                    })
+                    return error 
+                    // response.status(424).json({
+                    //     "response": "An error occured during mail sending"
+                    // })
                 } else {
                     console.log(info)
                     console.log(`Email sent to ${request.body.mailRecipient} about ${request.body.mailSubject}`)

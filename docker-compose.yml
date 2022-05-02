@@ -13,7 +13,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./auth-db/db-data/:/var/lib/postgresql/data/
-    #  - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
+      #  - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
       - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
@@ -43,7 +43,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./inventory-db/db-data/:/var/lib/postgresql/data/
-    #  - ./sql/inventory.sql:/docker-entrypoint-initdb.d/inventory.sql
+      #  - ./sql/inventory.sql:/docker-entrypoint-initdb.d/inventory.sql
       - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
@@ -73,7 +73,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./order-db/db-data/:/var/lib/postgresql/data/
-    #  - ./sql/order.sql:/docker-entrypoint-initdb.d/order.sql
+      #  - ./sql/order.sql:/docker-entrypoint-initdb.d/order.sql
       - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
 
@@ -118,13 +118,13 @@ services:
 
   authentication:
     image: authentication:latest
-    build: 
+    build:
       context: ./authentication/
       dockerfile: Dockerfile
       target: ${NODE_ENV}
     ports:
       - "${APP_AUTHENTICATION_PORT}:${APP_AUTHENTICATION_PORT}"
-    
+
     environment:
       - APP_AUTHENTICATION_PORT=${APP_AUTHENTICATION_PORT}
       - NODE_ENV=${NODE_ENV}
@@ -153,7 +153,7 @@ services:
     #    mode: replicated
     #    replicas: 4
     image: inventory:latest
-    build: 
+    build:
       context: ./inventory/
       dockerfile: Dockerfile
       target: ${NODE_ENV}
@@ -189,6 +189,8 @@ services:
       - "${APP_MAILER_PORT}:${APP_MAILER_PORT}"
     environment:
       - APP_MAILER_PORT=${APP_MAILER_PORT}
+      - APP_MAILER_USER=${APP_MAILER_USER}
+      - APP_MAILER_PASSWORD=${APP_MAILER_PASSWORD}
       - NODE_ENV=${NODE_ENV}
       - DIALECT=${DIALECT}
       - JWT_SECRET=${JWT_SECRET}
@@ -201,7 +203,7 @@ services:
 
   orders:
     image: orders:latest
-    build: 
+    build:
       context: ./orders/
       dockerfile: Dockerfile
       target: ${NODE_ENV}
