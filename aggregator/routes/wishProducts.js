@@ -10,6 +10,29 @@ const roads = {
     USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`
 }
 
+// //NEWSLETTER
+// router.get("/newsLetter", async (request, response) => {
+//     try {
+//         const limit = request.query.limit;
+//         const offset = request.query.offset;
+//         const wishProducts = await axios.get(roads.GET_WISHLIST_URL, {
+//             params: {
+//                 limit: limit,
+//                 offset: offset
+//             }
+//         });
+//         return response.status(wishProducts.status).json({
+//             "response": wishProducts.data.response
+//         });
+//     } catch (error) {
+//         console.log(error)
+//         return response.status(error.response.status).json({
+//             "response": error.response.data.response
+//         });
+//     }
+// });
+
+
 // ADD A PRODUCT IN WISHLIST
 router.post("/wishProduct", async (request, response) => {
     try {

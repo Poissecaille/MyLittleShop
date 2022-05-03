@@ -24,6 +24,7 @@
     "express": "^4.17.2",
     "fuse.js": "^6.5.3",
     "jsonwebtoken": "^8.5.1",
+    "node-cron": "^3.0.0",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",

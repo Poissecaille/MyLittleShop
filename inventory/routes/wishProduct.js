@@ -4,6 +4,30 @@ const Sequelize = require('sequelize');
 const Product = require("../models/product");
 const Op = Sequelize.Op
 
+
+router.get("/newsLetter", async (request, response) => {
+    try {
+        const userWishList = request.query.offset && request.query.limit ? await WishProduct.findAll({
+            where: {
+                [Op.and]: {
+                    id: { [Op.gt]: request.query.offset },
+                    id: { [Op.lt]: request.query.limit }
+                }
+            }
+        })
+            :
+            await WishProduct.findAll();
+        return response.status(200).json({
+            "response": userWishList
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
 router.post("/wishProduct", async (request, response) => {
     try {
         console.log("############")
@@ -72,7 +96,7 @@ router.get("/wishProducts", async (request, response) => {
 
 router.put("/wishProduct", async (request, response) => {
     try {
-        console.log("#####",request.body,"#####")
+        console.log("#####", request.body, "#####")
 
         const wishedProduct = await Product.findOne({
             where: {
