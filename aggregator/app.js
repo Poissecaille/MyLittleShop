@@ -19,7 +19,7 @@ const admin = require("./routes/admin");
 
 const app = express();
 
-//scheduledFunctions.newsLetter();
+scheduledFunctions.newsLetter();
 
 app.use(express.json());
 app.use(cors());

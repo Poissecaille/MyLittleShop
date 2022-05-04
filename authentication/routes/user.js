@@ -179,15 +179,18 @@ router.get("/syncSellersPerProduct", async (request, response) => {
 //ADMIN CONSOLE ROUTE
 router.get("/admin/users", async (request, response) => {
     try {
+        console.log("GHOST", request.query)
         const users = request.query.limit && request.query.offset ? await User.findAll({
-            [Op.and]: {
-                id: { [Op.lt]: request.query.limit },
-                id: { [Op.gt]: request.query.offset }
+            where: {
+                id: { [Op.lt]: request.query.limit, [Op.gt]: request.query.offset }
             }
+        }
             // limit: request.query.limit,
             // offset: request.query.offset
-        }) : await User.findAll({
-            id: { [Op.in]: request.query.ids }
+        ) : await User.findAll({
+            where: {
+                id: { [Op.in]: request.query.ids }
+            }
         });
         return response.status(200).json({
             "response": users

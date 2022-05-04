@@ -173,8 +173,9 @@ app.post('/api/order/mail', async (request, response) => {
 });
 
 
-app.post('/api/newsLetter', async (request, response) => {
+app.post('/api/newsLetter/mail', async (request, response) => {
     try {
+        console.log(request.body)
         if (!request.body.mailRecipient || !request.body.usernameRecipient || !request.body.mailSubject || !request.body.mailContent) {
             return response.status(400).json({
                 "response": "Bad json format"
@@ -204,7 +205,7 @@ app.post('/api/newsLetter', async (request, response) => {
             var mailContent = JSON.parse(request.body.mailContent);
             console.log(mailContent)
             for (let i = 0; i < mailContent.length; i++) {
-                html += "<li>" + mailContent[i].availableQuantity.toString() + " units of " + request.body.mailContent[i].productName + " are currently available</li>"
+                html += "<li>" + mailContent[i].product.availableQuantity + " units of " + mailContent[i].product.name + " are currently available in the marketplace </li>"
             }
             html += "</ul>"
 

@@ -9,12 +9,11 @@ router.get("/newsLetter", async (request, response) => {
     try {
         const userWishList = request.query.offset && request.query.limit ? await WishProduct.findAll({
             where: {
-                [Op.and]: {
-                    id: { [Op.gt]: request.query.offset },
-                    id: { [Op.lt]: request.query.limit }
-                }
+                id: { [Op.gt]: request.query.offset, [Op.lt]: request.query.limit },
+                //id: { [Op.lt]: request.query.limit }
             }
-        })
+        }
+        )
             :
             await WishProduct.findAll();
         return response.status(200).json({
