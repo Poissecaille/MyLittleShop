@@ -1,9 +1,11 @@
-table
-{
-    border-collapse: collapse;
+table {
+  border-collapse: collapse;
+  margin: 10px;
 }
-td, th 
-{
-    border: 1px solid black;
+td,
+th {
+  border: 1px solid black;
+  width: 150px;
+  text-align: center;
+  padding: 5px;
 }
-

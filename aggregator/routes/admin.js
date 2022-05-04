@@ -104,6 +104,7 @@ router.get("/admin", async (request, response) => {
             // }
 
         }
+        console.log(usersToDisplay.data.response)
         return response.status(200).json({
             "response": usersToDisplay.data.response
         });
