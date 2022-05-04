@@ -95,7 +95,10 @@ services:
     #  mode: replicated
     #  replicas: 2
     image: aggregator:latest
-    build: ./aggregator/
+    build: 
+      context: ./aggregator/
+      dockerfile: Dockerfile
+      target: ${NODE_ENV}
     ports:
       - "${APP_AGGREGATOR_PORT}:${APP_AGGREGATOR_PORT}"
     environment:
@@ -106,8 +109,11 @@ services:
     container_name: littleshop_aggregator
     depends_on:
       - auth_db
+      - auth_db_test
       - inventory_db
+      - inventory_db_test
       - order_db
+      - order_db_test
       - authentication
       - inventory
       - mailer

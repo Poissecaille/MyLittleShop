@@ -1,0 +1,27 @@
+config:
+  target: "http://localhost:5001/api"
+  phases:
+    - duration: 20
+      arrivalRate: 20
+      name: "Warming up"
+    - duration: 20
+      arrivalRate: 20
+      rampTo: 100
+      name: "Ramping up"
+    - duration: 20
+      arrivalRate: 100
+      name: "Sustained load"
+  processor: "./processor.js"
+ 
+scenarios:
+  - name: "Order Creation"
+    flow:
+      - post:
+          url: "/orderProducts"
+          beforeRequest: generateOrderProductData
+          json:
+            ownerId: "{{ ownerId }}"
+            userAddressId: "{{ userAddressId }}"
+            cartProductsData: 
+            - productId: "{{ productId }}"
+              quantity: "{{ quantity }}"

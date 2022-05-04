@@ -7,7 +7,7 @@ const CartProduct = require("../models/cartProduct");
 const ProductCategory = require("../models/productCategory");
 const ProductTag = require("../models/productTag");
 const RatingProduct = require("../models/ratingProduct");
-const wishProduct = require("../models/wishProduct");
+const WishProduct = require("../models/wishProduct");
 const { UniqueConstraintError, ValidationError } = require("sequelize")
 const getRandomInt = require('../utils/utils');
 const db = sequelizeTest
@@ -49,7 +49,7 @@ describe("inventory-product unit tests", () => {
             sellerId: fakeProduct.sellerId,
             onSale: fakeProduct.onSale
         })
-        expect(async () => await product.save().not.toThrow(Error))  
+        expect(async () => await product.save().not.toThrow(ValidationError))  
     })
 
 
@@ -340,7 +340,7 @@ describe("inventory-productCategory unit tests", () => {
         await fakeProduct.save();
 
         const productCategory = new ProductCategory({
-            productId: 0,
+            productId: 1,
             name: faker.random.word()
         })
         expect(async () => await productCategory.save().not.toThrow(Error))
@@ -378,10 +378,21 @@ describe("inventory-productCategory unit tests", () => {
         
     })
 
-    /*it("Test-findAll should be able to find all productCategories", async () => {
+    it("Test-findAll should be able to find all productCategories", async () => {
+        const fakeProduct = new Product ({
+            name: faker.commerce.productName(),
+            label: faker.commerce.productAdjective(),
+            condition : condition[getRandomInt(0,3)],
+            description: faker.commerce.productDescription(),
+            unitPrice: faker.commerce.price(),
+            availableQuantity : getRandomInt(0,20),
+            sellerId: getRandomInt(0,100),
+            onSale: Math.random() < 0.5
+        })    
+        await fakeProduct.save();
         for (let i=0;i<10;i++){
             const productCategory = new ProductCategory({
-                productId: i,
+                productId: 1,
                 name: faker.random.word()
             })
             await productCategory.save()
@@ -390,7 +401,7 @@ describe("inventory-productCategory unit tests", () => {
         const result = await ProductCategory.findAll();
         expect(result).toBeInstanceOf(Array);
         expect(result.length).toBe(10);
-    })*/
+    })
 
     it("Test-save should conflit if productId and name are the same", async () => {
         const id = getRandomInt(0,100)
@@ -429,3 +440,346 @@ describe("inventory-productCategory unit tests", () => {
     })
 
 })
+
+describe("inventory-productTag unit tests", () => {
+    beforeAll(async () => {
+        jest.restoreAllMocks();
+        
+    })
+
+    beforeEach(async () => {
+        await db.sync({ force: true})
+    })
+    const condition = ["new", "occasion", "renovated"];
+
+    it("Test-save should be able to create a new productTag without throwing error", async () => {
+        
+        const fakeProduct = new Product ({
+            name: faker.commerce.productName(),
+            label: faker.commerce.productAdjective(),
+            condition : condition[getRandomInt(0,3)],
+            description: faker.commerce.productDescription(),
+            unitPrice: faker.commerce.price(),
+            availableQuantity : getRandomInt(0,20),
+            sellerId: getRandomInt(0,100),
+            onSale: Math.random() < 0.5
+        })    
+        await fakeProduct.save();
+
+        const productTag = new ProductTag({
+            productId: 1,
+            name: faker.random.word()
+        })
+        expect(async () => await productTag.save().not.toThrow(Error))
+          
+    })
+
+    it("Test-findOne should be able to find the correct productCategory",async () => {
+        const fakeProduct = new Product ({
+            name: faker.commerce.productName(),
+            label: faker.commerce.productAdjective(),
+            condition : condition[getRandomInt(0,3)],
+            description: faker.commerce.productDescription(),
+            unitPrice: faker.commerce.price(),
+            availableQuantity : getRandomInt(0,20),
+            sellerId: getRandomInt(0,100),
+            onSale: Math.random() < 0.5
+        })    
+        await fakeProduct.save();
+
+
+        const productTag = new ProductTag({
+            productId: 1,
+            name: faker.random.word()
+        })
+
+        await productTag.save();
+        const result = await ProductTag.findOne({
+            where: {
+                productId: productTag.productId,
+                name: productTag.name
+            }
+        });
+        expect(result).toBeInstanceOf(ProductTag);
+        expect(result.dataValues).toEqual(productTag.dataValues);
+        
+    })
+
+    it("Test-findAll should be able to find all productCategories", async () => {
+        const fakeProduct = new Product ({
+            name: faker.commerce.productName(),
+            label: faker.commerce.productAdjective(),
+            condition : condition[getRandomInt(0,3)],
+            description: faker.commerce.productDescription(),
+            unitPrice: faker.commerce.price(),
+            availableQuantity : getRandomInt(0,20),
+            sellerId: getRandomInt(0,100),
+            onSale: Math.random() < 0.5
+        })    
+        await fakeProduct.save();
+        for (let i=0;i<10;i++){
+            const productTag = new ProductTag({
+                productId: 1,
+                name: faker.random.word()
+            })
+            await productTag.save()
+        }
+        expect(async () => await ProductTag.findAll()).not.toThrow(Error)
+        const result = await ProductTag.findAll();
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toBe(10);
+    })
+
+    it("Test-save should conflit if productId and name are the same", async () => {
+        const id = getRandomInt(0,100)
+        const name = faker.random.word()
+        const productTag = new ProductTag({
+            productId: id,
+            name: name
+        })
+        const productTag2 = new ProductTag({
+            productId: id,
+            name: name
+        })
+        expect(async () => await productTag.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await productTag2.save().toThrow(UniqueConstraintError))
+
+    })
+
+    it("Test-save should not conflit if productId or name are different", async () => {
+        const id = getRandomInt(0,100)
+        const name = faker.random.word()
+        const productTag = new ProductTag({
+            productId: id,
+            name: name
+        })
+        const productTag2 = new ProductTag({
+            productId: id+1,
+            name: name
+        })
+        const productTag3 = new ProductTag({
+            productId: id,
+            name: name+1
+        })
+        expect(async() => await productTag.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await productTag2.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await productTag3.save().not.toThrow(UniqueConstraintError))
+    })
+})
+
+describe("inventory-ratingProduct unit tests", () => {
+    beforeAll(async () => {
+        jest.restoreAllMocks();
+        
+    })
+
+    beforeEach(async () => {
+        await db.sync({ force: true})
+    })
+    
+
+    it("Test-save should be able to create a new ratingProduct without throwing error", async () => {
+        const ratingProduct = new RatingProduct({
+            productId: getRandomInt(0,100),
+            ownerId: getRandomInt(0,100),
+            value: getRandomInt(0,6),
+            comment: faker.random.words(5)
+        })
+        expect(async () => await ratingProduct.save().not.toThrow(Error))
+            
+    })
+
+    it("Test-findOne should be able to find the correct ratingProduct",async () => {
+        const ratingProduct = new RatingProduct({
+            productId: getRandomInt(0,100),
+            ownerId: getRandomInt(0,100),
+            value: getRandomInt(0,6),
+            comment: faker.random.words(5)
+        })
+
+        await ratingProduct.save();
+        const result = await RatingProduct.findOne({
+            where: {
+                productId: ratingProduct.productId,
+                ownerId: ratingProduct.ownerId
+            }
+        });
+        expect(result).toBeInstanceOf(RatingProduct);
+        expect(result.dataValues).toEqual(ratingProduct.dataValues);
+        
+    })
+
+    it("Test-findAll should be able to find all ratingProducts", async () => {
+        
+        for (let i=0;i<10;i++){
+            const ratingProduct = new RatingProduct({
+                productId: getRandomInt(0,100),
+                ownerId: getRandomInt(0,100),
+                value: getRandomInt(0,6),
+                comment: faker.random.words(5)
+            })
+            await ratingProduct.save()
+        }
+        expect(async () => await RatingProduct.findAll()).not.toThrow(Error)
+        const result = await RatingProduct.findAll();
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toBe(10);
+    })
+
+    it("Test-save should conflit if productId and name are the same", async () => {
+        const ratingProduct = new RatingProduct({
+            productId: getRandomInt(0,100),
+            ownerId: getRandomInt(0,100),
+            value: getRandomInt(0,6),
+            comment: faker.random.words(5)
+        })
+        const ratingProduct2 = new RatingProduct({
+            productId: ratingProduct.productId,
+            ownerId: ratingProduct.ownerId,
+            value: getRandomInt(0,6),
+            comment: faker.random.words(5)
+        })
+        expect(async () => await productTag.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await productTag2.save().toThrow(UniqueConstraintError))
+
+    })
+
+    it("Test-save should not conflit if productId or ownerId are different", async () => {
+        const id = getRandomInt(0,100)
+        const ownerId = getRandomInt(0,100)
+        const ratingProduct = new RatingProduct({
+            productId: id,
+            ownerId: ownerId,
+            value: getRandomInt(0,6),
+            comment: faker.random.words(5)
+        })
+        const ratingProduct2 = new RatingProduct({
+            productId: id+1,
+            ownerId: ownerId,
+            value: getRandomInt(0,6),
+            comment: faker.random.words(5)
+        })
+        const ratingProduct3 = new RatingProduct({
+            productId: id,
+            ownerId: ownerId+1,
+            value: getRandomInt(0,6),
+            comment: faker.random.words(5)
+        })
+        expect(async() => await ratingProduct.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await ratingProduct2.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await ratingProduct3.save().not.toThrow(UniqueConstraintError))
+    })
+})
+
+describe("inventory-wishProduct unit tests", () => {
+
+    beforeAll(async () => {
+        jest.restoreAllMocks();
+        
+    })
+
+    beforeEach(async () => {
+        await db.sync({ force: true})
+    })
+    
+    it("Test-save should be able to create a new ratingProduct without throwing error", async () => {
+        const wishProduct = new WishProduct({
+            productId: getRandomInt(0,100),
+            ownerId: getRandomInt(0,100),
+            quantity: getRandomInt(0,100),
+        })
+        expect(async () => await wishProduct.save().not.toThrow(Error))
+            
+    })
+
+    it("Test-findOne should be able to find the correct ratingProduct",async () => {
+        const wishProduct = new WishProduct({
+            productId: getRandomInt(0,100),
+            ownerId: getRandomInt(0,100),
+            quantity: getRandomInt(0,100),
+        })
+
+        await wishProduct.save();
+        const result = await WishProduct.findOne({
+            where: {
+                productId: wishProduct.productId,
+                ownerId: wishProduct.ownerId
+            }
+        });
+        expect(result).toBeInstanceOf(WishProduct);
+        expect(result.dataValues).toEqual(wishProduct.dataValues);
+        
+    })
+
+    it("Test-findAll should be able to find all ratingProducts", async () => {
+        
+        for (let i=0;i<10;i++){
+            const wishProduct = new WishProduct({
+                productId: getRandomInt(0,100),
+                ownerId: getRandomInt(0,100),
+                quantity: getRandomInt(0,100),
+            })
+            await wishProduct.save()
+        }
+        expect(async () => await WishProduct.findAll()).not.toThrow(Error)
+        const result = await WishProduct.findAll();
+        expect(result).toBeInstanceOf(Array);
+        expect(result.length).toBe(10);
+    })
+
+    it("Test-save should conflit if productId and name are the same", async () => {
+        const wishProduct = new WishProduct({
+            productId: getRandomInt(0,100),
+            ownerId: getRandomInt(0,100),
+            quantity: getRandomInt(0,100),
+        })
+        const wishProduct2 = new WishProduct({
+            productId: wishProduct.productId,
+            ownerId: wishProduct.ownerId,
+            quantity: getRandomInt(0,100),
+        })
+        expect(async () => await wishProduct.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await wishProduct2.save().toThrow(UniqueConstraintError))
+
+    })
+
+    it("Test-save should not conflit if productId or ownerId are different", async () => {
+        const id = getRandomInt(0,100)
+        const ownerId = getRandomInt(0,100)
+        const wishProduct = new RatingProduct({
+            productId: id,
+            ownerId: ownerId,
+            quantity: getRandomInt(0,100),
+        })
+        const wishProduct2 = new RatingProduct({
+            productId: id+1,
+            ownerId: ownerId,
+            quantity: getRandomInt(0,100),
+        })
+        const wishProduct3 = new RatingProduct({
+            productId: id,
+            ownerId: ownerId+1,
+            quantity: getRandomInt(0,100),
+        })
+        expect(async() => await wishProduct.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await wishProduct2.save().not.toThrow(UniqueConstraintError))
+        expect(async() => await wishProduct3.save().not.toThrow(UniqueConstraintError))
+    })
+
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+

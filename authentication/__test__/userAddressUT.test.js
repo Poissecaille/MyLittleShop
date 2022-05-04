@@ -51,7 +51,7 @@ describe("UserAddress unit tests", () => {
             city: faker.address.city(),
             region: faker.address.county(),
             country : faker.address.country(),
-            postalCode: faker.address.zipCode(),
+            postalCode: faker.address.zipCode('#####'),
         }
             
         const newUserAddress = new UserAddress({
