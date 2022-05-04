@@ -77,26 +77,36 @@ router.post("/orderProducts", async (request, response) => {
     }
 });
 
+//DELIVERY UPDATE FOR SELLERS
 router.put("/seller/orderProduct", async (request, response) => {
-    const orderToUpdate = await OrderProduct.findOne({
-        where: {
-            ownerId: request.body.ownerId,
-            productId: request.body.productId,
-            addressId: request.body.addressId
+    try {
+        const orderToUpdate = await OrderProduct.findOne({
+            where: {
+                ownerId: request.body.ownerId,
+                productId: request.body.productId,
+                addressId: request.body.addressId,
+                shipped: request.body.oldShipped,
+                created_at: request.body.created_at
+            }
+        });
+        if (!orderToUpdate) {
+            return response.status(404).json({
+                "response": "Order not found"
+            });
         }
-    });
-    if (!orderToUpdate) {
-        return response.status(404).json({
-            "response": "Order not found"
+        await orderToUpdate.update({
+            shipped: request.body.newShipped,
+
+        });
+        return response.status(200).json({
+            "response": orderToUpdate
+        });
+    } catch (error) {
+        console.log(error)
+        return response.status(error.response.status).json({
+            "response": error.response.data.response
         });
     }
-    orderToUpdate.update({
-        shipped: request.body.shipped,
-        shippingDate: request.body.shippingDate
-    });
-    return response.status(200).json({
-        "response": orderToUpdate
-    });
 });
 
 module.exports = router;

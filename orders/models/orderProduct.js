@@ -4,7 +4,7 @@ process.env.NODE_ENV === "development" ? db = db.sequelizeDev : db = db.sequeliz
 
 const defaultNumberOfDaysToDeliver = 3; 
 const nextDate = new Date( Date.now() + defaultNumberOfDaysToDeliver * 24 * 60 * 60 * 1000)
-const deliveryStatus = ["preparation", "shipped", 'delivred']
+const deliveryStatus = ["preparation", "shipped", 'delivered']
 
 const OrderProduct = db.define('orderProduct', {
     id: {
