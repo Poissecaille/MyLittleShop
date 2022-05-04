@@ -8,7 +8,7 @@ const USERS_URL = `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/
 const PRODUCT_PER_WISH_URL = `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productsPerCart`;
 
 exports.newsLetter = () => {
-    const newsLetter = cron.schedule("* * * * *", async () => {
+    const newsLetter = cron.schedule("0 2 * * *", async () => {
         try {
             var limit = 10;
             var offset = 0;

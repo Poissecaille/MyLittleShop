@@ -73,27 +73,29 @@ router.get("/admin", async (request, response) => {
             }
         })
         console.log("-------------------------------")
+        console.log(buyerAddresses.data.response)
+        console.log(buyerOrders.data.response)
+        console.log(sellerOrders.data.response)
         console.log(usersToDisplay.data.response)
         console.log("-------------------------------")
 
         for (let i = 0; i < usersToDisplay.data.response.length; i++) {
             for (let j = 0; j < buyerAddresses.data.response.length; j++) {
-                if (buyerAddresses.data.response[j].userId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role != "admin") {
+                if (buyerAddresses.data.response[j].userId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role === "buyer") {
                     usersToDisplay.data.response[i].addresses.push(buyerAddresses.data.response[j])
                 }
             }
             for (let k = 0; k < buyerOrders.data.response.length; k++) {
-                if (buyerOrders.data.response[k].ownerId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role != "admin") {
+                if (buyerOrders.data.response[k].ownerId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role === "buyer") {
                     usersToDisplay.data.response[i].orders.push(buyerOrders.data.response[k])
                 }
             }
             for (let l = 0; l < sellerProducts.data.response.length; l++) {
-                if (sellerProducts.data.response[l].sellerId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role != "admin") {
+                if (sellerProducts.data.response[l].sellerId === usersToDisplay.data.response[i].id && usersToDisplay.data.response[i].role === "seller") {
                     usersToDisplay.data.response[i].products.push(sellerProducts.data.response[l])
                 }
                 for (let m = 0; m < sellerOrders.data.response.length; m++) {
-                    if (sellerOrders.data.response[m].productId === sellerProducts.data.response[l].id && usersToDisplay.data.response[i].role != "admin") {
-                        console.log(usersToDisplay.data.response[i])
+                    if (sellerOrders.data.response[m].productId === sellerProducts.data.response[l].id && usersToDisplay.data.response[i].role === "seller") {
                         usersToDisplay.data.response[i].orders.push(sellerOrders.data.response[m])
                     }
                 }
@@ -104,7 +106,6 @@ router.get("/admin", async (request, response) => {
             // }
 
         }
-        console.log(usersToDisplay.data.response)
         return response.status(200).json({
             "response": usersToDisplay.data.response
         });

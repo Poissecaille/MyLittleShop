@@ -158,13 +158,14 @@ app.post('/api/order/mail', async (request, response) => {
                 });
             });
 
-        }).then(() => {
-            return response.status(200).json({
-                "response": "Mail sent"
-            })
-        }).catch((error) => {
-            console.log(error)
         })
+            .then(() => {
+                return response.status(200).json({
+                    "response": "Mail sent"
+                })
+            }).catch((error) => {
+                console.log(error)
+            })
 
     } catch (error) {
         console.log("##################")
