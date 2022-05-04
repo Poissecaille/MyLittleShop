@@ -34,7 +34,7 @@ module.exports = {
       updated_at: now
     },
     {
-      email: "alex@hotmail.fr",
+      email: "alexboury@hotmail.fr",
       firstname: "alex",
       lastname: "boury",
       username: "alex",
@@ -46,7 +46,7 @@ module.exports = {
       updated_at: now
     },
     {
-      email: "rayane@hotmail.fr",
+      email: "rayaneserir@hotmail.fr",
       firstname: "rayane",
       lastname: "serir",
       username: "rayane",

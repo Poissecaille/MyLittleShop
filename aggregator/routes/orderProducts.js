@@ -13,13 +13,13 @@ const roads = {
     SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
     UPDATE_PRODUCTS_STOCKS: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/products`,
     SYNC_ORDERED_PRODUCT: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/orderedProduct`,
+    PRODUCTS_PER_CART: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productsPerCart`,
     //ORDER MICROSERVICE
     CREATE_ORDER_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/orderProducts`,
     GET_SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`,
     GET_BUYER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/buyer/orderProducts`,
     //MAILER SERVICE
-    SELLERS_ORDERS_MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/buyer/mail`,
-    BUYERS_ORDERS_MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/seller/mail/`
+    MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/mail`,
 }
 
 
@@ -114,7 +114,6 @@ router.post("/orderProducts", async (request, response) => {
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
-            console.log("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLOLOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
                 { data: productsInCart.data.response }
@@ -136,26 +135,31 @@ router.post("/orderProducts", async (request, response) => {
                     })
                     var productIds = [];
                     for (let i = 0; i < productsInCart.data.response.length; i++) {
-                        productIds.push(productsInCart.data.response[i].id)
+                        productIds.push(productsInCart.data.response[i].productId)
                     }
-                    const productsData = await axios.get(roads.BUYER_PRODUCT_URL, {
+                    const productsData = await axios.get(roads.PRODUCTS_PER_CART, {
                         params: {
-                            sellerId: userId,
                             productIds: productIds
                         }
                     })
+                    console.log("##########################")
+                    console.log("productsInCart", productsInCart.data.response)
+                    console.log("##########################")
+                    console.log("productsData", productsData.data.response)
+                    console.log("##########################")
+
                     for (let i = 0; i < productsInCart.data.response.length; i++) {
                         for (let j = 0; j < productsData.data.response.length; j++) {
-                            if (productsData[j].data.response.id === productsInCart.data.response[i].productId) {
+                            if (productsData.data.response[j].id === productsInCart.data.response[i].productId) {
                                 productsInCart.data.response[i].product = productsData.data.response[j]
                             }
                         }
                     }
-                    await axios.post(roads.BUYERS_ORDERS_MAILER_URL, {
+                    await axios.post(roads.MAILER_URL, {
                         mailRecipient: userData.data.response.email,
                         usernameRecipient: userData.data.response.username,
                         mailSubject: "LITTLESHOP Your order has been saved!",
-                        mailContent: productsInCart.data.response
+                        mailContent: JSON.stringify(productsInCart.data.response)
                     });
                 }
                 return response.status(ordersProducts.status).json({
@@ -225,11 +229,11 @@ router.put("/orderProduct", async (request, response) => {
             });
             //TODO MAILER NODE
             if (orderProductToUpdate.status == 200) {
-                await axios.post(roads.SELLERS_ORDERS_MAILER_URL, {
+                await axios.post(roads.MAILER_URL, {
                     mailRecipient: request.body.mailRecipient,
                     usernameRecipient: request.body.usernameRecipient,
                     mailSubject: "LITTLESHOP your delivery is on the way!",
-                    mailContent: sellerProduct.data.response
+                    mailContent: JSON.stringify(sellerProduct.data.response)
                 });
 
             }

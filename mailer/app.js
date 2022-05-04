@@ -33,16 +33,21 @@ app.post('/api/mail', async (request, response) => {
             <p>This is the summary of your order in LITTLESHOP</p>
             <ul>
             `
-            for (let i = 0; i < request.body.mailContent.length; i++) {
-                html += "<li>" + request.body.mailContent[i].quantity.toString() + " " + request.body.mailContent[i].productName + "</li>"
+            var mailContent = JSON.parse(request.body.mailContent);
+            console.log(mailContent)
+            var totalBill = 0
+            for (let i = 0; i < mailContent.length; i++) {
+                html += "<li>" + mailContent[i].quantity + " " + mailContent[i].product.name + " " + mailContent[i].product.unitPrice + "€</li>"
+                totalBill += mailContent[i].product.unitPrice
             }
             html += "</ul>"
-
+            html += `<b>total bill: ${totalBill}€</b>`
+            console.log(html)
             var mailSettings = {
                 from: process.env.APP_MAILER_USER,
                 to: request.body.mailRecipient || "alexboury@hotmail.fr",
                 subject: request.body.mailSubject,
-                html: request.body.mailContent
+                html: html
             };
             transporter.sendMail(mailSettings, (error, response) => {
                 if (error) {
@@ -116,8 +121,10 @@ app.post('/api/newsLetter', async (request, response) => {
             <p>These products from your wishlist are currenlty available on LITTLESHOP marketplace:</p>
             <ul>
             `
-            for (let i = 0; i < request.body.mailContent.length; i++) {
-                html += "<li>" + request.body.mailContent[i].availableQuantity.toString() + " units of " + request.body.mailContent[i].productName + " are currently available</li>"
+            var mailContent = JSON.parse(request.body.mailContent);
+            console.log(mailContent)
+            for (let i = 0; i < mailContent.length; i++) {
+                html += "<li>" + mailContent[i].availableQuantity.toString() + " units of " + request.body.mailContent[i].productName + " are currently available</li>"
             }
             html += "</ul>"
 
@@ -125,7 +132,7 @@ app.post('/api/newsLetter', async (request, response) => {
                 from: process.env.APP_MAILER_USER,
                 to: request.body.mailRecipient || "alexboury@hotmail.fr",
                 subject: request.body.mailSubject,
-                html: request.body.mailContent
+                html: html
             };
             transporter.sendMail(mailSettings, (error, response) => {
                 if (error) {

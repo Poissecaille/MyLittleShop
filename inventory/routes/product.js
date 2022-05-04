@@ -32,6 +32,29 @@ router.get("/buyer/product", async (request, response) => {
     }
 });
 
+//GET PRODUCTS PER SELLER AND USER ID FOR AGGREGATOR
+router.get("/productsPerCart", async (request, response) => {
+    try {
+        console.log("$$$$$$$$$$$$$$$", request.query.productIds)
+        const Products = await Product.findAll({
+            where: {
+                id: { [Op.in]: request.query.productIds }
+            }
+        });
+        console.log("Products", Products)
+        return response.status(200).json({
+            "response": Products
+        });
+
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
+    }
+});
+
+
 // CONSULT PRODUCTS FOR BUYERS
 router.get("/buyer/products", async (request, response) => {
     try {
