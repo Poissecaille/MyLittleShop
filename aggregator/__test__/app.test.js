@@ -1,4 +1,5 @@
 const request = require('supertest');
+const {faker} = require('@faker-js/faker');
 const app = require('../app');
 
 var buyerToken;
@@ -164,6 +165,7 @@ describe('POST /register', () => {
   });
 });
 
+/*
 describe('POST /login', () => {
   it('correct buyer login responds with json and token', (done) => {
     request(app)
@@ -1711,4 +1713,4 @@ describe('GET /orderProducts', () => {
       })
       .catch(err => done(err));
   });
-});
+});*/

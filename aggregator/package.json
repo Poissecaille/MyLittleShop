@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "jest --detectOpenHandles --forceExit",
+    "test": "jest --detectOpenHandles --forceExit && nodemon server.js",
     "launch": "concurrently \"nodemon server.js\" \"nodemon ../authentication/server.js\" \"nodemon ../inventory/app.js\" \"nodemon ../orders/app.js\" \"nodemon ../mailer/app.js\""
   },
   "repository": {
@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^6.3.1",
     "axios": "^0.25.0",
     "concurrently": "^7.0.0",
     "cors": "^2.8.5",
