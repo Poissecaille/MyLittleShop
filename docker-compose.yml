@@ -106,6 +106,9 @@ services:
       - NODE_ENV=${NODE_ENV}
       - DIALECT=${DIALECT}
       - JWT_SECRET=${JWT_SECRET}
+      - DBTEST_NAME=${DBTEST_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     container_name: littleshop_aggregator
     depends_on:
       - auth_db

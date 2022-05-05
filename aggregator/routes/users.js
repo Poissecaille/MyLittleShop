@@ -71,6 +71,7 @@ router.post("/login", async (request, response) => {
         // }
     }
 });
+
 // BUYER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
     try {
@@ -97,7 +98,7 @@ router.post("/register", async (request, response) => {
             });
         }
     } catch (error) {
-        console.log(error)
+        console.log(error.response)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

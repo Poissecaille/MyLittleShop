@@ -12,6 +12,25 @@ const { UniqueConstraintError, ValidationError } = require("sequelize")
 const getRandomInt = require('../utils/utils');
 const db = sequelizeTest
 
+const execSync = require('child_process').execSync;
+afterAll(async () => {
+    await db.sync({ force: true }).
+        then(
+            () => {
+                try {
+                    execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
+                } catch (error) { console.log(error) }
+                try {
+                    execSync('npx sequelize-cli  db:seed --seed 20220205122444-categories.js', { encoding: 'utf-8' });
+                } catch (error) { console.log(error) }
+                try {
+                    execSync('npx sequelize-cli  db:seed --seed 20220213104607-tags.js', { encoding: 'utf-8' });
+                } catch (error) { console.log(error) }
+            }
+        )
+})
+
+
 
 describe("inventory-product unit tests", () => {
 

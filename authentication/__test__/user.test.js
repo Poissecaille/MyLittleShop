@@ -1,14 +1,20 @@
 const app = require('../app'); //important
-const {
-  sequelizeTest
-} = require("../settings/database")
+const {sequelizeTest} = require("../settings/database")
 const request = require('supertest');
-const {
-  faker
-} = require('@faker-js/faker');
+const {faker} = require('@faker-js/faker');
+const User = require("../models/user");
+const CryptoJS = require("crypto-js")
+const db = sequelizeTest;
+const execSync = require('child_process').execSync;
+afterAll(async () => {
+  await db.sync({
+    force: true
+  }).then(
+    () => {
+        execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
+    })
+});
 
-
-const db = sequelizeTest
 
 describe("POST /api/register", () => {
   beforeAll(async () => {

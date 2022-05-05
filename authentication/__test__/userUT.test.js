@@ -9,6 +9,18 @@ var difflib = require('difflib');
 const env = require("dotenv").config();
 const db = sequelizeTest
 
+const execSync = require('child_process').execSync;
+afterAll(async () => {
+  await db.sync({
+    force: true
+  }).then(
+    () => {
+        execSync('npx sequelize-cli  db:seed --seed 20220212150215-users.js', { encoding: 'utf-8' });
+    })
+});
+  
+
+
 
 describe("Crypto unit tests", () => {
     it("Test-cryptoJs should be inconsistent with encrypting result" , () => {

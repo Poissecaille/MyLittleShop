@@ -1,0 +1,80 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 20
+      arrivalRate: 20
+      name: "Warming up"
+    - duration: 20
+      arrivalRate: 20
+      rampTo: 100
+      name: "Ramping up"
+    - duration: 20
+      arrivalRate: 100
+      name: "Sustained load"
+  processor: "./processor.js"
+
+scenarios:
+  - name: "Add address"
+    flow:
+      - post:
+          url: "/register"
+          beforeRequest: generateSignupData
+          json:
+            email: "{{ email }}"
+            username: "{{ username }}"
+            password: "{{ password }}"
+            firstname: "{{ firstname }}"
+            lastname: "{{ lastname }}"
+            birthdate: "{{ birthdate }}"
+            role: "{{ role }}"
+      - think: 2
+      - post:
+          url: "/login"
+          json:
+            email: "{{ email }}"
+            password: "{{ password }}"
+          capture:
+            - json: $.token
+              as: token
+      - think: 2
+      - post:
+          url: "/userAddress"
+          beforeRequest: generateAddressData
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            address1: "{{ address1 }}"
+            address2: "{{ address2 }}"
+            city: "{{ city }}"
+            region: "{{ region }}"
+            country: "{{ country }}"
+            postalCode: "{{ postalCode }}"
+  
+  - name: "Consult products"
+    flow:
+      - post:
+          url: "/register"
+          beforeRequest: generateSignupData
+          json:
+            email: "{{ email }}"
+            username: "{{ username }}"
+            password: "{{ password }}"
+            firstname: "{{ firstname }}"
+            lastname: "{{ lastname }}"
+            birthdate: "{{ birthdate }}"
+            role: "{{ role }}"
+      - think: 2
+      - post:
+          url: "/login"
+          json:
+            email: "{{ email }}"
+            password: "{{ password }}"
+          capture:
+            - json: $.token
+              as: token
+      - think: 2
+      - get:
+          url: "/products/?lowerPrice=0&higherPrice=100&filter=unitPrice"
+          headers:
+            Authorization: "Bearer {{ token }}"
+ 
