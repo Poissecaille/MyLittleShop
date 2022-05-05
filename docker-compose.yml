@@ -126,6 +126,9 @@ services:
       - ./aggregator:/aggregator
 
   authentication:
+    deploy:
+      mode: replicated
+      replicas: 8
     image: authentication:latest
     build:
       context: ./authentication/

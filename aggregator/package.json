@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "jest --detectOpenHandles --forceExit && nodemon server.js",
+    "test": "nodemon server.js",
+    "test-complete": "jest --detectOpenHandles --forceExit && nodemon server.js",
     "launch": "concurrently \"nodemon server.js\" \"nodemon ../authentication/server.js\" \"nodemon ../inventory/app.js\" \"nodemon ../orders/app.js\" \"nodemon ../mailer/app.js\""
   },
   "repository": {
