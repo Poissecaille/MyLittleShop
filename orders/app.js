@@ -3,6 +3,7 @@ const env = require("dotenv").config();
 const order = require("./models/order")
 const orderProduct = require("./models/orderProduct");
 const { sequelizeDev, sequelizeTest } = require("./settings/database")
+const logger = require('./settings/logger');
 
 // ENVIRONNEMENT SELECTION
 var db;
@@ -15,20 +16,20 @@ if (process.env.NODE_ENV === "development") {
     force = false
     // DB CONNECTION
     db.authenticate().
-    then(() => console.log(`Connected to data base ${dbName}...`))
-    .catch((error) => console.log(error));
+        then(() => logger.info(`Connected to data base ${dbName}...`))
+        .catch((error) => logger.error(error));
     db.sync({ force: force }).
         then(
             () => {
-                console.log(`database ${dbName} synced!`)
+                logger.info(`database ${dbName} synced!`)
             }
-                
-            
+
+
         )
-        .catch((error) => console.log(error));
+        .catch((error) => logger.error(error));
 
 
-} 
+}
 
 // DB ASSOCIATIONS
 //order.hasMany(orderProduct)

@@ -10,7 +10,7 @@ var logger = require('../settings/logger');
 router.get("/userData", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         var userData;
         if (request.query.userId) {
             const user = await User.findByPk(request.query.userId);
@@ -134,7 +134,7 @@ router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, res
 router.get("/syncAccount", checkToken, async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         var result = {};
         const userId = request.user.id
         const userData = await User.findByPk(userId)
@@ -157,7 +157,7 @@ router.get("/syncAccount", checkToken, async (request, response) => {
 router.get("/syncSellersPerProduct", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const sellerData = await User.findAll({
             where: {
                 id: { [Op.in]: request.query.sellerIds }
@@ -178,7 +178,7 @@ router.get("/syncSellersPerProduct", async (request, response) => {
 router.get("/admin/users", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const users = request.query.limit && request.query.offset ? await User.findAll({
             where: {
                 id: { [Op.lt]: request.query.limit, [Op.gt]: request.query.offset }
@@ -201,8 +201,6 @@ router.get("/admin/users", async (request, response) => {
         });
     }
 });
-
-
 
 
 module.exports = router;

@@ -3,14 +3,16 @@ const WishProduct = require("../models/wishProduct");
 const Sequelize = require('sequelize');
 const Product = require("../models/product");
 const Op = Sequelize.Op
+var logger = require('../settings/logger');
 
 
 router.get("/newsLetter", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const userWishList = request.query.offset && request.query.limit ? await WishProduct.findAll({
             where: {
                 id: { [Op.gt]: request.query.offset, [Op.lt]: request.query.limit },
-                //id: { [Op.lt]: request.query.limit }
             }
         }
         )
@@ -29,19 +31,8 @@ router.get("/newsLetter", async (request, response) => {
 
 router.post("/wishProduct", async (request, response) => {
     try {
-        console.log("############")
-        console.log(request.body)
-        // const wishedProduct = await Product.findOne({
-        //     where: {
-        //         name: request.body.productName,
-        //         sellerId: request.body.sellerId
-        //     }
-        // });
-        // if (request.query.quantity > wishedProduct.quantity) {
-        //     return response.status(404).json({
-        //         "response": "Product not in stock"
-        //     })
-        // }
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         if (request.body.quantity > request.body.availableQuantity) {
             return response.status(404).json({
                 "response": "Product not in stock"
@@ -49,7 +40,6 @@ router.post("/wishProduct", async (request, response) => {
         }
         const wishProduct = new WishProduct({
             ownerId: request.body.ownerId,
-            // productId: wishedProduct.id,
             productId: request.body.productId,
             quantity: request.body.quantity
         });
@@ -60,6 +50,7 @@ router.post("/wishProduct", async (request, response) => {
     } catch (error) {
         console.log(error)
         if (error.name === "SequelizeUniqueConstraintError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
             return response.status(409).json({
                 "response": "Product already rated"
             });
@@ -72,6 +63,8 @@ router.post("/wishProduct", async (request, response) => {
 
 router.get("/wishProducts", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const userWishList = await WishProduct.findAll({
             where: {
                 ownerId: request.query.ownerId
@@ -95,8 +88,9 @@ router.get("/wishProducts", async (request, response) => {
 
 router.put("/wishProduct", async (request, response) => {
     try {
-        console.log("#####", request.body, "#####")
-
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.debug(`BODY: ${request.body}`)
         const wishedProduct = await Product.findOne({
             where: {
                 name: request.body.productName,
@@ -127,6 +121,8 @@ router.put("/wishProduct", async (request, response) => {
 
 router.delete("/wishProduct", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const wishedProduct = await Product.findOne({
             where: {
                 name: request.body.productName,

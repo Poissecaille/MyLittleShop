@@ -3,12 +3,14 @@ const ProductCategory = require("../models/productCategory");
 const { QueryTypes } = require('sequelize');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
-const { sequelizeDev, sequelizeTest } = require("../settings/database")
+const { sequelizeDev, sequelizeTest } = require("../settings/database");
+const logger = require("../settings/logger");
 
 // GET CATEGORIES FOR PRODUCTS
 router.get("/productCategories", async (request, response) => {
     try {
-        console.log("inventory", request.query.productIds)
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const productCategories = await ProductCategory.findAll({
             where: {
                 productId: { [Op.in]: request.query.productIds }
@@ -29,6 +31,8 @@ router.get("/productCategories", async (request, response) => {
 // GET ALL CATEGORIES NAMES FOR FRONT END DROPDOWN
 router.get("/productCategoriesNames", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         var categoryNames = []
         const categories = await sequelizeDev.query('SELECT DISTINCT name FROM "productCategory"', {
             model: ProductCategory
@@ -51,13 +55,13 @@ router.get("/productCategoriesNames", async (request, response) => {
 // MODIFY PRODUCT CATEGORIES
 router.put("/productCategories", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const productCategories = await ProductCategory.findAll({
             where: {
                 name: { [Op.in]: request.body.categories }
             }
         })
-        //await productCategories.update
-
     } catch (error) {
         console.log(error)
         response.status(error.response.status).json({
@@ -69,6 +73,8 @@ router.put("/productCategories", async (request, response) => {
 // ADD PRODUCT CATEGORIES
 router.post("/productCategories", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         var productCategories = []
         const now = new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')
         for (let i = 0; i < request.body.categoriesToCreate.length; i++) {
@@ -87,6 +93,7 @@ router.post("/productCategories", async (request, response) => {
     } catch (error) {
         console.log(error)
         if (error.name === "SequelizeUniqueConstraintError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
             return response.status(409).json({
                 "response": "Category already existant for current product"
             });
@@ -100,6 +107,8 @@ router.post("/productCategories", async (request, response) => {
 // REMOVE PRODUCT CATEGORIES
 router.delete("/productCategories", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const productCategoriesToDelete = ProductCategory.destroy({
             where: {
                 name: categoriesToDelete,

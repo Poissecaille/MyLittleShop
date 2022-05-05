@@ -8,7 +8,7 @@ var logger = require('../settings/logger');
 router.get("/cartProducts", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         if (!request.query.userId) {
             return response.status(400).json({
                 "response": "Bad json format",
@@ -33,8 +33,7 @@ router.get("/cartProducts", async (request, response) => {
 router.post("/cartProduct", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
-
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const availableProduct = await Product.findOne(
             {
                 where: {
@@ -106,7 +105,7 @@ router.post("/cartProduct", async (request, response) => {
 router.put("/cartProduct", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const availableProduct = await Product.findOne({
             where: {
                 name: request.body.productName,
@@ -145,7 +144,7 @@ router.put("/cartProduct", async (request, response) => {
 router.delete("/cartProduct", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const product = await Product.findOne({
             where: {
                 name: request.body.productName,
@@ -183,7 +182,7 @@ router.delete("/cartProduct", async (request, response) => {
 router.delete("/cartProducts", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         request.body.forEach(async (productInCart) => {
             logger.debug(`productId: ${productInCart.productId}`)
             logger.debug(`quantity: ${productInCart.quantity}`)

@@ -9,7 +9,7 @@ var logger = require('../settings/logger');
 router.get("/userAddresses", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const addresses = request.query.userId ?
             await UserAddress.findAll({
                 where: {
@@ -42,7 +42,7 @@ router.get("/userAddresses", async (request, response) => {
 router.get("/userAddress", checkToken, async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const userId = request.user.id
         const userRole = request.user.role
         if (userRole == "buyer") {
@@ -81,7 +81,7 @@ router.get("/userAddress", checkToken, async (request, response) => {
 router.get("/deliveryUserAddress", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const deliveryAddresses = await UserAddress.findAll({
             where: {
                 id: { [Op.in]: request.query.addressIds }

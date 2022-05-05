@@ -2,10 +2,13 @@ const router = require("express").Router();
 const Sequelize = require('sequelize');
 const OrderProduct = require("../models/orderProduct");
 const Op = Sequelize.Op
+var logger = require('../settings/logger');
 
 // GET ORDERED PRODUCTS FOR SELLERS
 router.get("/seller/orderProducts", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const orderProducts = await OrderProduct.findAll({
             where: {
                 productId: {
@@ -27,13 +30,12 @@ router.get("/seller/orderProducts", async (request, response) => {
 // GET ORDERED PRODUCTS FOR BUYERS
 router.get("/buyer/orderProducts", async (request, response) => {
     try {
-        console.log("----------------TEST---------------")
-        console.log(request.query)
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const orderProducts = await OrderProduct.findAll({
             where: {
                 ownerId: request.query.ownerId ? request.query.ownerId : { [Op.in]: request.query.buyerIds },
                 productId: request.query.productId !== undefined ? request.query.productId : { [Op.ne]: null },
-                //sellerId: request.query.sellerId !== undefined ? request.query.sellerId : { [Op.ne]: null },
                 shipped: request.query.orderStatus !== undefined ? request.query.orderStatus : { [Op.ne]: null }
             }
         });
@@ -52,6 +54,8 @@ router.get("/buyer/orderProducts", async (request, response) => {
 // CREATE ORDER
 router.post("/orderProducts", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         var ordersProducts = [];
         request.body.cartProductsData.forEach(async (cartProduct) => {
             console.log(cartProduct)
@@ -80,6 +84,8 @@ router.post("/orderProducts", async (request, response) => {
 //DELIVERY UPDATE FOR SELLERS
 router.put("/seller/orderProduct", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const orderToUpdate = await OrderProduct.findOne({
             where: {
                 ownerId: request.body.ownerId,

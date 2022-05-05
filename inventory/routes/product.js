@@ -11,7 +11,7 @@ var logger = require('../settings/logger');
 router.get("/buyer/product", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const productToRate = Product.findOne({
             where: {
                 sellerId: request.query.sellerId,
@@ -39,8 +39,7 @@ router.get("/buyer/product", async (request, response) => {
 router.get("/productsPerCart", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
-        logger.debug(`productIds: ${request.query.productIds}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const Products = await Product.findAll({
             where: {
                 id: { [Op.in]: request.query.productIds }
@@ -63,7 +62,7 @@ router.get("/productsPerCart", async (request, response) => {
 router.get("/buyer/products", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         var sellersIds = [];
         var productsIdsPerCategory = [];
         var productsIdsPerTag = [];
@@ -143,7 +142,7 @@ router.get("/buyer/products", async (request, response) => {
 router.get("/seller/products", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const sellerProducts = await Product.findAll({
             where: {
                 sellerId: request.query.sellerId ? request.query.sellerId : { [Op.in]: request.query.sellerIds },
@@ -170,7 +169,7 @@ router.get("/seller/products", async (request, response) => {
 router.get("/seller/product", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         logger.debug(`query: ${request.query}`)
         const sellerProducts = await Product.findOne({
             where: {
@@ -199,7 +198,7 @@ router.get("/seller/product", async (request, response) => {
 router.put("/seller/products", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const productsToWithdraw = await Product.findAll({
             where: {
                 sellerId: request.query.userId,
@@ -231,8 +230,7 @@ router.put("/seller/products", async (request, response) => {
 router.put("/products", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
-        logger.debug(`BODY: ${request.body}`)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         request.body.forEach(async (cartProduct) => {
             console.log("productId: ", cartProduct.productId)
             console.log("quantity: ", cartProduct.quantity)
@@ -257,7 +255,7 @@ router.put("/products", async (request, response) => {
 router.post("/seller/product", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const newSellerProduct = new Product({
             name: request.body.name,
             label: request.body.label,
@@ -291,7 +289,7 @@ router.post("/seller/product", async (request, response) => {
 router.put("/seller/product", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const productToUpdate = await Product.findOne({
             where: {
                 name: request.body.name,
@@ -335,8 +333,7 @@ router.put("/seller/product", async (request, response) => {
 router.delete("/seller/product", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
-
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const productToDelete = await Product.findOne({
             where: {
                 name: request.body.productName,
@@ -359,8 +356,7 @@ router.delete("/seller/product", async (request, response) => {
 router.get("/productsPerId", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
-
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const products = await Product.findAll({
             where: {
                 id: { [Op.in]: request.query.productIds }
@@ -381,8 +377,7 @@ router.get("/productsPerId", async (request, response) => {
 router.get("/orderedProduct", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
-
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         const products = await Product.findAll({
             where: {
                 id: { [Op.in]: request.query.productIds }
@@ -391,10 +386,6 @@ router.get("/orderedProduct", async (request, response) => {
         return response.status(200).json({
             "response": products
         });
-        // const product = await Product.findByPk(request.query.productId)
-        // return response.status(200).json({
-        //     "response": product
-        // });
     } catch (error) {
         console.log(error)
         return response.status(error.response.status).json({
@@ -408,8 +399,7 @@ router.get("/orderedProduct", async (request, response) => {
 router.put("/updateProductRating", async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
-
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const productToUpdate = await Product.findByPk(request.body.productId)
         await productToUpdate.update({
             averageRating: request.body.averageRating

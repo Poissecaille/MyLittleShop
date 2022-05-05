@@ -9,7 +9,7 @@ var logger = require('../settings/logger');
 router.get("/checkToken", checkToken, async (request, response) => {
     try {
         var loggerDate = new Date().toISOString()
-        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, query:${request.query}`)
         return response.status(200).json({
             "response": request.user
         });
@@ -62,7 +62,7 @@ router.post("/register", async (request, response) => {
 
 // LOGIN
 router.post("/login", checkPasswordWithEmail, async (request, response) => {
-    logger.info(new Date().toISOString(), request.headers, request.url, request.method)
+    logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
             "response": "Bad json format"
@@ -81,7 +81,6 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
         const accessToken = jwt.sign({
             id: user.id,
             role: user.role,
-            //activated: user.activated
         }, process.env.JWT_SECRET, {
             expiresIn: "3d"
         });
@@ -91,8 +90,6 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
         return response.status(200).json({
             "response": "Logged in",
             "token": accessToken,
-            // "role": user.role
-            //"expire": tokenExpiration
         });
     } catch (error) {
         response.status(error.response.status).json({
