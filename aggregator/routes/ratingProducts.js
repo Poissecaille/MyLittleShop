@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const axios = require('axios');
 const averageFromArray = require("../utils/functions");
+var logger = require('../settings/logger');
 
 const roads = {
     // AUTHENTICATION MICROSERVICE
@@ -19,6 +20,7 @@ const roads = {
 
 //GET RATED PRODUCT FOR A USER FOR ORDER PAGE
 router.get("/ratingsProductsPerUser", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -33,13 +35,26 @@ router.get("/ratingsProductsPerUser", async (request, response) => {
                     ownerId: userId
                 }
             });
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${ratings.data.response}`)
             return response.status(ratings.status).json({
                 "response": ratings.data.response
             });
         }
     }
     catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -48,9 +63,17 @@ router.get("/ratingsProductsPerUser", async (request, response) => {
 
 //POST A RATING ON AN ORDERED PRODUCT
 router.post("/ratingProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         console.log(request.body)
         if (!request.body.productId || !request.body.value || request.body.value < 0 && request.body.value > 5) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -88,61 +111,26 @@ router.post("/ratingProduct", async (request, response) => {
                     averageRating: newAverage,
                     productId: request.body.productId
                 })
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${newRating.data.response}`) 
             return response.status(newRating.status).json({
                 "response": newRating.data.response
             });
         }
-        // const sellerData = await axios.get(roads.USER_DATA_URL, {
-        //     params: {
-        //         sellerUsername: request.body.sellerUsername
-        //     }
-        // });
-        // if (!sellerData) {
-        //     return response.status(404).json({
-        //         "response": "User not found"
-        //     })
-        // }
-        // const productToRate = await axios.get(roads.BUYER_PRODUCT_URL, {
-        //     params: {
-        //         sellerId: request.body.sellerName,
-        //         productName: sellerData.data.response.id
-        //     }
-        // });
-        // if (!productToRate) {
-        //     return response.status(404).json({
-        //         "response": "Product not found"
-        //     });
-        // }
-        //     const buyerOrders = await axios.get(roads.GET_BUYER_ORDERS_URL, {
-        //         params: {
-        //             ownerId: userId,
-        //             productId: productToRate.data.response.id,
-        //             sellerId: sellerData.data.response.id,
-        //             orderStatus: "delivered"
-        //         }
-        //     });
-        //     if (buyerOrders.length == 0) {
-        //         return response.status(404).json({
-        //             "response": "Order not found"
-        //         });
-        //     } else {
-        //         const quotation = await axios.post(roads.RATE_PRODUCT_URL, {
-        //             ownerId: userId,
-        //             productId: productToRate.data.response.id,
-        //             quotationValue: request.body.quotationValue,
-        //             quotationComment: request.body.comment ? request.body.comment : null
-        //         })
-        //         return response.status(quotation.status).json({
-        //             "response": quotation.data.response
-        //         });
-        //     }
-        // } else {
-        //     return response.status(401).json({
-        //         "reponse": "Unauthorized"
-        //     });
-        // }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response:${error.response.data.response}`)
+
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

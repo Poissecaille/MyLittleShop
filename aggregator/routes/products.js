@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const axios = require('axios');
 const Fuse = require('fuse.js')
+var logger = require('../settings/logger');
 
 const roads = {
     // INVENTORY MICROSERVICE
@@ -19,6 +20,7 @@ const roads = {
 
 //GET PRODUCTS FOR BUYERS AND SELLERS
 router.get("/products", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -31,6 +33,13 @@ router.get("/products", async (request, response) => {
         if (userRole == "buyer") {
             if (request.query.condition) {
                 if (request.query.condition != "new" && request.query.condition != "occasion" && request.query.condition != "renovated" && request.query.condition != "all") {
+                    logger.error(`timestamp:${loggerDate}, 
+                        headers:${request.headers}, 
+                        url:${request.url}, 
+                        method:${request.method}, 
+                        body:${request.body},
+                        query:${request.query},
+                        response: Bad json format`)
                     return response.status(400).json({
                         "response": "Bad json format"
                     });
@@ -58,6 +67,13 @@ router.get("/products", async (request, response) => {
             if (!request.query.filter) {
                 filter = "unitPrice";
             } else if (request.query.filter != "unitPrice" && request.query.filter != "condition") {
+                logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Bad json format`)
                 return response.status(400).json({
                     "response": "Bad json format"
                 });
@@ -121,6 +137,13 @@ router.get("/products", async (request, response) => {
             // console.log(productIds)
             // console.log(sellerIds)
             if (products.data.response.length === 0) {
+                logger.info(`timestamp:${loggerDate}, 
+                    headers:${request.headers}, 
+                    url:${request.url}, 
+                    method:${request.method}, 
+                    body:${request.body}
+                    query:${request.query},
+                    response:${products.data.response}`)
                 return response.status(products.status).json({
                     "response": products.data.response,
                     "rows": products.data.response.length
@@ -167,11 +190,25 @@ router.get("/products", async (request, response) => {
                 for (let i = 0; i < result.length; i++) {
                     final.push(result[i].item)
                 }
+                logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${final}`)
                 return response.status(products.status).json({
                     "response": final,
                     "rows": result.length
                 });
             } else {
+                logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${products.data.response}`)
                 return response.status(products.status).json({
                     "response": products.data.response,
                     "rows": products.data.rows
@@ -248,11 +285,25 @@ router.get("/products", async (request, response) => {
                 for (let i = 0; i < result.length; i++) {
                     final.push(result[i].item)
                 }
+                logger.info(`timestamp:${loggerDate}, 
+                    headers:${request.headers}, 
+                    url:${request.url}, 
+                    method:${request.method}, 
+                    body:${request.body}
+                    query:${request.query},
+                    response:${final}`)
                 return response.status(products.status).json({
                     "response": final,
                     "rows": result.length
                 });
             } else {
+                logger.info(`timestamp:${loggerDate}, 
+                    headers:${request.headers}, 
+                    url:${request.url}, 
+                    method:${request.method}, 
+                    body:${request.body}
+                    query:${request.query},
+                    response:${products.data.response}`)
                 return response.status(products.status).json({
                     "response": products.data.response,
                     "rows": products.data.rows
@@ -260,13 +311,33 @@ router.get("/products", async (request, response) => {
             }
 
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`)
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
         if (error.code == "ERR_HTTP_INVALID_HEADER_VALUE") {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`)
             return response.status(401).json({ "response": "Unauthorized" });
         }
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -275,13 +346,28 @@ router.get("/products", async (request, response) => {
 
 //ALLOW A SELLER TO CREATE A PRODUCT
 router.post("/product", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.body.name || !request.body.label || !request.body.condition || !request.body.description || !request.body.unitPrice || !request.body.availableQuantity) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
         }
         if (request.body.condition != "new" && request.body.condition != "occasion" && request.body.condition != "renovated") {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -321,16 +407,37 @@ router.post("/product", async (request, response) => {
                     })
                 }
             }
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${newProduct.data.response}`)
             return response.status(newProduct.status).json({
                 "response": newProduct.data.response
             });
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
     }
     catch (error) {
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response:${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -338,15 +445,16 @@ router.post("/product", async (request, response) => {
 });
 
 router.put("/product", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
-        // if (process.env.NODE_ENV === "development") {
-        //     if (!request.body.mailRecipient || !request.body.mailSubject || !request.body.mailContent) {
-        //         return response.status(400).json({
-        //             "response": "Bad json format",
-        //         });
-        //     }
-        // }
         if (!request.body.name) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -427,17 +535,37 @@ router.put("/product", async (request, response) => {
                     productId: productToUpdate.data.response.id
                 });
             }
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${productToUpdate.data.response}`)
             return response.status(productToUpdate.status).json({
                 "response": productToUpdate.data.response
             });
         }
         else {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response:${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -446,8 +574,16 @@ router.put("/product", async (request, response) => {
 
 
 router.delete("/product", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.body.name) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -467,17 +603,37 @@ router.delete("/product", async (request, response) => {
                     sellerId: userId
                 }
             });
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${productToDelete.data.response}`)
             return response.status(productToDelete.status).json({
                 "response": productToDelete.data.response
             });
 
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

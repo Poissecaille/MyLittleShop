@@ -1,7 +1,7 @@
 
 const router = require("express").Router();
 const axios = require('axios');
-
+var logger = require('../settings/logger');
 
 const roads = {
     // AUTHENTICATION MISCROSERVICE
@@ -18,6 +18,7 @@ const roads = {
 
 //ADMIN CONSOLE ROUTE
 router.get("/admin", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     const limit = request.query.limit;
     const offset = request.query.offset;
     const user = await axios.get(roads.CHECK_TOKEN_URL, {
@@ -72,12 +73,9 @@ router.get("/admin", async (request, response) => {
                 productsIds: sellerProductIds
             }
         })
-        console.log("-------------------------------")
-        console.log(buyerAddresses.data.response)
-        console.log(buyerOrders.data.response)
-        console.log(sellerOrders.data.response)
-        console.log(usersToDisplay.data.response)
-        console.log("-------------------------------")
+
+        logger.debug(`${buyerAddresses.data.response},${buyerOrders.data.response},
+        ${sellerOrders.data.response},${usersToDisplay.data.response}`)
 
         for (let i = 0; i < usersToDisplay.data.response.length; i++) {
             for (let j = 0; j < buyerAddresses.data.response.length; j++) {
@@ -106,11 +104,25 @@ router.get("/admin", async (request, response) => {
             // }
 
         }
+        logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${usersToDisplay.data.response}`)
         return response.status(200).json({
             "response": usersToDisplay.data.response
         });
 
     } else {
+        logger.error(`timestamp:${loggerDate}, 
+        headers:${request.headers}, 
+        url:${request.url}, 
+        method:${request.method}, 
+        body:${request.body},
+        query:${request.query},
+        response: Unauthorized`)
         return response.status(401).json({
             "response": "Unauthorized"
         });

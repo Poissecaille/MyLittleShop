@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const axios = require('axios');
-
+var logger = require('../settings/logger');
 const roads = {
     //USER MICROSERVICE
     USER_ADDRESSES_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userAddresses`,
@@ -10,6 +10,7 @@ const roads = {
 
 // CONSULT ALL USER ADDRESSES
 router.get("/userAddresses", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -26,47 +27,43 @@ router.get("/userAddresses", async (request, response) => {
                 'Authorization': request.headers.authorization
             }
         });
+        logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${addresses.data.response}`)
         return response.status(addresses.status).json({
             "response": addresses.data.response
         });
     }
     catch (error) {
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
     }
 })
 
-// // CONSULT A USER ADDRESS
-// router.get("/userAddress", async (request, response) => {
-//     try {
-//         if (!request.query.address1) {
-//             return response.status(400).json({
-//                 "response": "Bad json format",
-//             });
-//         }
-//         const address = await axios.get(roads.USER_ADDRESS_URL, {
-//             headers: {
-//                 'Authorization': request.headers.authorization
-//             },
-//             params: {
-//                 address1: request.query.address1
-//             }
-//         });
-//         return response.status(address.status).json({
-//             "response": address.data.response
-//         });
-//     } catch (error) {
-//         return response.status(error.response.status).json({
-//             "response": error.response.data.response
-//         });
-//     }
-// });
-
 //CREATE A USER ADDRESS
 router.post("/userAddress", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.body.address1 || !request.body.address2 || !request.body.city || !request.body.region || !request.body.country || !request.body.postalCode) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -76,11 +73,24 @@ router.post("/userAddress", async (request, response) => {
                 'Authorization': request.headers.authorization
             },
         });
-        console.log(newAddress)
+        logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${newAddress.data.response}`)
         return response.status(newAddress.status).json({
             "response": newAddress.data.response
         });
     } catch (error) {
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -89,8 +99,16 @@ router.post("/userAddress", async (request, response) => {
 
 //MODIFY A USER ADDRESS
 router.put("/userAddress", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.body.address1 || !request.body.address2 || request.body.postalCode.toString().length != 5) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -101,10 +119,24 @@ router.put("/userAddress", async (request, response) => {
             },
         }
         );
+        logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${userAddressToUpdate.data.response}`)
         return response.status(userAddressToUpdate.status).json({
             "response": userAddressToUpdate.data.response
         });
     } catch (error) {
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -113,8 +145,16 @@ router.put("/userAddress", async (request, response) => {
 
 //DELETE A USER ADDRESS
 router.delete("/userAddress", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.body.address1 || !request.body.address2) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -125,10 +165,24 @@ router.delete("/userAddress", async (request, response) => {
             },
             data: request.body
         });
+        logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${userAddressToDelete.data.response}`)
         return response.status(userAddressToDelete.status).json({
             "response": userAddressToDelete.data.response
         });
     } catch (error) {
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });

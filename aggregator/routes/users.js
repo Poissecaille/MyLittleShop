@@ -1,5 +1,7 @@
 const router = require("express").Router();
 const axios = require('axios');
+var logger = require('../settings/logger');
+
 
 const roads = {
     // AUTHENTICATION MICROSERVICE
@@ -20,6 +22,9 @@ const roads = {
 //GET USER ROLE FOR DYNAMIC FRONT RENDERING
 router.get("/userRole", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}`)
+
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -31,7 +36,7 @@ router.get("/userRole", async (request, response) => {
         })
     }
     catch (error) {
-        console.log(error)
+        logger.error(error)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -41,17 +46,30 @@ router.get("/userRole", async (request, response) => {
 // LOGIN
 router.post("/login", async (request, response) => {
     if (!request.body.email || !request.body.password) {
+        var loggerDate = new Date().toISOString()
+        logger.error(`timestamp:${loggerDate}, 
+        headers:${request.headers}, url:${request.url},
+        method:${request.method}, body:${request.body},
+        response: Bad json format`)
+
         return response.status(400).json({
             "response": "Bad json format"
         });
     }
     try {
+        
         const userToLogin = await axios.post(roads.LOGIN_ACCOUNT_URL, {
             email: request.body.email,
             password: request.body.password,
         });
 
         if (userToLogin.status === 200) {
+            var loggerDate = new Date().toISOString()
+            logger.info(`timestamp:${loggerDate}, headers:${request.headers},
+            url:${request.url},
+            method:${request.method},
+            body:${request.body},
+            response:${userToLogin.data.response},${userToLogin.data.token},${userToLogin.data.role}`)
             return response.status(200).json({
                 "response": userToLogin.data.response,
                 "token": userToLogin.data.token,
@@ -60,7 +78,7 @@ router.post("/login", async (request, response) => {
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(error)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -75,13 +93,21 @@ router.post("/login", async (request, response) => {
 // BUYER ACCOUNT CREATION
 router.post("/register", async (request, response) => {
     try {
-        console.log(request.body)
-        console.log("########################")
+        
+        
         if (!request.body.email || !request.body.password || !request.body.firstname || !request.body.lastname || !request.body.birthdate || !request.body.username) {
+            var loggerDate = new Date().toISOString()
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format"
             });
         }
+        
         const userToRegister = await axios.post(roads.CREATE_ACCOUNT_URL, {
             email: request.body.email,
             password: request.body.password,
@@ -93,12 +119,19 @@ router.post("/register", async (request, response) => {
         })
 
         if (userToRegister.status === 201) {
+            var loggerDate = new Date().toISOString()
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            response:${userToRegister.data.response}`)
             return response.status(201).json({
                 "response": userToRegister.data.response
             });
         }
     } catch (error) {
-        console.log(error.response)
+        logger.error(error.response)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -111,6 +144,14 @@ router.post("/seller/register", async (request, response) => {
 
     try {
         if (!request.body.email || !request.body.password || !request.body.firstname || !request.body.lastname || !request.body.birthdate || !request.body.username) {
+            var loggerDate = new Date().toISOString()
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            response: Bad json format`)
+
             return response.status(400).json({
                 "response": "Bad json format"
             });
@@ -134,15 +175,36 @@ router.post("/seller/register", async (request, response) => {
             })
 
             if (userToRegister.status === 201) {
+                var loggerDate = new Date().toISOString()
+                logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                response:${userToRegister.data.response}`)
                 return response.status(201).json({
                     "response": userToRegister.data.response
                 });
             }
         }
         else {
+            var loggerDate = new Date().toISOString()
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            response: Unauthorized`)
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
+        var loggerDate = new Date().toISOString()
+        logger.error(`timestamp:${loggerDate}, 
+        headers:${request.headers}, 
+        url:${request.url}, 
+        method:${request.method}, 
+        body:${request.body},
+        response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -152,13 +214,28 @@ router.post("/seller/register", async (request, response) => {
 
 // ADMIN ROAD FOR ACCOUNT DISABLING //TODO DISABLE SELLERS PRODUCTS
 router.put("/disable", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.body.password || !request.query.email) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format"
             });
         }
         if (!request.headers.authorization) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
@@ -170,10 +247,18 @@ router.put("/disable", async (request, response) => {
                 'Authorization': request.headers.authorization
             }
         });
+        logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${userDisabled.data.response}`)
         return response.status(200).json({
             "response": userDisabled.data.response
         });
     } catch (error) {
+        logger.error(error.response.data.response)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -182,13 +267,26 @@ router.put("/disable", async (request, response) => {
 
 // DISABLE USER WHO MAKE THE REQUEST
 router.put("/deactivate", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.headers.authorization) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
         if (!request.body.password) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                response: Bad request format`)
             return response.status(400).json({
                 "response": "Bad request format"
             });
@@ -203,16 +301,30 @@ router.put("/deactivate", async (request, response) => {
         const sellerId = deactivatedAccount.data.userId
         if (deactivatedAccount.data.userRole == "seller") {
             const sellerProducts = await axios.put(roads.SELLER_PRODUCTS_URL + "?sellerId=" + sellerId)
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${sellerProducts.data.response}`)
             return response.status(200).json({
                 "response": sellerProducts.data.response
             });
         } else {
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${deactivatedAccount.data.response}`)
             return response.status(200).json({
                 "response": deactivatedAccount.data.response
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(error.response.data.response)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -221,17 +333,25 @@ router.put("/deactivate", async (request, response) => {
 
 //SYNC ACCOUNT WITH FRONT STORAGE
 router.get("/syncAccount", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const userData = await axios.get(roads.SYNC_ACCOUNT_URL, {
             headers: {
                 'Authorization': request.headers.authorization
             }
         })
+        logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${userData.data.response}`)
         return response.status(200).json({
             "response": userData.data.response
         });
     } catch (error) {
-        console.log(error)
+        logger.error(error.response.data.response)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });

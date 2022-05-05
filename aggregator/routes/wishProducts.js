@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const axios = require('axios');
-
+var logger = require('../settings/logger');
 const roads = {
     // INVENTORY MICROSERVICE
     CRUD_WISHLIST_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/wishProduct`,
@@ -10,49 +10,22 @@ const roads = {
     USER_DATA_URL: `http://authentication:${process.env.APP_AUTHENTICATION_PORT}/api/userData`
 }
 
-// //NEWSLETTER
-// router.get("/newsLetter", async (request, response) => {
-//     try {
-//         const limit = request.query.limit;
-//         const offset = request.query.offset;
-//         const wishProducts = await axios.get(roads.GET_WISHLIST_URL, {
-//             params: {
-//                 limit: limit,
-//                 offset: offset
-//             }
-//         });
-//         return response.status(wishProducts.status).json({
-//             "response": wishProducts.data.response
-//         });
-//     } catch (error) {
-//         console.log(error)
-//         return response.status(error.response.status).json({
-//             "response": error.response.data.response
-//         });
-//     }
-// });
-
-
 // ADD A PRODUCT IN WISHLIST
 router.post("/wishProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
-        console.log("############")
-        console.log(request.body)
         if (!request.body.productId || !request.body.quantity || !request.body.availableQuantity) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
         }
-        // if (!request.body.productName || !request.body.quantity) {
-        //     return response.status(400).json({
-        //         "response": "Bad json format",
-        //     });
-        // }
-        // if (!request.body.sellerId && !request.body.sellerUsername) {
-        //     return response.status(400).json({
-        //         "response": "Bad json format",
-        //     });
-        // }
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -61,27 +34,7 @@ router.post("/wishProduct", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
-            // const sellerData = await axios.get(roads.USER_DATA_URL, {
-            //     params: {
-            //         userId: request.body.userId
-            //     }
-            // });
-            // if (!sellerData) {
-            //     return response.status(404).json({
-            //         "response": "User not found"
-            //     });
-            // }
-            // const wishedProduct = await axios.get(roads.BUYER_PRODUCT_URL, {
-            //     params: {
-            //         sellerId: request.body.sellerName,
-            //         productName: sellerData.data.response.id
-            //     }
-            // });
-            // if (!wishedProduct) {
-            //     return response.status(404).json({
-            //         "response": "Product not found"
-            //     });
-            // }
+        
             const wishProduct = await axios.post(roads.CRUD_WISHLIST_URL, {
                 ownerId: userId,
                 productId: request.body.productId,
@@ -91,16 +44,36 @@ router.post("/wishProduct", async (request, response) => {
                 // sellerId: sellerData.data.response.id,
                 quantity: request.body.quantity
             });
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${wishProduct.data.response}`)
             return response.status(wishProduct.status).json({
                 "response": wishProduct.data.response
             });
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -109,6 +82,7 @@ router.post("/wishProduct", async (request, response) => {
 
 // GET ALL PRODUCTS FROM USER WISHLIST
 router.get("/wishProducts", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -123,14 +97,35 @@ router.get("/wishProducts", async (request, response) => {
                     ownerId: userId
                 }
             });
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${wishProducts.data.response}`)
             return response.status(wishProducts.status).json({
                 "response": wishProducts.data.response
             });
-        } return response.status(401).json({
+        }
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`) 
+        return response.status(401).json({
             "response": "Unauthorized"
         })
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`) 
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -139,6 +134,7 @@ router.get("/wishProducts", async (request, response) => {
 
 
 router.put("/wishProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -154,6 +150,13 @@ router.put("/wishProduct", async (request, response) => {
                 }
             });
             if (!sellerData) {
+                logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: User not found`)
                 return response.status(404).json({
                     "response": "User not found"
                 });
@@ -166,16 +169,36 @@ router.put("/wishProduct", async (request, response) => {
                     productName: request.body.productName,
                     quantity: request.body.quantity
                 });
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${wishProductsToUpdate.data.response}`)
             return response.status(wishProductsToUpdate.status).json({
                 "response": wishProductsToUpdate.data.response
             });
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -183,6 +206,7 @@ router.put("/wishProduct", async (request, response) => {
 });
 
 router.delete("/wishProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -192,15 +216,21 @@ router.delete("/wishProduct", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole == "buyer") {
-            console.log("PREMIER TEST")
+
             const sellerData = await axios.get(roads.USER_DATA_URL, {
                 params: {
                     sellerUsername: request.body.sellerUsername
                 }
             });
-            console.log("DEUXIEME TEST")
-            console.log(request.body)
+
             if (!sellerData) {
+                logger.error(`timestamp:${loggerDate}, 
+                    headers:${request.headers}, 
+                    url:${request.url}, 
+                    method:${request.method}, 
+                    body:${request.body},
+                    query:${request.query},
+                    response: User not found`)
                 return response.status(404).json({
                     "response": "User not found"
                 });
@@ -212,16 +242,37 @@ router.delete("/wishProduct", async (request, response) => {
                     productName: request.body.productName,
                 }
             })
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${wishProductsToDelete.data.response}`)
             return response.status(wishProductsToDelete.status).json({
                 "response": wishProductsToDelete.data.response
             });
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
+
             return response.status(401).json({
                 "response": "Unauthorized"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

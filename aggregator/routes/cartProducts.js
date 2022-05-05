@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const axios = require('axios');
-
+var logger = require('../settings/logger');
 const roads = {
     // INVENTORY MICROSERVICE
     GET_CART_ITEMS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/cartProducts`,
@@ -14,6 +14,7 @@ const roads = {
 
 // CONSULT ALL PRODUCTS IN CART
 router.get("/cartProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     const user = await axios.get(roads.CHECK_TOKEN_URL, {
         headers: {
             'Authorization': request.headers.authorization
@@ -27,18 +28,40 @@ router.get("/cartProduct", async (request, response) => {
                 userId: userId
             }
         });
+        logger.info(`timestamp:${loggerDate}, 
+        headers:${request.headers}, 
+        url:${request.url}, 
+        method:${request.method}, 
+        body:${request.body}
+        query:${request.query},
+        response:${cart.data.response}`)
         return response.status(cart.status).json({
             "response": cart.data.response
         });
     } else {
+        logger.error(`timestamp:${loggerDate}, 
+        headers:${request.headers}, 
+        url:${request.url}, 
+        method:${request.method}, 
+        body:${request.body},
+        query:${request.query},
+        response: Unauthorized`)
         return response.status(401).json({ "response": "Unauthorized" });
     }
 });
 
 // ADD A PRODUCT IN CART
 router.post("/cartProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         if (!request.body.productName || !request.body.sellerUsername || !request.body.quantity || request.body.quantity == 0) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -62,19 +85,46 @@ router.post("/cartProduct", async (request, response) => {
                 productName: request.body.productName,
                 quantity: request.body.quantity,
             });
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${newCartProduct.data.response}`)
             return response.status(newCartProduct.status).json({
                 "response": newCartProduct.data.response
             });
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
-        console.log(error)
         if (error instanceof TypeError && error.code === "ERR_HTTP_INVALID_HEADER_VALUE") {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
+        logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: ${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -83,9 +133,17 @@ router.post("/cartProduct", async (request, response) => {
 
 // MODIFY CART
 router.put("/cartProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
-        console.log(request.body)
+        
         if (!request.body.productName || !request.body.sellerUsername || !request.body.quantity || request.body.quantity == 0) {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -112,6 +170,14 @@ router.put("/cartProduct", async (request, response) => {
                 quantity: request.body.quantity,
                 quantityVariation: request.body.quantityVariation
             });
+
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${cartToUpdate.data.response}`)
             return response.status(cartToUpdate.status).json({
                 "response": cartToUpdate.data.response
             });
@@ -119,7 +185,13 @@ router.put("/cartProduct", async (request, response) => {
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -128,9 +200,17 @@ router.put("/cartProduct", async (request, response) => {
 
 // REMOVE PRODUCT FROM CART
 router.delete("/cartProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         console.log(request.body)
         if (!request.body.productName || !request.body.sellerUsername) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -156,14 +236,34 @@ router.delete("/cartProduct", async (request, response) => {
                     sellerId: sellerData.data.response.id
                 }
             });
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${newCart.data.response}`)
             return response.status(newCart.status).json({
                 "response": newCart.data.response
             });
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
             return response.status(401).json({ "response": "Unauthorized" });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: ${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -172,6 +272,7 @@ router.delete("/cartProduct", async (request, response) => {
 
 //CART REFRESH
 router.get("/syncCart", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -181,6 +282,13 @@ router.get("/syncCart", async (request, response) => {
         const userId = user.data.response.id
         const userRole = user.data.response.role
         if (userRole !== "buyer") {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
             return response.status(401).json({ "response": "Unauthorized" });
         }
         else {
@@ -189,8 +297,14 @@ router.get("/syncCart", async (request, response) => {
                     userId: userId
                 }
             });
-            console.log("ASSERTION:", cart.data.response)
             if (cart.data.response.length === 0) {
+                logger.info(`timestamp:${loggerDate}, 
+                    headers:${request.headers}, 
+                    url:${request.url}, 
+                    method:${request.method}, 
+                    body:${request.body}
+                    query:${request.query},
+                    response:${cart.data.response}`)
                 return response.status(200).json({
                     "response": cart.data.response
                 });
@@ -206,8 +320,6 @@ router.get("/syncCart", async (request, response) => {
                 }
             });
             var sellerIds = [];
-            console.log("#########")
-            console.log(cartProductsData.data.response)
             for (let i = 0; i < cartProductsData.data.response.length; i++) {
                 sellerIds.push(cartProductsData.data.response[i].sellerId)
             }
@@ -229,12 +341,25 @@ router.get("/syncCart", async (request, response) => {
                     }
                 }
             }
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${cartProductsData.data.response}`)
             return response.status(200).json({
                 "response": cartProductsData.data.response
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+        headers:${request.headers}, 
+        url:${request.url}, 
+        method:${request.method}, 
+        body:${request.body},
+        query:${request.query},
+        response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });

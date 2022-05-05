@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const axios = require('axios');
+var logger = require('../settings/logger');
 
 const roads = {
     // AUTHENTICATION MICROSERVICE
@@ -27,6 +28,7 @@ const roads = {
 
 // GET ORDERS FOR SELLERS AND BUYERS
 router.get("/orderProducts", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
@@ -47,6 +49,13 @@ router.get("/orderProducts", async (request, response) => {
                 sellerProductsIds.push(product.id)
             });
             if (!sellerProducts) {
+                logger.error(`timestamp:${loggerDate}, 
+                    headers:${request.headers}, 
+                    url:${request.url}, 
+                    method:${request.method}, 
+                    body:${request.body},
+                    query:${request.query},
+                    response: No products added to sells for current user`)
                 return response.status(404).json({
                     "response": "No products added to sells for current user"
                 });
@@ -56,8 +65,14 @@ router.get("/orderProducts", async (request, response) => {
                     productsIds: sellerProductsIds
                 }
             });
-            console.log(sellerOrderProducts.data.response)
-
+            
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${sellerOrderProducts.data.response}`)
             return response.status(200).json({
                 "response": sellerOrderProducts.data.response
             });
@@ -67,12 +82,25 @@ router.get("/orderProducts", async (request, response) => {
                     ownerId: userId
                 }
             })
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${buyerOrders.data.response}`)
             return response.status(200).json({
                 "response": buyerOrders.data.response
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -81,9 +109,16 @@ router.get("/orderProducts", async (request, response) => {
 
 // MAKE AN ORDER
 router.post("/orderProducts", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
-        console.log("WOLOLO", request.body)
         if (!request.body.address1 || !request.body.address2) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format",
             });
@@ -108,6 +143,13 @@ router.post("/orderProducts", async (request, response) => {
                 }
             });
             if (productsInCart.data.response.length == 0) {
+                logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: No product found in user cart`)
                 return response.status(404).json({
                     "response": "No product found in user cart"
                 });
@@ -144,11 +186,7 @@ router.post("/orderProducts", async (request, response) => {
                             productIds: productIds
                         }
                     })
-                    console.log("##########################")
-                    console.log("productsInCart", productsInCart.data.response)
-                    console.log("##########################")
-                    console.log("productsData", productsData.data.response)
-                    console.log("##########################")
+
 
                     for (let i = 0; i < productsInCart.data.response.length; i++) {
                         for (let j = 0; j < productsData.data.response.length; j++) {
@@ -164,23 +202,50 @@ router.post("/orderProducts", async (request, response) => {
                         mailContent: JSON.stringify(productsInCart.data.response)
                     });
                 }
+                logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${ordersProducts.data.response}`)
                 return response.status(ordersProducts.status).json({
                     "response": ordersProducts.data.response
                 });
             }
             else {
+                logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: order cancelled`)
                 return response.status(400).json({
                     "response": "order cancelled"
                 });
             }
         }
         else {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response:${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -189,16 +254,16 @@ router.post("/orderProducts", async (request, response) => {
 
 //UPDATE DELIVERY STATUS FOR SELLERS
 router.put("/orderProduct", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
-        console.log('CHECKING')
-        console.log(request.body)
-        // if (!request.body.productName || !request.body.ownerId || !request.body.addressName || !request.body.shipped || !request.body.shippingDate) {
-
-        //     return response.status(400).json({
-        //         "response": "Bad json format"
-        //     });
-        // }
         if (!request.body.ownerId) {
+            logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response: Bad json format`)
             return response.status(400).json({
                 "response": "Bad json format"
             });
@@ -210,31 +275,14 @@ router.put("/orderProduct", async (request, response) => {
         })
         const userId = user.data.response.id
         const userRole = user.data.response.role
-        console.log("userId:", userId, "userRole:", userRole)
+
         if (userRole == "seller") {
             const orderProductOwner = await axios.get(roads.GET_USER_DATA_URL, {
                 params: {
                     userId: request.body.ownerId
                 }
             })
-            console.log(orderProductOwner.data.response)
-            // const address = await axios.get(roads.GET_ONE_USER_ADDRESS_URL, {
-            //     params: {
-            //         address1: request.body.addressName
-            //     }
-            // });
-
-            // const sellerProduct = await axios.get(roads.SELLER_PRODUCTS_URL, {
-            //     params: {
-            //         sellerId: userId,
-            //         productName: request.body.productName
-            //     }
-            // });
-            // if (!sellerProduct) {
-            //     return response.status(404).json({
-            //         "response": "No products added to sells for current user"
-            //     });
-            // }
+            
             const orderProductToUpdate = await axios.put(roads.SELLER_UPDATE_ORDER_URL, {
                 ownerId: request.body.ownerId,
                 productId: request.body.productId,
@@ -243,7 +291,6 @@ router.put("/orderProduct", async (request, response) => {
                 oldShipped: request.body.oldShipped,
                 created_at: request.body.created_at
             });
-            console.log(orderProductToUpdate.data.response)
             if (orderProductToUpdate.status == 200 && request.body.newShipped === "shipped") {
                 await axios.post(roads.DELIVERY_MAILER_URL, {
                     mailRecipient: orderProductOwner.data.response.email,
@@ -256,16 +303,36 @@ router.put("/orderProduct", async (request, response) => {
                     })
                 });
             }
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${orderProductToUpdate.data.response}`)
             return response.status(orderProductToUpdate.status).json({
                 "response": orderProductToUpdate.data.response
             });
         } else {
+            logger.error(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body},
+                query:${request.query},
+                response: Unauthorized`)
             return response.status(401).json({
                 "response": "Unauthorized"
             });
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body},
+            query:${request.query},
+            response:${error.response.data.response}`)
         response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -274,6 +341,7 @@ router.put("/orderProduct", async (request, response) => {
 
 //REFRESH ORDERS
 router.get("/syncOrder", async (request, response) => {
+    var loggerDate = new Date().toISOString()
     try {
         var json = [];
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
@@ -292,25 +360,19 @@ router.get("/syncOrder", async (request, response) => {
                     ownerId: userId
                 }
             })
-            console.log(orders.data.response)
+            
             if (orders.data.response.length === 0) {
+                logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${orders.data.response}`)
                 return response.status(200).json({
                     "response": orders.data.response
                 });
             }
-
-            // for (let i=0;i<orders.data.response.length;i++){
-            //     const userDeliveryAddress = await axios.get(roads.GET_DELIVERY_USER_ADDRESS, {
-            //             params: {
-            //                 addressId: orders.data.response[i].addressId
-            //             }
-            //         });
-            //         const productData = await axios.get(roads.SYNC_ORDERED_PRODUCT, {
-            //             params: {
-            //                 productId: orders.data.response[i].productId
-            //             }
-            //         }); 
-            // }
 
             const deliveryAddressIds = [];
             const orderedProductIds = [];
@@ -348,6 +410,13 @@ router.get("/syncOrder", async (request, response) => {
                 }
                 json.push(dict)
             }
+            logger.info(`timestamp:${loggerDate}, 
+                headers:${request.headers}, 
+                url:${request.url}, 
+                method:${request.method}, 
+                body:${request.body}
+                query:${request.query},
+                response:${json}`)
             return response.status(200).json({
                 "response": json
             });
@@ -361,9 +430,7 @@ router.get("/syncOrder", async (request, response) => {
             for (let i = 0; i < sellerProducts.data.response.length; i++) {
                 sellerProductsIds.push(sellerProducts.data.response[i].id)
             }
-            console.log("********************")
-            console.log(userId)
-            console.log(sellerProductsIds)
+
             const sellerOrders = await axios.get(roads.GET_SELLER_ORDERS_URL, {
                 params: {
                     productsIds: sellerProductsIds
@@ -405,14 +472,26 @@ router.get("/syncOrder", async (request, response) => {
 
                 }
             }
-            console.log(sellerOrders.data.response)
+            logger.info(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method}, 
+            body:${request.body}
+            query:${request.query},
+            response:${sellerOrders.data.response}`)
             return response.status(200).json({
                 "response": sellerOrders.data.response
             });
         }
     }
     catch (error) {
-        console.log(error)
+        logger.error(`timestamp:${loggerDate}, 
+            headers:${request.headers}, 
+            url:${request.url}, 
+            method:${request.method},
+            body:${request.body},
+            query:${request.query},
+            response: ${error.response.data.response}`)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
