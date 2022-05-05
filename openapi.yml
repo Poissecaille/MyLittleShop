@@ -264,7 +264,6 @@ paths:
           description: "Forbidden"
       security:
         - bearerAuth: []
-    description: "Array of products from cart with additionnal data"
 
   /productCategories:
     get:
@@ -325,7 +324,6 @@ paths:
           description: "Forbidden"
       security:
         - bearerAuth: []
-    description: "Array of products"
     parameters:
       - in: query
         name: condition
