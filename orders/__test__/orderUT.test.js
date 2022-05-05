@@ -17,7 +17,7 @@ describe("order-OrderProduct unit tests", () => {
     beforeEach(async () => {
         await db.sync({ force: true})
     })
-    const deliveryStatus = ["preparation", "shipped", 'delivred']
+    const deliveryStatus = ["preparation", "shipped", 'delivered']
     it("Test-save should be able to create a new OrderProduct without throwing error", async () => {
         const orderProduct = new OrderProduct({
             ownerId: getRandomInt(0,100),

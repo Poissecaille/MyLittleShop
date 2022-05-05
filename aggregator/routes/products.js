@@ -234,7 +234,7 @@ router.get("/products", async (request, response) => {
                 }
             }
 
-            if (request.query.productName !== "") {
+            if (request.query.productName) {
                 const options = {
                     isCaseSensitive: false,
                     shouldSort: true,
