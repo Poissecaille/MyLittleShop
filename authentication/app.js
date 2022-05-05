@@ -6,6 +6,22 @@ const { sequelizeDev, sequelizeTest } = require("./settings/database")
 const cors = require('cors');
 const execSync = require('child_process').execSync;
 
+const winston = require('winston');
+const logger = winston.createLogger({
+    format: winston.format.json(),
+    defaultMeta: { service: 'Authentication service' },
+    transports: [
+      //
+      // - Write all logs with importance level of `error` or less to `error.log`
+      // - Write all logs with importance level of `info` or less to `combined.log`
+      //
+      new winston.transports.Console(),
+      new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+      new winston.transports.File({ filename: 'logs/debug.log', level: 'debug' }),
+      new winston.transports.File({ filename: 'logs/combined.log' }),
+    ],
+  });
+
 
 // ENVIRONNEMENT SELECTION
 var db;
@@ -21,7 +37,7 @@ if (process.env.NODE_ENV === "development") {
     force = false
     // DB CONNECTION
     db.authenticate().
-    then(() => console.log(`Connected to data base ${dbName}...`))
+    then(() => logger.info(`Connected to data base ${dbName}...`))
     .catch((error) => console.log(error));
     db.sync({ force: force }).
         then(
@@ -32,11 +48,14 @@ if (process.env.NODE_ENV === "development") {
                 
             
         )
-        .catch((error) => console.log(error));
+        .catch((error) => logger.error(error));
 
 
 } 
-    
+logger.error("test error")
+logger.info("test info")
+logger.debug("test debug")
+
 const app = express();
 //ROUTES
 const authRoute = require("./routes/auth");

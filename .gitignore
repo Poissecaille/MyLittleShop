@@ -7,3 +7,4 @@ inventory-db
 auth-db
 order-db
 coverage
+logs
