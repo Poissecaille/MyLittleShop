@@ -3,11 +3,901 @@ info:
   title: "MyLittleShopping API"
   version: 0.0.1
 paths:
-  /user/disable:
-    put:
+  /admin:
+    get:
+      description: "Array of users with additionnal data"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/user"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
       security:
         - bearerAuth: []
-      description: "Disable the account"
+    description: "Get data for admin console"
+    parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+
+  /cartProduct:
+    get:
+      description: "Get all data from a user cart"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/cartProduct"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+    description: "Array of products from cart"
+    parameters:
+      - in: query
+        name: userId
+        schema:
+          type: integer
+
+    post:
+      description: "Allow a user to add a product added to his cart"
+      responses:
+        201:
+          description: "Product added to CartProduct"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                productName:
+                  type: string
+                sellerUsername:
+                  type: string
+                quantity:
+                  type: integer
+              required:
+                - productName
+                - sellerUsername
+                - quantity
+
+    put:
+      description: "Allow a user to modify a product from his cart"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/cartProduct"
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+
+    delete:
+      description: "Allow a user to delete a product from his cart"
+      responses:
+        200:
+          description: "Product deleted from cart"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                productName:
+                  type: string
+                sellerUsername:
+                  type: string
+              required:
+                - productName
+                - sellerUsername
+
+  /syncCart:
+    get:
+      description: "Refresh front for caching data"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/cartProduct"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+    description: "Array of products from cart with additionnal data"
+
+  /orderProducts:
+    get:
+      description: "Get orders with separate logic for sellers and buyers"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/orderProduct"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+    post:
+      description: "Allow the app to create an order when a user validate his cart"
+      responses:
+        201:
+          description: "OrderProduct created"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                address1:
+                  type: string
+                address2:
+                  type: string
+              required:
+                - address1
+                - address2
+
+    put:
+      description: "Modify a product from the cart"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/orderProduct"
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                ownerId:
+                  type: integer
+              required:
+                - ownerId
+
+  /syncOrder:
+    get:
+      description: "Refresh front for caching data"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/orderProduct"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+  /productCategories:
+    get:
+      description: "Get all categories for front-end"
+      responses:
+        200:
+          description: "Get all categories for front-end"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/productCategory"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+  /productTags:
+    get:
+      description: "Get all tags for front-end"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/productTag"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+  /products:
+    get:
+      description: "Get all products data according to your role as a user"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/product"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+    parameters:
+      - in: query
+        name: condition
+        schema:
+          type: string
+      - in: query
+        name: category
+        schema:
+          type: string
+      - in: query
+        name: tag
+        schema:
+          type: string
+      - in: query
+        name: filter
+        schema:
+          type: string
+      - in: query
+        name: sellerUsername
+        schema:
+          type: string
+      - in: query
+        name: lowerPrice
+        schema:
+          type: number
+          multipleOf: 0.01
+      - in: query
+        name: higherPrice
+        schema:
+          type: number
+          multipleOf: 0.01
+
+    post:
+      description: "Allow a user to create a product for sell"
+      responses:
+        201:
+          description: "Product created"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                label:
+                  type: string
+                condition:
+                  type: string
+                  enum: [new, renovated, occasion]
+                description:
+                  type: string
+                unitPrice:
+                  type: number
+                  multipleOf: 0.01
+                availableQuantity:
+                  type: integer
+              required:
+                - name
+                - label
+                - condition
+                - description
+                - unitPrice
+                - availableQuantity
+
+    put:
+      description: "Allow a seller to modify one of his products"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/product"
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                categories:
+                  type: string
+                tags:
+                  type: string
+    delete:
+      description: "Allow a seller to delete one of his products"
+      responses:
+        200:
+          description: "Product deleted"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+              required:
+                - name
+
+  /ratingsProductsPerUser:
+    get:
+      description: "Get all ratings per user"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/ratingProduct"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+    post:
+      description: "Allow a user to publish a rating on a received product"
+      responses:
+        201:
+          description: "Rating created"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                productId:
+                  type: integer
+                value:
+                  type: integer
+                  minimum: 0
+                  maximum: 5
+              required:
+                - productId
+                - value
+
+  /userAddresses:
+    get:
+      description: "Get all addresses per user"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/userAddress"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+    post:
+      description: "Allow a user to create an address for deliveries"
+      responses:
+        201:
+          description: "Address created"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                address1:
+                  type: integer
+                address2:
+                  type: string
+                city:
+                  type: string
+                region:
+                  type: string
+                country:
+                  type: string
+                postalCode:
+                  type: string
+              required:
+                - address1
+                - address2
+                - city
+                - region
+                - country
+                - postalCode
+
+    put:
+      description: "Allow a user to modify one of his addresses"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/userAddress"
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                address1:
+                  type: string
+                address2:
+                  type: string
+                postalCode:
+                  type: integer
+                  multipleOf: 10000
+
+    delete:
+      description: "Allow a user to delete on of his addresses"
+      responses:
+        200:
+          description: "Address deleted"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                address1:
+                  type: string
+                address2:
+                  type: string
+              required:
+                - address1
+                - address2
+
+  /wishProducts:
+    get:
+      description: "Get all products per user wishlist"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/wishProduct"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+  /wishProduct:
+    post:
+      responses:
+        201:
+          description: "Product added to wishlist"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                productId:
+                  type: integer
+                quantity:
+                  type: integer
+                availableQuantity:
+                  type: integer
+              required:
+                - productId
+                - quantity
+                - availableQuantity
+
+    put:
+      description: "Modify the quantity of a product in a wishlist"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/wishProduct"
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                sellerUsername:
+                  type: string
+                productName:
+                  type: string
+                quantity:
+                  type: integer
+
+    delete:
+      description: "Allow a buyer to remove a product from his wishlist"
+      responses:
+        200:
+          description: "Product deleted from wishlist"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                sellerUsername:
+                  type: string
+                productName:
+                  type: string
+              required:
+                - sellerUsername
+                - productName
+
+  /userRole:
+    get:
+      description: "Get role for current user front side"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: string
+                enum: ["buyer", "seller", "admin"]
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+
+  /login:
+    post:
+      description: "Allow a user to login"
+      responses:
+        201:
+          description: "Logged in"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+
+  /register:
+    post:
+      description: "Allow a user to create an account"
+      responses:
+        201:
+          description: "Account created"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                birthdate:
+                  type: string
+                  format: date
+                  description: Birthdate of current user
+                  example: "2021-01-30"
+                username:
+                  type: string
+              required:
+                - email
+                - password
+                - firstname
+                - birthdate
+                - username
+
+  /seller/register:
+    post:
+      description: "Admin route for seller user creation"
+      responses:
+        201:
+          description: "Account created"
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: "Bad Json Format"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                birthdate:
+                  type: string
+                  format: date
+                  description: Birthdate of current user
+                  example: "2021-01-30"
+                username:
+                  type: string
+              required:
+                - email
+                - password
+                - firstname
+                - birthdate
+                - username
+  /disable:
+    put:
+      description: "Admin route for user deactivation"
       requestBody:
         content:
           application/json:
@@ -25,468 +915,110 @@ paths:
           description: "Unauthorized"
         403:
           description: "Forbidden"
-  /user/login:
-    post:
-      description: "Log In"
+      security:
+        - bearerAuth: []
+
+  /deactivate:
+    put:
+      description: "Allow a user to deactivate his profile"
       requestBody:
         content:
           application/json:
             schema:
               type: object
               required:
-                - email
                 - password
               properties:
-                email:
-                  type: string
                 password:
                   type: string
       responses:
         200:
-          description: "Logged in"
-        400:
-          description: "Malformed request"
+          description: "Account disabled"
         401:
-          description: "Bad credentials"
-        404:
-          description: "User not found"
-  /user/register:
-    post:
-      description: "Sign In"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - firstname
-                - lastname
-                - birthdate
-                - email
-                - password
-              properties:
-                firstname:
-                  type: string
-                lastname:
-                  type: string
-                birthdate:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
-      responses:
-        201:
-          description: "Signed in"
-        400:
-          description: "Malformed request"
-        409:
-          description: "Email already used"
-  /user:
-    get:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
       security:
         - bearerAuth: []
-      description: "List all users"
-      parameters:
-        - in: query
-          name: offset
-          schema:
-            type: integer
-          description: "The number of users to skip before starting collecting the result set"
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          description: "The number of users to return"
+
+  /syncAccount:
+    get:
+      description: "Refresh front for caching data"
       responses:
         200:
-          description: "List of users"
+          description: "OK"
           content:
             application/json:
               schema:
-                type: "array"
+                type: array
                 items:
-                  $ref: "#/definitions/User"
-        400:
-          description: "Bad request"
+                  allOf:
+                    - $ref: "#/components/schemas/user"
         401:
           description: "Unauthorized"
-  /user/{id}:
-    get:
+        403:
+          description: "Forbidden"
       security:
         - bearerAuth: []
-      description: "Get user information"
-      responses:
-        200:
-          description: "Return user information"
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/User"
-        401:
-          description: "Unauthorized"
-  /user/{}/state:
-    put:
-      security:
-        - bearerAuth: []
-      description: "Switch state of the user (disabled or enabled)"
-      responses:
-        200:
-          description: "Changed state"
-        401:
-          description: "Unauthorized"
-  /product/{name}:
-    get:
-      description: "Get data of a specific product retrieved by name"
-      responses:
-        200:
-          description: "Returned product informations"
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/Product"
-        400:
-          description: "Bad request"
-  /product/{category}:
-    get:
-      description: "Get data of a specific product retrieved by category"
-      responses:
-        200:
-          description: "Returned product informations"
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/Product"
-        400:
-          description: "Bad request"
-  /product/{tag}:
-    get:
-      description: "Get data of a specific product retrieved by tag"
-      responses:
-        200:
-          description: "Returned product informations"
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/Product"
-        400:
-          description: "Bad request"
-  /product:
-    post:
-      security:
-        - bearerAuth: []
-      description: "Add a product to the e-shop catalog"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/definitions/Product"
-      responses:
-        201:
-          description: "Product added"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-    put:
-      security:
-        - bearerAuth: []
-      description: "Allow a seller to update a product saved in the e-shop catalog"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/definitions/Product"
-      responses:
-        200:
-          description: "Product updated"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-  /product/products/{condition}:
-    get:
-      description: "Get a list of products from the e-shop catalog according to their condition"
-      responses:
-        200:
-          description: "Returned products informations"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Product"
-        400:
-          description: "Bad request"
-  /product/products/{low_price}-{high_price}:
-    get:
-      description: "Get a list of products from the e-shop catalog according to a price range"
-      parameters:
-        - in: query
-          name: low_price
-          schema:
-            type: number
-            format: currency
-          description: "The minimal price for the filtered products"
-        - in: query
-          name: high_price
-          schema:
-            type: number
-            format: currency
-          description: "The maximal price for the filtered products"
-      responses:
-        200:
-          description: "Returned products informations"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Product"
-        400:
-          description: "Bad request"
-  /product/products/{seller_id}:
-    get:
-      security:
-        - bearerAuth: []
-      description: "Get a list of products from the e-shop catalog according to the seller who owns the products"
-      parameters:
-        - in: "query"
-          name: "seller_id"
-          schema:
-            type: "number"
-            description: "The id of the seller"
-      responses:
-        200:
-          description: "List of seller products"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Product"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-  /product/cart/{user_id}:
-    get:
-      security:
-        - bearerAuth: []
-      description: "Allow a user to get access to his owned cart data"
-      parameters:
-        - in: query
-          name: user_id
-          schema:
-            type: "integer"
-      responses:
-        200:
-          description: "Owner cart data"
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/Cart"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-        404:
-          description: "No cart found"
-    put:
-      security:
-        - bearerAuth: []
-      description: "Allow a user to update his owned cart"
-      parameters:
-        - in: "query"
-          name: "user_id"
-          schema:
-            type: "integer"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/definitions/Cart"
-      responses:
-        200:
-          description: "Cart updated"
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/Cart"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-  /orders/product/{product_id}/{timestamp1}-{timestamp2}:
-    get:
-      security:
-        - bearerAuth: []
-      description: "Allow a seller to retrieve data concerning the sales of their products over a time range"
-      parameters:
-        - in: "query"
-          name: "product_id"
-          schema:
-            type: "number"
-          description: "The id of the seller product"
-        - in: "query"
-          name: "timestamp1"
-          schema:
-            type: "string"
-          description: "The youngest timestamp range of the query"
-        - in: "query"
-          name: "timestamp2"
-          schema:
-            type: "string"
-          description: "The youngest timestamp range of the query"
-      responses:
-        200:
-          description: "List of seller products orders"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Order"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-  /orders/order{cart_id}:
-    post:
-      security:
-        - bearerAuth: []
-      description: "Allow a user to validate his cart which create an order"
-      parameters:
-        - in: "query"
-          name: "cart_id"
-          schema:
-            type: "number"
-          description: "id of the user cart"
-      responses:
-        201:
-          description: "Delivery created"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Order"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-  /orders/deliveries{}-{}:
-    get:
-      security:
-        - bearerAuth: []
-      description: "Get a list of deliveries handled by the sellers"
-      parameters:
-        - in: query
-          name: offset
-          schema:
-            type: integer
-          description: "The number of deliveries to skip before starting collecting the result set"
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          description: "The number of deliveries to return"
-      responses:
-        200:
-          description: "List of deliveries"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Delivery"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-  /orders/delivery{payment_id}:
-    post:
-      security:
-        - bearerAuth: []
-      description: "Allows the creation of a delivery if payment has been made"
-      parameters:
-        - in: "query"
-          name: "payment_id"
-          schema:
-            type: "number"
-          description: "id of the payment"
-      responses:
-        201:
-          description: "Delivery created"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Delivery"
-        400:
-          description: "Bad request"
-        401:
-          description: "Unauthorized"
-        402:
-          description: "Payment required"
-  /orders/delivery/{uid}:
-    get:
-      description: "Allows a buyer to get data from a specific delivery according to a delivery number"
-      responses:
-        200:
-          description: "Returned delivery informations"
-          content:
-            application/json:
-              schema:
-                $ref: "#/definitions/Delivery"
-        400:
-          description: "Bad request"
+
 components:
   schemas:
-    Cart:
+    cartProduct:
       type: "object"
       properties:
         id:
           type: "integer"
           format: "int64"
-        user_id:
-          type: "integer"
         product_id:
           type: "integer"
+          format: "int64"
+        quantity:
+          type: "integer"
+          format: "int64"
+        shipped:
+          type: string
+          enum: ["preparation", "shipped", "delivered"]
+        shippingDate:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
+    orderProduct:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        owner_id:
+          type: "integer"
+          format: "int64"
+        product_id:
+          type: "integer"
+          format: "int64"
+        address_id:
+          type: "integer"
+          format: "int64"
         quantity:
           type: "integer"
           format: "int64"
         created_at:
-          type: "string"
-        modified_at:
-          type: "string"
-    Order:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        user_id:
-          type: "integer"
-        cart_id:
-          type: "integer"
-        value:
-          type: "integer"
-          format: "currency"
-        created_at:
-          type: "string"
-        modified_at:
-          type: "string"
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
 
-    UserAddress:
+    userAddress:
       type: "object"
       properties:
         id:
           type: "integer"
           format: "int64"
-        user_id:
-          type: "integer"
         address1:
           type: "string"
         address2:
@@ -495,63 +1027,54 @@ components:
           type: "string"
         city:
           type: "string"
-        state:
+        region:
           type: "string"
         country:
           type: "string"
         postalCode:
           type: "integer"
           format: "int32"
+          multipleOf: 10000
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
 
-    Delivery:
+    user:
       type: "object"
       properties:
         id:
           type: "integer"
           format: "int64"
-        uid:
+        email:
           type: "string"
-        order_id:
-          type: "integer"
-        status:
-          type: "string"
-          description: "State of the delivery"
-          enum:
-            - "preparation"
-            - "sent"
-            - "received"
-        user_address_id:
-          type: "integer"
-        expedition_date:
-          type: "string"
-    User:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
         firstname:
+          type: "string"
+        username:
           type: "string"
         lastname:
           type: "string"
         password:
           type: "string"
         birthdate:
-          type: "string"
+          type: string
+          format: date
         role:
           type: "string"
           description: "Role of a user"
-          enum:
-            - "buyer"
-            - "seller"
-            - "admin"
+          enum: ["buyer", "seller", "admin"]
         activated:
           type: "boolean"
         created_at:
-          type: "string"
-        modified_at:
-          type: "string"
-    Product:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
+    product:
       type: "object"
       properties:
         id:
@@ -564,17 +1087,112 @@ components:
         condition:
           type: "string"
           description: "Condition of a product"
-          enum:
-            - "new"
-            - "occasion"
-            - "renovated"
+          enum: ["new", "occasion", "renovated"]
         description:
           type: "string"
-        unit_price:
+        unitPrice:
           type: "number"
-        available_quantity:
+          multipleOf: 0.01
+        availableQuantity:
           type: "integer"
           format: "int64"
+        sellerId:
+          type: "integer"
+          format: "int64"
+        onSale:
+          type: "boolean"
+        averageRating:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+          maximum: 5
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
+    productCategory:
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        productId:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
+    productTag:
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        productId:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
+    ratingProduct:
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        productId:
+          type: "integer"
+          format: "int64"
+        ownerId:
+          type: "integer"
+          format: "int64"
+        value:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+          maximum: 5
+        comment:
+          type: "string"
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
+    wishProduct:
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        productId:
+          type: "integer"
+          format: "int64"
+        ownerId:
+          type: "integer"
+          format: "int64"
+        quantity:
+          type: "integer"
+          format: "int64"
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+
   securitySchemes:
     bearerAuth:
       type: http

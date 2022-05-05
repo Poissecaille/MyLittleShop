@@ -32,16 +32,22 @@ router.get("/userData", async (request, response) => {
         }
         else if (Array.isArray(request.query.sellerUsername)) {
             userData = []
-            for (let i = 0; i < request.query.sellerUsername.length; i++) {
-                const user = await User.findOne({
-                    where: {
-                        username: request.query.sellerUsername[i]
-                    }
-                });
-                if (user) {
-                    userData.push(user.dataValues)
+            const user = await User.findAll({
+                where: {
+                    username: { [Op.in]: request.query.sellerUsername }
                 }
-            }
+            })
+            userData = user.data.response;
+            // for (let i = 0; i < request.query.sellerUsername.length; i++) {
+            //     const user = await User.findOne({
+            //         where: {
+            //             username: request.query.sellerUsername[i]
+            //         }
+            //     });
+            //     if (user) {
+            //         userData.push(user.dataValues)
+            //     }
+            // }
         }
         else {
             userData = await User.findOne({
@@ -173,9 +179,18 @@ router.get("/syncSellersPerProduct", async (request, response) => {
 //ADMIN CONSOLE ROUTE
 router.get("/admin/users", async (request, response) => {
     try {
-        const users = await User.findAll({
-            limit: request.query.limit,
-            offset: request.query.offset
+        console.log("GHOST", request.query)
+        const users = request.query.limit && request.query.offset ? await User.findAll({
+            where: {
+                id: { [Op.lt]: request.query.limit, [Op.gt]: request.query.offset }
+            }
+        }
+            // limit: request.query.limit,
+            // offset: request.query.offset
+        ) : await User.findAll({
+            where: {
+                id: { [Op.in]: request.query.ids }
+            }
         });
         return response.status(200).json({
             "response": users

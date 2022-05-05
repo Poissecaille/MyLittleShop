@@ -83,6 +83,7 @@ const Cart = () => {
   };
 
   const handleCartQuantity = (cartProduct) => async (e) => {
+    console.log(e.target.value)
     for (let i = 0; i < cart.length; i++) {
       if (cartProduct.id === cart[i].id) {
         if (!cart[i].unitPrice) {

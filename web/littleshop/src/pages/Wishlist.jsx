@@ -12,7 +12,8 @@ const WishList = () => {
   const BACKEND_WISHLIST_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/wishProducts`;
   const BACKEND_WISHLIST_URL_CRUD = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/wishProduct`;
   const BACKEND_CART_PRODUCTS_URL = `http://localhost:${process.env.REACT_APP_AGGREGATOR_PORT}/cartProduct`;
-
+  var initialWishPrice = 0;
+  var [wishPrice, setWishPrice] = useState(initialWishPrice);
   const [quantity, setQuantity] = useState(0);
   var wishs = localStorage.getItem("wishProduct")
     ? JSON.parse(localStorage.getItem("wishProduct"))
@@ -34,8 +35,49 @@ const WishList = () => {
     });
   };
 
-  const handleWishProductQuantity = (e) => {
+  const handleWishProductQuantity = (wishProduct) => async (e) => {
+    console.log(e.target.value)
+    for (let i = 0; i < wishs.length; i++) {
+      if (wishs[i].id === wishProduct.id) {
+        var quantityVariation =
+          Number(wishs[i].quantity) - Number(e.target.value);
+      }
+      if (e.target.value === 0) {
+        e.target.value = 1;
+      } else if (Number(wishs[i].quantity) < Number(e.target.value)) {
+        wishs[i].quantity = Number(e.target.value);
+        wishPrice += wishs[i].unitPrice;
+        wishProduct.availableQuantity += quantityVariation;
+      } else if (Number(wishs[i].quantity) > Number(e.target.value)) {
+        wishs[i].quantity = Number(e.target.value);
+        wishPrice -= wishs[i].unitPrice;
+        wishProduct.availableQuantity -= quantityVariation;
+      }
+      localStorage["wishProduct"]=JSON.stringify(wishs);
+      
+      await axios
+        .put(
+          BACKEND_WISHLIST_URL_CRUD,
+          {
+            productName: wishs[i].name,
+            sellerUsername: wishs[i].sellerUsername,
+            quantity: wishs[i].quantity,
+            quantityVariation: quantityVariation,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
+        
+    }
+    if (wishPrice < 0) {
+      wishPrice = 0;
+    }
+    initialWishPrice = 0;
     setQuantity(e.target.value);
+    setWishPrice(Number(wishPrice.toFixed(2)));
   };
 
   const removeProductFromWishList = (data) => {
@@ -230,7 +272,8 @@ const WishList = () => {
                 name="quantity"
                 min="0"
                 max={wishProduct.availableQuantity}
-                onInput={handleWishProductQuantity}
+                value={wishProduct.quantity}
+                onInput={handleWishProductQuantity(wishProduct)}
               ></input>
               <br></br>
               <button

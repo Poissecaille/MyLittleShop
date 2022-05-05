@@ -13,15 +13,19 @@ const roads = {
     SELLER_PRODUCTS_URL: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/seller/products`,
     UPDATE_PRODUCTS_STOCKS: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/products`,
     SYNC_ORDERED_PRODUCT: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/orderedProduct`,
+    PRODUCTS_PER_CART: `http://inventory:${process.env.APP_INVENTORY_PORT}/api/productsPerCart`,
     //ORDER MICROSERVICE
     CREATE_ORDER_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/orderProducts`,
     GET_SELLER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProducts`,
     GET_BUYER_ORDERS_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/buyer/orderProducts`,
+    SELLER_UPDATE_ORDER_URL: `http://orders:${process.env.APP_ORDER_PORT}/api/seller/orderProduct`,
     //MAILER SERVICE
-    MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/mail`
+    DELIVERY_MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/delivery/mail`,
+    ORDER_MAILER_URL: `http://mailer:${process.env.APP_MAILER_PORT}/api/order/mail`
 }
 
-// GET ORDERS FOR SELLERS
+
+// GET ORDERS FOR SELLERS AND BUYERS
 router.get("/orderProducts", async (request, response) => {
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
@@ -78,13 +82,6 @@ router.get("/orderProducts", async (request, response) => {
 // MAKE AN ORDER
 router.post("/orderProducts", async (request, response) => {
     try {
-        // if (process.env.NODE_ENV === "develop") {
-        //     if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
-        //         return response.status(400).json({
-        //             "response": "Bad json format"
-        //         });
-        //     }
-        // }
         console.log("WOLOLO", request.body)
         if (!request.body.address1 || !request.body.address2) {
             return response.status(400).json({
@@ -119,7 +116,6 @@ router.post("/orderProducts", async (request, response) => {
             const stockUpdate = await axios.put(roads.UPDATE_PRODUCTS_STOCKS,
                 productsInCart.data.response
             )
-            console.log("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLOLOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 
             const cartProductsToDelete = await axios.delete(roads.CART_URL,
                 { data: productsInCart.data.response }
@@ -139,20 +135,33 @@ router.post("/orderProducts", async (request, response) => {
                             userId: userId
                         }
                     })
-                    const mailSubject = "LITTLESHOP Your order has been saved!";
-                    var mailContent =
-                        `<h3>${userData.data.response.firstname} ${userData.data.response.lastname}</h3>`
-                    mailContent += "<p>"
-                    for (let i = 0; i < request.body.orders.length; i++) {
-                        mailContent += JSON.stringify(request.body.orders[i])
+                    var productIds = [];
+                    for (let i = 0; i < productsInCart.data.response.length; i++) {
+                        productIds.push(productsInCart.data.response[i].productId)
                     }
-                    mailContent += "</p>"
+                    const productsData = await axios.get(roads.PRODUCTS_PER_CART, {
+                        params: {
+                            productIds: productIds
+                        }
+                    })
+                    console.log("##########################")
+                    console.log("productsInCart", productsInCart.data.response)
+                    console.log("##########################")
+                    console.log("productsData", productsData.data.response)
+                    console.log("##########################")
 
-                    await axios.post(roads.MAILER_URL, {
-                        //userData.data.response.email
-                        mailRecipient: "boury_a@etna-alternance.net",
-                        mailSubject: mailSubject,
-                        mailContent: mailContent
+                    for (let i = 0; i < productsInCart.data.response.length; i++) {
+                        for (let j = 0; j < productsData.data.response.length; j++) {
+                            if (productsData.data.response[j].id === productsInCart.data.response[i].productId) {
+                                productsInCart.data.response[i].product = productsData.data.response[j]
+                            }
+                        }
+                    }
+                    await axios.post(roads.ORDER_MAILER_URL, {
+                        mailRecipient: userData.data.response.email,
+                        usernameRecipient: userData.data.response.username,
+                        mailSubject: "LITTLESHOP Your order has been saved!",
+                        mailContent: JSON.stringify(productsInCart.data.response)
                     });
                 }
                 return response.status(ordersProducts.status).json({
@@ -163,7 +172,6 @@ router.post("/orderProducts", async (request, response) => {
                 return response.status(400).json({
                     "response": "order cancelled"
                 });
-                //TODO ROLLBACK IF NECESSARY
             }
         }
         else {
@@ -182,26 +190,19 @@ router.post("/orderProducts", async (request, response) => {
 //UPDATE DELIVERY STATUS FOR SELLERS
 router.put("/orderProduct", async (request, response) => {
     try {
-        // if (process.env.NODE_ENV === "test") {
-        //     if (!request.body.mailRecipient || request.body.mailSubject || request.body.mailContent) {
-        //         return response.status(400).json({
-        //             "response": "Bad json format"
-        //         });
-        //     }
-        // }
         console.log('CHECKING')
-        console.log(request.headers)
-        if (!request.body.productName || !request.body.ownerId || !request.body.addressName || !request.body.shipped || !request.body.shippingDate) {
+        console.log(request.body)
+        // if (!request.body.productName || !request.body.ownerId || !request.body.addressName || !request.body.shipped || !request.body.shippingDate) {
 
+        //     return response.status(400).json({
+        //         "response": "Bad json format"
+        //     });
+        // }
+        if (!request.body.ownerId) {
             return response.status(400).json({
                 "response": "Bad json format"
             });
         }
-        const address = await axios.get(roads.GET_ONE_USER_ADDRESS_URL, {
-            params: {
-                address1: request.body.addressName
-            }
-        });
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -211,31 +212,49 @@ router.put("/orderProduct", async (request, response) => {
         const userRole = user.data.response.role
         console.log("userId:", userId, "userRole:", userRole)
         if (userRole == "seller") {
-
-            const sellerProduct = await axios.get(roads.SELLER_PRODUCTS_URL, {
+            const orderProductOwner = await axios.get(roads.GET_USER_DATA_URL, {
                 params: {
-                    sellerId: userId,
-                    productName: request.body.productName
+                    userId: request.body.ownerId
                 }
-            });
-            if (!sellerProduct) {
-                return response.status(404).json({
-                    "response": "No products added to sells for current user"
-                });
-            }
-            const orderProductToUpdate = await axios.put(roads.SELLER_PRODUCTS_URL, {
-                ownerId: userId,
-                productId: sellerProduct.data.response.id,
-                addressId: address.data.response.id
-            });
-            //TODO MAILER
-            if (orderProductToUpdate.status == 200) {
-                await axios.post(roads.MAILER_URL, {
-                    mailRecipient: request.body.mailRecipient,
-                    mailSubject: request.body.mailSubject,
-                    mailContent: request.body.mailContent
-                });
+            })
+            console.log(orderProductOwner.data.response)
+            // const address = await axios.get(roads.GET_ONE_USER_ADDRESS_URL, {
+            //     params: {
+            //         address1: request.body.addressName
+            //     }
+            // });
 
+            // const sellerProduct = await axios.get(roads.SELLER_PRODUCTS_URL, {
+            //     params: {
+            //         sellerId: userId,
+            //         productName: request.body.productName
+            //     }
+            // });
+            // if (!sellerProduct) {
+            //     return response.status(404).json({
+            //         "response": "No products added to sells for current user"
+            //     });
+            // }
+            const orderProductToUpdate = await axios.put(roads.SELLER_UPDATE_ORDER_URL, {
+                ownerId: request.body.ownerId,
+                productId: request.body.productId,
+                addressId: request.body.addressId,
+                newShipped: request.body.newShipped,
+                oldShipped: request.body.oldShipped,
+                created_at: request.body.created_at
+            });
+            console.log(orderProductToUpdate.data.response)
+            if (orderProductToUpdate.status == 200 && request.body.newShipped === "shipped") {
+                await axios.post(roads.DELIVERY_MAILER_URL, {
+                    mailRecipient: orderProductOwner.data.response.email,
+                    usernameRecipient: orderProductOwner.data.response.username,
+                    mailSubject: "LITTLESHOP your delivery is on the way!",
+                    mailContent: JSON.stringify({
+                        "shippingDate": request.body.shippingDate,
+                        "productName": request.body.productName,
+                        "address": request.body.address,
+                    })
+                });
             }
             return response.status(orderProductToUpdate.status).json({
                 "response": orderProductToUpdate.data.response

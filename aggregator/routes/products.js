@@ -20,7 +20,6 @@ const roads = {
 //GET PRODUCTS FOR BUYERS AND SELLERS
 router.get("/products", async (request, response) => {
     try {
-
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
             headers: {
                 'Authorization': request.headers.authorization
@@ -70,8 +69,6 @@ router.get("/products", async (request, response) => {
                     sellerUsername: request.query.sellerUsername
                 }
             });
-            console.log("SELLERS: ", sellerData.data.response)
-            console.log(request.query)
             //if (request.query.sellerUsername) {
             if (Array.isArray(sellerData.data.response)) {
                 for (let i = 0; i < sellerData.data.response.length; i++) {

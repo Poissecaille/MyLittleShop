@@ -2,6 +2,9 @@ const express = require("express");
 const env = require("dotenv").config();
 const cors = require('cors');
 
+//CRON
+const scheduledFunctions = require("./scheduled_jobs/newsletter");
+
 //ROUTES
 const users = require("./routes/users");
 const products = require("./routes/products");
@@ -15,6 +18,8 @@ const wishProducts = require("./routes/wishProducts");
 const admin = require("./routes/admin");
 
 const app = express();
+
+scheduledFunctions.newsLetter();
 
 app.use(express.json());
 app.use(cors());
