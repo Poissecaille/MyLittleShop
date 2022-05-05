@@ -25,7 +25,7 @@ const roads = {
 }
 
 
-// GET ORDERS FOR SELLERS
+// GET ORDERS FOR SELLERS AND BUYERS
 router.get("/orderProducts", async (request, response) => {
     try {
         const user = await axios.get(roads.CHECK_TOKEN_URL, {
