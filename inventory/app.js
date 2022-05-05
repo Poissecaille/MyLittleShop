@@ -6,6 +6,7 @@ const productTag = require("./models/productTag");
 const product = require("./models/product");
 const { sequelizeDev, sequelizeTest } = require("./settings/database")
 const execSync = require('child_process').execSync;
+const logger = require('./settings/logger');
 
 // ENVIRONNEMENT SELECTION
 var db;
@@ -23,28 +24,26 @@ if (process.env.NODE_ENV === "development") {
     force = false
     // DB CONNECTION
     db.authenticate().
-        then(() => {
-            console.log(`Connected to data base ${dbName}...`)
-        })
-        .catch((error) => console.log(error));
+        then(() => logger.info(`Connected to data base ${dbName}...`))
+        .catch((error) => logger.error(error));
 
     // DB SYNC
     db.sync({ force: force }).
         then(
             () => {
-                console.log(`database ${dbName} synced!`)
+                logger.info(`database ${dbName} synced!`)
                 try {
                     execSync('npx sequelize-cli  db:seed --seed 20220205145748-products.js', { encoding: 'utf-8' });
-                } catch (error) { console.log(error) }
+                } catch (error) { logger.error(error) }
                 try {
                     execSync('npx sequelize-cli  db:seed --seed 20220205122444-categories.js', { encoding: 'utf-8' });
-                } catch (error) { console.log(error) }
+                } catch (error) { logger.error(error) }
                 try {
                     execSync('npx sequelize-cli  db:seed --seed 20220213104607-tags.js', { encoding: 'utf-8' });
-                } catch (error) { console.log(error) }
+                } catch (error) { logger.error(error) }
             }
         )
-        .catch((error) => console.log(error));
+        .catch((error) => logger.error(error));
 
 } else if (process.env.NODE_ENV === "test") {
     db = sequelizeTest

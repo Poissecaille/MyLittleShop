@@ -1,39 +1,35 @@
 const router = require("express").Router();
 const UserAddress = require("../models/userAddress");
 const { checkToken } = require("../middlewares/security")
-
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
-
-//TODO check if all get succeed when data response is empty
+var logger = require('../settings/logger');
 
 // GET ALL USER ADDRESSES
 router.get("/userAddresses", async (request, response) => {
     try {
-            const addresses = request.query.userId ?
-                await UserAddress.findAll({
-                    where: {
-                        userId: request.query.userId,
-                    }
-                }) :
-                await UserAddress.findAll({
-                    where: {
-                        userId: { [Op.in]: request.query.userIds },
-                    }
-                });
-            if (!addresses) {
-                return response.status(404).json({
-                    "response": "No addresses found for current user(s)"
-                });
-            } else {
-                return response.status(200).json({
-                    "response": addresses,
-//                    "userRole": userRole
-                });
-            }
-        // } else {
-        //     return response.status(401).json({ "response": "Unauthorized" });
-        // }
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
+        const addresses = request.query.userId ?
+            await UserAddress.findAll({
+                where: {
+                    userId: request.query.userId,
+                }
+            }) :
+            await UserAddress.findAll({
+                where: {
+                    userId: { [Op.in]: request.query.userIds },
+                }
+            });
+        if (!addresses) {
+            return response.status(404).json({
+                "response": "No addresses found for current user(s)"
+            });
+        } else {
+            return response.status(200).json({
+                "response": addresses,
+            });
+        }
     } catch (error) {
         console.log(error)
         return response.status(error.response.status).json({
@@ -45,7 +41,8 @@ router.get("/userAddresses", async (request, response) => {
 // GET A USER ADDRESS FOR ORDERS
 router.get("/userAddress", checkToken, async (request, response) => {
     try {
-        console.log("ERRORDETECTION", request.query.address1)
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const userId = request.user.id
         const userRole = request.user.role
         if (userRole == "buyer") {
@@ -83,6 +80,8 @@ router.get("/userAddress", checkToken, async (request, response) => {
 //GET USER ADDRESS FOR ORDERS
 router.get("/deliveryUserAddress", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const deliveryAddresses = await UserAddress.findAll({
             where: {
                 id: { [Op.in]: request.query.addressIds }
@@ -91,10 +90,6 @@ router.get("/deliveryUserAddress", async (request, response) => {
         return response.status(200).json({
             "response": deliveryAddresses
         });
-        // const deliveryAddress = await UserAddress.findByPK(request.query.addressId)
-        // return response.status(200).json({
-        //     "response": deliveryAddress
-        // });
     }
     catch (error) {
         console.log(error)
@@ -107,6 +102,8 @@ router.get("/deliveryUserAddress", async (request, response) => {
 // CREATE ADDRESS
 router.post("/userAddress", checkToken, async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const userId = request.user.id
         const userRole = request.user.role
         if (userRole == "buyer") {
@@ -144,6 +141,17 @@ router.post("/userAddress", checkToken, async (request, response) => {
     }
     catch (error) {
         console.log(error)
+        if (error.name === "SequelizeDatabaseError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
+            return response.status(400).json({
+                "response": "Bad json format"
+            });
+        } else if (error.name === "SequelizeUniqueConstraintError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
+            return response.status(409).json({
+                "response": "Address already saved by current user"
+            });
+        }
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -153,6 +161,8 @@ router.post("/userAddress", checkToken, async (request, response) => {
 // MODIFY ADDRESS
 router.put("/userAddress", checkToken, async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const userId = request.user.id
         const userRole = request.user.role
         if (userRole == "buyer") {
@@ -196,6 +206,8 @@ router.put("/userAddress", checkToken, async (request, response) => {
 //DELETE ADDRESS
 router.delete("/userAddress", checkToken, async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const userId = request.user.id
         const userRole = request.user.role
         if (userRole == "buyer") {

@@ -3,15 +3,18 @@ const User = require("../models/user");
 const CryptoJS = require("crypto-js")
 const jwt = require('jsonwebtoken');
 const { checkToken, checkPasswordWithEmail } = require("../middlewares/security");
+var logger = require('../settings/logger');
 
 // GIVE ACCESS TO BUYER REQUESTS
 router.get("/checkToken", checkToken, async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
         return response.status(200).json({
             "response": request.user
         });
     } catch (error) {
-        console.log(error)
+        logger.error(error)
         return response.status(error.response.status).json({
             "response": error.response.data.response
         });
@@ -22,6 +25,8 @@ router.get("/checkToken", checkToken, async (request, response) => {
 // REGISTER
 router.post("/register", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         var date = new Date();
         date = date.toISOString().split("T");
         date = date[0] + " " + date[1].split(".")[0];
@@ -41,12 +46,13 @@ router.post("/register", async (request, response) => {
             "response": "Signed in"
         });
     } catch (error) {
-        console.log(error)
         if (error.name === "SequelizeDatabaseError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
             return response.status(400).json({
                 "response": "Bad json format"
             });
         } else if (error.name === "SequelizeUniqueConstraintError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
             return response.status(409).json({
                 "response": "Username or email already used"
             });
@@ -56,6 +62,7 @@ router.post("/register", async (request, response) => {
 
 // LOGIN
 router.post("/login", checkPasswordWithEmail, async (request, response) => {
+    logger.info(new Date().toISOString(), request.headers, request.url, request.method)
     if (!request.body.email || !request.body.password) {
         return response.status(400).json({
             "response": "Bad json format"
@@ -84,7 +91,7 @@ router.post("/login", checkPasswordWithEmail, async (request, response) => {
         return response.status(200).json({
             "response": "Logged in",
             "token": accessToken,
-           // "role": user.role
+            // "role": user.role
             //"expire": tokenExpiration
         });
     } catch (error) {

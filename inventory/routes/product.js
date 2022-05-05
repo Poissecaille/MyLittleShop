@@ -4,11 +4,14 @@ const ProductCategory = require("../models/productCategory");
 const ProductTag = require("../models/productTag");
 const Product = require("../models/product");
 const Op = Sequelize.Op
+var logger = require('../settings/logger');
 
 
 // DEDICATED ROAD FOR ORDERS RATING
 router.get("/buyer/product", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
         const productToRate = Product.findOne({
             where: {
                 sellerId: request.query.sellerId,
@@ -35,13 +38,14 @@ router.get("/buyer/product", async (request, response) => {
 //GET PRODUCTS PER SELLER AND USER ID FOR AGGREGATOR
 router.get("/productsPerCart", async (request, response) => {
     try {
-        console.log("$$$$$$$$$$$$$$$", request.query.productIds)
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.debug(`productIds: ${request.query.productIds}`)
         const Products = await Product.findAll({
             where: {
                 id: { [Op.in]: request.query.productIds }
             }
         });
-        console.log("Products", Products)
         return response.status(200).json({
             "response": Products
         });
@@ -58,11 +62,12 @@ router.get("/productsPerCart", async (request, response) => {
 // CONSULT PRODUCTS FOR BUYERS
 router.get("/buyer/products", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
         var sellersIds = [];
         var productsIdsPerCategory = [];
         var productsIdsPerTag = [];
         var productsIds = [];
-
         if (Array.isArray(request.query.sellerId)) {
             console.log(request.query.sellerId)
             request.query.sellerId.forEach(
@@ -73,8 +78,6 @@ router.get("/buyer/products", async (request, response) => {
         } else {
             sellersIds.push(parseInt(request.query.sellerId))
         }
-        console.log("ERREUR1", request.query)
-        // if (request.query.category || request.query.tag) {
         if (request.query.category) {
             const productCategories = await ProductCategory.findAll({
                 where:
@@ -85,12 +88,9 @@ router.get("/buyer/products", async (request, response) => {
             for (let i = 0; i < productCategories.length; i++) {
                 productsIdsPerCategory.push(productCategories[i].productId)
             }
-            // 
-            // } else {
             for (let i = 0; i < productsIdsPerCategory.length; i++) {
                 productsIds.push(productsIdsPerCategory[i])
             }
-            // }
         }
 
         if (request.query.tag) {
@@ -106,7 +106,6 @@ router.get("/buyer/products", async (request, response) => {
             for (let i = 0; i < productsIdsPerTag.length; i++) {
                 productsIds.push(productsIdsPerTag[i])
             }
-
         }
         if (request.query.tag && request.query.category) {
             productsIds = productsIdsPerCategory.filter((value) => productsIdsPerTag.includes(value));
@@ -115,12 +114,10 @@ router.get("/buyer/products", async (request, response) => {
         } else if (request.query.tag && !request.query.category) {
             productsIds = productsIdsPerTag
         }
-        console.log("PRODUCT_IDS: ", productsIds, productsIdsPerCategory, productsIdsPerTag)
-
+        logger.debug(`PRODUCT_IDS, PRODUCT_IDS_PER_CATEGORY, PRODUCT_IDS_PER_TAG : ${productsIds}, ${productsIdsPerCategory}, ${productsIdsPerTag}`)
         const products = await Product.findAndCountAll({
             where: {
                 [Op.and]: [
-                    //{ id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
                     { id: productsIds.length > 0 ? { [Op.in]: productsIds } : { [Op.not]: null } },
                     { sellerId: request.query.sellerId !== undefined ? { [Op.in]: sellersIds } : { [Op.not]: null } },
                     { unitPrice: { [Op.between]: [request.query.lowerPrice, request.query.higherPrice] } },
@@ -136,23 +133,17 @@ router.get("/buyer/products", async (request, response) => {
         });
     } catch (error) {
         console.log(error)
-        if (error.name == "SequelizeDatabaseError") {
-            return response.status(400).json({
-                "response": "Bad json format",
-            });
-        }
-        else {
-            console.log(error)
-            response.status(error.response.status).json({
-                "response": error.response.data.response
-            });
-        }
+        response.status(error.response.status).json({
+            "response": error.response.data.response
+        });
     }
 });
 
 // CONSULT PRODUCTS FOR SELLERS
 router.get("/seller/products", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
         const sellerProducts = await Product.findAll({
             where: {
                 sellerId: request.query.sellerId ? request.query.sellerId : { [Op.in]: request.query.sellerIds },
@@ -178,9 +169,9 @@ router.get("/seller/products", async (request, response) => {
 // CONSULT ONE PRODUCT FOR SELLERS ORDERS
 router.get("/seller/product", async (request, response) => {
     try {
-        console.log(request.query)
-        console.log("##########chap###########")
-        console.log(request.query.sellerId)
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.debug(`query: ${request.query}`)
         const sellerProducts = await Product.findOne({
             where: {
                 sellerId: request.query.sellerId,
@@ -206,31 +197,42 @@ router.get("/seller/product", async (request, response) => {
 
 // WITHDRAW FROM SELL THE PRODUCTS OWNED BY DISABLED SELLER ACCOUNTS
 router.put("/seller/products", async (request, response) => {
-    const productsToWithdraw = await Product.findAll({
-        where: {
-            sellerId: request.query.userId,
-            onSale: true
+    try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        const productsToWithdraw = await Product.findAll({
+            where: {
+                sellerId: request.query.userId,
+                onSale: true
+            }
+        });
+        if (productsToWithdraw.length == 0) {
+            return response.status(200).json({
+                "response": "account deleted"
+            });
         }
-    });
-    if (productsToWithdraw.length == 0) {
+        productsToWithdraw.forEach((product) => {
+            product.update({
+                onSale: false
+            });
+        });
         return response.status(200).json({
-            "response": "account deleted"
+            "response": "account deleted and products withdrawn from sale"
+        });
+    } catch (error) {
+        console.log(error)
+        response.status(error.response.status).json({
+            "response": error.response.data.response
         });
     }
-    productsToWithdraw.forEach((product) => {
-        product.update({
-            onSale: false
-        });
-    });
-    return response.status(200).json({
-        "response": "account deleted and products withdrawn from sale"
-    });
 });
 
 // ROAD FOR PRODUCTS QUANTITY UPDATE AFTER ORDER CREATION
 router.put("/products", async (request, response) => {
     try {
-        console.log("BODY", request.body)
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+        logger.debug(`BODY: ${request.body}`)
         request.body.forEach(async (cartProduct) => {
             console.log("productId: ", cartProduct.productId)
             console.log("quantity: ", cartProduct.quantity)
@@ -248,13 +250,14 @@ router.put("/products", async (request, response) => {
             "response": error.response.data.response
         });
     }
-    //const productToUpdate = await Product.fin
 })
 
 
-// ADD A PRODUCT FOR SELLERS //TODO HANDLE PRODUCT CATEGORY AND TAG FOR PUT AND POST
+// ADD A PRODUCT FOR SELLERS
 router.post("/seller/product", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
         const newSellerProduct = new Product({
             name: request.body.name,
             label: request.body.label,
@@ -270,11 +273,13 @@ router.post("/seller/product", async (request, response) => {
         });
     } catch (error) {
         if (error.name === "SequelizeDatabaseError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
             return response.status(400).json({
                 "response": "Bad json format"
             });
         }
         else if (error.name === "SequelizeUniqueConstraintError") {
+            logger.error(`timestamp:${loggerDate}, errorName:${error.name}, queryParameters:${error.parent.parameters}`)
             return response.status(409).json({
                 "response": "Product already existant for current user"
             });
@@ -285,6 +290,8 @@ router.post("/seller/product", async (request, response) => {
 // MODIFY A PRODUCT FOR SELLERS 
 router.put("/seller/product", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
         const productToUpdate = await Product.findOne({
             where: {
                 name: request.body.name,
@@ -296,28 +303,6 @@ router.put("/seller/product", async (request, response) => {
                 "response": "Product not found for current user"
             });
         }
-        // if (request.body.categoryNames) {
-        //     var categoryIds = []
-        //     request.body.categoryNames.forEach(async (categoryName) => {
-        //         await ProductCategory.findOne({
-        //             where: {
-        //                 name: categoryName
-        //             }
-        //         });
-        //         categoryIds.push(categoryName.id)
-        //     })
-        // }
-        // if (request.body.tagNames) {
-        //     var tagsIds = []
-        //     request.body.tagNames.forEach(async (tagName) => {
-        //         await ProductTag.findOne({
-        //             where: {
-        //                 name: tagName
-        //             }
-        //         });
-        //         tagsIds.push(tagName.id)
-        //     })
-        // }
         if (request.body.availableQuantity !== undefined || request.body.availableQuantity == 0) {
             if (request.body.onSale == true)
                 return response.status(400).json({
@@ -349,6 +334,9 @@ router.put("/seller/product", async (request, response) => {
 // DELETE A PRODUCT FOR SELLERS 
 router.delete("/seller/product", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+
         const productToDelete = await Product.findOne({
             where: {
                 name: request.body.productName,
@@ -370,6 +358,9 @@ router.delete("/seller/product", async (request, response) => {
 // SYNC CARTPRODUCT FOR AGGREGATOR
 router.get("/productsPerId", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+
         const products = await Product.findAll({
             where: {
                 id: { [Op.in]: request.query.productIds }
@@ -389,6 +380,9 @@ router.get("/productsPerId", async (request, response) => {
 //GET PRODUCTS FOR ORDERS
 router.get("/orderedProduct", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+
         const products = await Product.findAll({
             where: {
                 id: { [Op.in]: request.query.productIds }
@@ -413,6 +407,9 @@ router.get("/orderedProduct", async (request, response) => {
 //DEDICATED ROAD FOR PRODUCTS AVERAGE RATING UPDATE
 router.put("/updateProductRating", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(loggerDate, request.headers, request.url, request.method, request.body)
+
         const productToUpdate = await Product.findByPk(request.body.productId)
         await productToUpdate.update({
             averageRating: request.body.averageRating

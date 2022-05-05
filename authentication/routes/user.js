@@ -3,11 +3,14 @@ const User = require("../models/user");
 const { checkToken, checkPasswordWithId, checkAdminPasswordWithId } = require("../middlewares/security")
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
+var logger = require('../settings/logger');
 
 
 //GET USER DATA FOR AGGREGATOR
 router.get("/userData", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         var userData;
         if (request.query.userId) {
             const user = await User.findByPk(request.query.userId);
@@ -38,16 +41,6 @@ router.get("/userData", async (request, response) => {
                 }
             })
             userData = user.data.response;
-            // for (let i = 0; i < request.query.sellerUsername.length; i++) {
-            //     const user = await User.findOne({
-            //         where: {
-            //             username: request.query.sellerUsername[i]
-            //         }
-            //     });
-            //     if (user) {
-            //         userData.push(user.dataValues)
-            //     }
-            // }
         }
         else {
             userData = await User.findOne({
@@ -75,6 +68,8 @@ router.get("/userData", async (request, response) => {
 // DISABLE ACCOUNT
 router.put("/disable", [checkToken, checkAdminPasswordWithId], async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const userToDisable = await User.findOne(
             {
                 where: { email: request.query.email }
@@ -101,11 +96,10 @@ router.put("/disable", [checkToken, checkAdminPasswordWithId], async (request, r
 // DEACTIVATE ACCOUNT
 router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const userId = request.user.id
         const userRole = request.user.role
-        console.log(request.user.role)
-        console.log(request.user.id)
-
         const userActivated = await User.findByPk(userId)
         if (!userActivated.activated) {
             return response.status(403).json({
@@ -139,6 +133,8 @@ router.put("/deactivate", [checkToken, checkPasswordWithId], async (request, res
 // SYNC USER ACCOUNT FOR AGGREGATOR
 router.get("/syncAccount", checkToken, async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         var result = {};
         const userId = request.user.id
         const userData = await User.findByPk(userId)
@@ -160,6 +156,8 @@ router.get("/syncAccount", checkToken, async (request, response) => {
 //SYNC CART WITH FRONT STORAGE FOR SELLERS
 router.get("/syncSellersPerProduct", async (request, response) => {
     try {
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const sellerData = await User.findAll({
             where: {
                 id: { [Op.in]: request.query.sellerIds }
@@ -179,7 +177,8 @@ router.get("/syncSellersPerProduct", async (request, response) => {
 //ADMIN CONSOLE ROUTE
 router.get("/admin/users", async (request, response) => {
     try {
-        console.log("GHOST", request.query)
+        var loggerDate = new Date().toISOString()
+        logger.info(`timestamp:${loggerDate}, headers:${request.headers}, url:${request.url}, method:${request.method}, body:${request.body}`)
         const users = request.query.limit && request.query.offset ? await User.findAll({
             where: {
                 id: { [Op.lt]: request.query.limit, [Op.gt]: request.query.offset }
