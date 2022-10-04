@@ -1,4 +1,8 @@
-# Groupe de boury_a 950231
+## MyLittleShop
+- E-commerce with distributed architecture (microservices) developed in nodejs and react.  
+  
+![alt text](images/littleshop.png)
+
 ## .env variables
 ```
 APP_AGGREGATOR_PORT=APP_AGGREGATOR_PORT

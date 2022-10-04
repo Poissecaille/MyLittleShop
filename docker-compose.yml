@@ -3,16 +3,33 @@ services:
   auth_db:
     image: postgres:latest
     ports:
-      - "${AUTH_DB_PORT}:${AUTH_DB_PORT}"
+      - "${AUTH_DB_PORT}:5010"
     container_name: shop_auth_db
     environment:
-      - PGPORT=${AUTH_DB_PORT}
+      - PGPORT=5010
       - DB_NAME=${DB_NAME}
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./auth-db/db-data/:/var/lib/postgresql/data/
+      #  - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
+      - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
+    restart: on-failure
+
+  auth_db_slave:
+    image: postgres:latest
+    ports:
+      - "5050:5432"
+    container_name: shop_auth_db_slave
+    environment:
+      - PGPORT=5050
+      - DB_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./auth-db-slave/db-data/:/var/lib/postgresql/data/
       #  - ./sql/authentication.sql:/docker-entrypoint-initdb.d/authentication.sql
       - ./sql/initialization.sql:/docker-entrypoint-initdb.d/initialization.sql
     restart: on-failure
@@ -95,7 +112,7 @@ services:
     #  mode: replicated
     #  replicas: 2
     image: aggregator:latest
-    build: 
+    build:
       context: ./aggregator/
       dockerfile: Dockerfile
       target: ${NODE_ENV}

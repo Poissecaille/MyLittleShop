@@ -8,3 +8,4 @@ auth-db
 order-db
 coverage
 logs
+auth-db-slave
